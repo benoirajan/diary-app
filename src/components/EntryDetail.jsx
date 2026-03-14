@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -128,9 +130,15 @@ const EntryDetail = ({
                 />
             </div>
         ) : (
-            <p className="text-lg text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
-            {entry.content}
-            </p>
+            <article className="prose prose-stone dark:prose-invert max-w-none 
+              prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)]
+              prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
+              prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]
+              leading-relaxed">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {entry.content}
+                </ReactMarkdown>
+            </article>
         )}
 
         {/* Save Button (Editing Mode) */}

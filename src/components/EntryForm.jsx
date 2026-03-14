@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const moods = [
   { label: "Happy", value: "happy", emoji: "😊" },
@@ -27,6 +29,7 @@ const EntryForm = ({
   const [content, setContent] = useState("");
   const [mood, setMood] = useState("happy");
   const [affirmation, setAffirmation] = useState("");
+  const [isPreview, setIsPreview] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,14 +59,24 @@ const EntryForm = ({
 
   return (
     <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
-      <h2 className="text-2xl font-bold mb-6 text-[var(--text-primary)] px-1">
-        Create New Entry<span className="text-[var(--accent-happy)]">.</span>
-      </h2>
+      <div className="flex justify-between items-center mb-6 px-1">
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            Create New Entry<span className="text-[var(--accent-happy)]">.</span>
+        </h2>
+        
+        <button 
+            type="button"
+            onClick={() => setIsPreview(!isPreview)}
+            className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--accent-happy)] transition-colors"
+        >
+            {isPreview ? "✍️ Edit Mode" : "👁️ Preview Mode"}
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Title</label>
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Title</label>
           <input
             type="text"
             placeholder="How was your day?"
@@ -76,20 +89,37 @@ const EntryForm = ({
 
         {/* Content */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Your Story</label>
-          <textarea
-            placeholder="Write your thoughts here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={5}
-            required
-            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm resize-none leading-relaxed"
-          />
+          <div className="flex justify-between items-center px-1">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Your Story</label>
+            <span className="text-[10px] text-[var(--text-secondary)] opacity-50 italic">Markdown supported</span>
+          </div>
+          
+          {isPreview ? (
+            <div className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)]/50 min-h-[160px] border border-dashed border-[var(--bg-soft)]">
+                <article className="prose prose-sm prose-stone dark:prose-invert max-w-none 
+                    prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)]
+                    prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
+                    prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {content || "*No content to preview...*"}
+                    </ReactMarkdown>
+                </article>
+            </div>
+          ) : (
+            <textarea
+              placeholder="Write your thoughts here... (e.g. # Hello World)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={5}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm resize-none leading-relaxed"
+            />
+          )}
         </div>
 
         {/* Mood Selector */}
         <div className="space-y-3">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">How do you feel?</label>
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">How do you feel?</label>
           <div className="flex gap-2.5 flex-wrap">
             {moods.map((m) => {
               const isActive = mood === m.value;
