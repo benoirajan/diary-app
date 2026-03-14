@@ -12,6 +12,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Component Style:** Use functional components with hooks.
 - **File Naming:** React components should use PascalCase (e.g., `MyComponent.jsx`). Hooks should use camelCase and start with `use` (e.g., `useEntries.js`).
 - **Imports:** Group imports logically (React/Libraries first, then local components, then assets/styles).
+- After editing commit the code with git add and git commit with suitable message
 
 ## Common Commands
 - **Start Development Server:** `npm run dev`

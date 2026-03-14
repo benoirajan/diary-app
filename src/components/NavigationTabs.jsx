@@ -4,8 +4,8 @@ const NavigationTabs = ({
     onTabChange,
   }) => {
     return (
-      <div className="bg-white dark:bg-gray-900 shadow-sm px-6 py-3 transition-all">
-        <div className="flex gap-4 border-b dark:border-gray-700">
+      <div className="flex justify-center mb-3">
+        <nav className="inline-flex bg-[var(--bg-soft)] p-1.5 rounded-3xl border border-[var(--bg-soft)] shadow-inner">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.value;
   
@@ -13,17 +13,20 @@ const NavigationTabs = ({
               <button
                 key={tab.value}
                 onClick={() => onTabChange(tab.value)}
-                className={`pb-2 text-sm font-medium transition-all border-b-2 ${
+                className={`relative px-8 py-3 rounded-2xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
                   isActive
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-500"
+                    ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-md ring-1 ring-black/5 scale-[1.02]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]/50"
                 }`}
               >
+                {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-happy)]"></span>
+                )}
                 {tab.label}
               </button>
             );
           })}
-        </div>
+        </nav>
       </div>
     );
   };

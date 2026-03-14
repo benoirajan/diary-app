@@ -8,6 +8,15 @@ const moods = [
   { label: "Calm", value: "calm", emoji: "😌" },
 ];
 
+const moodColors = {
+  happy: "bg-[var(--accent-happy)]",
+  sad: "bg-[var(--accent-sad)]",
+  angry: "bg-[var(--accent-angry)]",
+  excited: "bg-[var(--accent-excited)]",
+  calm: "bg-[var(--accent-calm)]",
+  neutral: "bg-[var(--accent-neutral)]",
+}
+
 const EntryForm = ({
   onSubmit,
   onGenerateAffirmation,
@@ -46,90 +55,90 @@ const EntryForm = ({
   };
 
   return (
-    <div className="bg-[var(--bg-card)]
-    rounded-2xl
-    p-6
-    shadow-[var(--shadow-soft)]
-    border border-gray-100
-    hover:shadow-md
-    transition-all">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-        Create New Entry
+    <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
+      <h2 className="text-2xl font-bold mb-6 text-[var(--text-primary)] px-1">
+        Create New Entry<span className="text-[var(--accent-happy)]">.</span>
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title */}
-        <input
-          type="text"
-          placeholder="Title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="w-full p-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
-        />
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Title</label>
+          <input
+            type="text"
+            placeholder="How was your day?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+          />
+        </div>
 
         {/* Content */}
-        <textarea
-          placeholder="Write your thoughts..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={5}
-          required
-          className="w-full p-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-        />
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Your Story</label>
+          <textarea
+            placeholder="Write your thoughts here..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={5}
+            required
+            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm resize-none leading-relaxed"
+          />
+        </div>
 
         {/* Mood Selector */}
-        <div>
-          <p className="mb-2 font-medium text-gray-700 dark:text-gray-300">
-            Select Mood
-          </p>
-          <div className="flex gap-3 flex-wrap">
-            {moods.map((m) => (
-              <button
-                type="button"
-                key={m.value}
-                onClick={() => setMood(m.value)}
-                className={`px-4 py-2 rounded-xl border transition-all ${
-                  mood === m.value
-                    ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900"
-                    : "bg-gray-100 dark:bg-gray-800"
-                }`}
-              >
-                {m.emoji} {m.label}
-              </button>
-            ))}
+        <div className="space-y-3">
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">How do you feel?</label>
+          <div className="flex gap-2.5 flex-wrap">
+            {moods.map((m) => {
+              const isActive = mood === m.value;
+              return (
+                <button
+                  type="button"
+                  key={m.value}
+                  onClick={() => setMood(m.value)}
+                  className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
+                    isActive
+                      ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
+                      : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
+                  }`}
+                >
+                  <span className="text-base">{m.emoji}</span> {m.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* AI Affirmation */}
-        {onGenerateAffirmation && (
-          <div className="space-y-2">
+        <div className="pt-2 flex flex-col gap-3">
+          {/* AI Affirmation */}
+          {onGenerateAffirmation && (
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={isGeminiLoading}
-              className="px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition disabled:opacity-50"
+              disabled={isGeminiLoading || !content.trim()}
+              className="w-full py-3.5 rounded-2xl bg-white border-2 border-purple-100 text-purple-600 font-bold text-sm hover:bg-purple-50 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
             >
-              {isGeminiLoading ? "Generating..." : "Generate Affirmation"}
+              {isGeminiLoading ? "✨ Thinking..." : "✨ Generate AI Affirmation"}
             </button>
+          )}
 
-            {affirmation && (
-              <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900 text-sm text-gray-700 dark:text-gray-200">
-                {affirmation}
-              </div>
-            )}
-          </div>
-        )}
+          {affirmation && (
+            <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-sm text-[var(--text-primary)] italic leading-relaxed shadow-sm">
+              "{affirmation}"
+            </div>
+          )}
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 rounded-xl bg-[var(--bg-soft)]
-  text-[var(--text-primary)] font-medium  hover:bg-gray-200 transition disabled:opacity-50"
-        >
-          {isSubmitting ? "Saving..." : "Save Entry"}
-        </button>
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
+          >
+            {isSubmitting ? "Saving to your diary..." : "Save Entry"}
+          </button>
+        </div>
       </form>
     </div>
   );

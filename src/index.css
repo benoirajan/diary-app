@@ -18,3 +18,15 @@
 
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
+
+/* 🌙 Dark Mode Overrides */
+.dark {
+  --bg-main: #1a1817;
+  --bg-card: #252321;
+  --bg-soft: #2e2a27;
+
+  --text-primary: #fdfaf6;
+  --text-secondary: #a8a29e;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
