@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* 🌿 Soft Warm Minimal Theme */
+:root {
+  --bg-main: #fdfaf6;
+  --bg-card: #ffffff;
+  --bg-soft: #f4f1ea;
+
+  --text-primary: #2e2a27;
+  --text-secondary: #6b645f;
+
+  --accent-happy: #fbbf24;
+  --accent-sad: #60a5fa;
+  --accent-angry: #f87171;
+  --accent-neutral: #a8a29e;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+}

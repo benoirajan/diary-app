@@ -1,0 +1,156 @@
+import { useState, useMemo } from "react";
+import useEntries from "./hooks/useEntries";
+
+import Header from "./components/Header";
+import NavigationTabs from "./components/NavigationTabs";
+import EntryForm from "./components/EntryForm";
+import EntryList from "./components/EntryList";
+import EntryDetail from "./components/EntryDetail";
+import AnalyticsView from "./views/AnalyticsView";
+import { useAuth } from "./context/AuthContext";
+import AuthPage from "./views/AuthPage";
+
+
+function App() {
+
+    const { user } = useAuth();
+    // console.log(user)
+    /*
+      =========================
+      Global State
+      =========================
+    */
+    const {
+        entries,
+        loading,
+        error,
+        addEntry,
+        updateEntry,
+        deleteEntry,
+    } = useEntries();
+
+    const [currentView, setCurrentView] = useState("list");
+    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [darkMode, setDarkMode] = useState(false);
+
+    /*
+      =========================
+      Derived Filtered Entries
+      =========================
+    */
+    const filteredEntries = useMemo(() => {
+        if (!searchTerm.trim()) return entries;
+
+        return entries.filter((entry) =>
+            entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            entry.content.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [entries, searchTerm]);
+
+    /*
+      =========================
+      View Renderer
+      =========================
+    */
+    const renderView = () => {
+        if (loading) {
+            return (
+                <div className="p-6 text-center text-gray-500">
+                    Loading entries...
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className="p-6 text-center text-red-500">
+                    {error}
+                </div>
+            );
+        }
+
+        switch (currentView) {
+            case "create":
+                return (
+                    <EntryForm
+                        onSubmit={(data) => {
+                            addEntry(data);
+                            setCurrentView("list");
+                        }}
+                    />
+                );
+
+            case "detail":
+                return (
+                    <EntryDetail
+                        entry={selectedEntry}
+                        onBack={() => setCurrentView("list")}
+                        onDelete={(id) => {
+                            deleteEntry(id);
+                            setCurrentView("list");
+                        }}
+                        onUpdate={updateEntry}
+                    />
+                );
+
+            case "analytics":
+                return <AnalyticsView entries={entries} />;
+
+            case "list":
+            default:
+                return (
+                    <EntryList
+                        entries={filteredEntries}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        onSelectEntry={(entry) => {
+                            setSelectedEntry(entry);
+                            setCurrentView("detail");
+                        }}
+                    />
+                );
+        }
+    };
+
+    if (!user) {
+        return <AuthPage />;
+    }
+    return (
+        <div className={"min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]"}>
+            <div className="max-w-5xl mx-auto px-6 py-10">
+                {/* Header */}
+                
+                <Header
+                    title="AI Diary"
+                    isDarkMode={darkMode}
+                    onToggleDarkMode={() => setDarkMode(!darkMode)}
+                    onPrimaryAction={() => setCurrentView("create")}
+                    primaryActionLabel="New Entry"
+                />
+                
+                {/* Tabs */}
+                <NavigationTabs
+                    tabs={[
+                        { label: "Entries", value: "list" },
+                        { label: "Create", value: "create" },
+                        { label: "Analytics", value: "analytics" },
+                    ]}
+                    activeTab={currentView === "detail" ? "list" : currentView}
+                    onTabChange={(value) => {
+                        setSelectedEntry(null);
+                        setCurrentView(value);
+                    }}
+                />
+
+                {/* Main Content */}
+                <main className="max-w-4xl mx-auto p-6">
+                    {renderView()}
+                </main>
+            </div>
+        </div>
+
+    );
+}
+
+export default App;
