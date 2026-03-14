@@ -2,16 +2,15 @@ import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyBn3qDM0SNi0NRYbCgpAc6DDeByg6s1iUc",
-    authDomain: "diary360.firebaseapp.com",
-    databaseURL: "https://diary360-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "diary360",
-    storageBucket: "diary360.appspot.com",
-    messagingSenderId: "590616453663",
-    appId: "1:590616453663:web:966a947e9b1ae46c5a6b2a",
-    measurementId: "G-7X86N4GF7R"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
   };
 
 const app = initializeApp(firebaseConfig)
