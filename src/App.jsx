@@ -117,36 +117,37 @@ function App() {
         return <AuthPage />;
     }
     return (
-        <div className={"min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]"}>
-            <div className="max-w-5xl mx-auto px-6 py-10">
-                {/* Header */}
-                
-                <Header
-                    title="AI Diary"
-                    isDarkMode={darkMode}
-                    onToggleDarkMode={() => setDarkMode(!darkMode)}
-                    onPrimaryAction={() => setCurrentView("create")}
-                    primaryActionLabel="New Entry"
-                />
-                
-                {/* Tabs */}
-                <NavigationTabs
-                    tabs={[
-                        { label: "Entries", value: "list" },
-                        { label: "Create", value: "create" },
-                        { label: "Analytics", value: "analytics" },
-                    ]}
-                    activeTab={currentView === "detail" ? "list" : currentView}
-                    onTabChange={(value) => {
-                        setSelectedEntry(null);
-                        setCurrentView(value);
-                    }}
-                />
+        <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>
+            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-happy)]/30">
+                <div className="max-w-4xl mx-auto px-6 py-6">
+                    {/* Header */}
+                    <Header
+                        title="AI Diary"
+                        isDarkMode={darkMode}
+                        onToggleDarkMode={() => setDarkMode(!darkMode)}
+                        onPrimaryAction={() => setCurrentView("create")}
+                        primaryActionLabel="New Entry"
+                    />
+                    
+                    {/* Tabs */}
+                    <NavigationTabs
+                        tabs={[
+                            { label: "Entries", value: "list" },
+                            { label: "Create", value: "create" },
+                            { label: "Analytics", value: "analytics" },
+                        ]}
+                        activeTab={currentView === "detail" ? "list" : currentView}
+                        onTabChange={(value) => {
+                            setSelectedEntry(null);
+                            setCurrentView(value);
+                        }}
+                    />
 
-                {/* Main Content */}
-                <main className="max-w-4xl mx-auto p-6">
-                    {renderView()}
-                </main>
+                    {/* Main Content */}
+                    <main className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {renderView()}
+                    </main>
+                </div>
             </div>
         </div>
 

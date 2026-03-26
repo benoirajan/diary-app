@@ -9,31 +9,35 @@ const Header = ({
     primaryActionLabel = "",
   }) => {
     return (
-      <header className="flex justify-between items-center mb-10">
+      <header className="flex justify-between items-center mb-6 px-2">
         {/* Left Side - Title */}
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {title}
+        <h1 className="text-4xl font-black tracking-tight text-[var(--text-primary)]">
+          {title}<span className="text-[var(--accent-happy)]">.</span>
         </h1>
   
         {/* Right Side - Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Optional Primary Button */}
           {onPrimaryAction && primaryActionLabel && (
             <button
               onClick={onPrimaryAction}
-              className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
+              className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-bold hover:scale-105 transition-all active:scale-95 shadow-lg shadow-amber-200/40"
             >
               {primaryActionLabel}
             </button>
           )}
   
-          <button onClick={() => signOut(auth)}>
-                    Sign Out
-                </button>
+          <button 
+            onClick={() => signOut(auth)}
+            className="px-4 py-3 rounded-2xl bg-[var(--bg-soft)] text-[var(--text-secondary)] font-medium hover:text-[var(--text-primary)] transition-all"
+          >
+            Sign Out
+          </button>
+
           {/* Dark Mode Toggle */}
           <button
             onClick={onToggleDarkMode}
-            className="px-3 py-2 rounded-xl border dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:scale-105 transition"
+            className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] hover:border-[var(--accent-happy)] transition-all shadow-sm text-xl"
           >
             {isDarkMode ? "🌙" : "☀️"}
           </button>

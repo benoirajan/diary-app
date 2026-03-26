@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Diary Base -->
+  <rect x="12" y="8" width="40" height="48" rx="6" fill="#fbbf24" fill-opacity="0.1" stroke="#fbbf24" stroke-width="4"/>
+  <rect x="12" y="8" width="8" height="48" rx="2" fill="#fbbf24"/>
+  
+  <!-- Sparkle (AI) -->
+  <path d="M42 20L44.5 25.5L50 28L44.5 30.5L42 36L39.5 30.5L34 28L39.5 25.5L42 20Z" fill="#fbbf24"/>
+  <path d="M52 40L53.5 43.5L57 45L53.5 46.5L52 50L50.5 46.5L47 45L50.5 43.5L52 40Z" fill="#fbbf24" fill-opacity="0.6"/>
+  
+  <!-- Content Lines -->
+  <line x1="28" y1="44" x2="44" y2="44" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="38" x2="36" y2="38" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,13 +1,23 @@
 import { useState } from "react";
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString();
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 const moodColors = {
   happy: "bg-[var(--accent-happy)]",
   sad: "bg-[var(--accent-sad)]",
   angry: "bg-[var(--accent-angry)]",
+  excited: "bg-[var(--accent-excited)]",
+  calm: "bg-[var(--accent-calm)]",
   neutral: "bg-[var(--accent-neutral)]",
 }
 
@@ -38,104 +48,127 @@ const EntryDetail = ({
   };
 
   const handleAnalyze = async () => {
+    if (!onAnalyze) return;
     const result = await onAnalyze(entry);
     if (result) setAnalysis(result);
   };
 
   return (
-    <div className="bg-[var(--bg-card)]
-    rounded-2xl
-    p-6
-    shadow-[var(--shadow-soft)]
-    border border-gray-100
-    hover:shadow-md
-    transition-all">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-[var(--bg-card)] rounded-3xl p-8 md:p-10 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
+      {/* Top Actions */}
+      <div className="flex justify-between items-center mb-10">
         <button
           onClick={onBack}
-          className="text-sm text-blue-600 hover:underline"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all font-bold text-sm"
         >
-          ← Back
+          <span>←</span> Back to entries
         </button>
 
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="px-3 py-1 text-sm rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
+            className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
+                isEditing 
+                ? "bg-gray-100 text-gray-600 hover:bg-gray-200" 
+                : "bg-[var(--bg-soft)] text-[var(--text-primary)] hover:bg-gray-200"
+            }`}
           >
-            {isEditing ? "Cancel" : "Edit"}
+            {isEditing ? "Cancel" : "Edit Entry"}
           </button>
 
           <button
-            onClick={() => onDelete(entry.id)}
-            className="px-3 py-1 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700"
+            onClick={() => {
+                if(window.confirm("Are you sure you want to delete this memory?")) {
+                    onDelete(entry.id);
+                }
+            }}
+            className="px-5 py-2 rounded-xl text-sm font-bold bg-red-50 text-red-500 hover:bg-red-100 transition-all"
           >
             Delete
           </button>
         </div>
       </div>
 
-      {/* Title */}
-      {isEditing ? (
-        <input
-          value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
-          className="w-full mb-3 p-2 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
-        />
-      ) : (
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          {editedTitle}
-        </h2>
-      )}
-
-      {/* Date */}
-      <p className={`px-3 py-1 rounded-full text-xs text-white ${moodColors[entry.mood]}`}>
-        {formatDate(entry.date)} • Mood: {entry.mood}
-      </p>
-
-      {/* Content */}
-      {isEditing ? (
-        <textarea
-          value={editedContent}
-          onChange={(e) => setEditedContent(e.target.value)}
-          rows={6}
-          className="w-full p-3 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 resize-none"
-        />
-      ) : (
-        <p className="text-gray-700 dark:text-gray-200 whitespace-pre-line">
-          {editedContent}
-        </p>
-      )}
-
-      {/* Save Button (Editing Mode) */}
-      {isEditing && (
-        <button
-          onClick={handleUpdate}
-          className="mt-3 px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700"
-        >
-          Save Changes
-        </button>
-      )}
-
-      {/* AI Analysis */}
-      {onAnalyze && (
-        <div className="mt-6 space-y-3">
-          <button
-            onClick={handleAnalyze}
-            disabled={isGeminiLoading}
-            className="px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
-          >
-            {isGeminiLoading ? "Analyzing..." : "Analyze Entry"}
-          </button>
-
-          {analysis && (
-            <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line">
-              {analysis}
-            </div>
-          )}
+      <div className="space-y-6">
+        {/* Mood Badge */}
+        <div className="flex items-center gap-3">
+            <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-sm ${moodColors[entry.mood] || moodColors.neutral}`}>
+                {entry.mood}
+            </span>
+            <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                {formatDate(entry.date)}
+            </span>
         </div>
-      )}
+
+        {/* Title */}
+        {isEditing ? (
+            <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider px-1">Title</label>
+                <input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full p-4 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-bold text-2xl"
+                />
+            </div>
+        ) : (
+            <h2 className="text-4xl font-black text-[var(--text-primary)] leading-tight">
+            {entry.title}
+            </h2>
+        )}
+
+        {/* Content */}
+        {isEditing ? (
+            <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider px-1">Content</label>
+                <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    rows={10}
+                    className="w-full p-5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium resize-none leading-relaxed"
+                />
+            </div>
+        ) : (
+            <p className="text-lg text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+            {entry.content}
+            </p>
+        )}
+
+        {/* Save Button (Editing Mode) */}
+        {isEditing && (
+            <button
+            onClick={handleUpdate}
+            className="w-full mt-4 py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-lg hover:opacity-90 transition-all shadow-lg"
+            >
+            Save Changes
+            </button>
+        )}
+
+        {/* AI Analysis Section */}
+        {!isEditing && onAnalyze && (
+            <div className="mt-12 pt-10 border-t border-[var(--bg-soft)]">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-[var(--text-primary)]">AI Insights</h3>
+                        <p className="text-sm text-[var(--text-secondary)]">Let AI help you reflect on this entry.</p>
+                    </div>
+                    <button
+                        onClick={handleAnalyze}
+                        disabled={isGeminiLoading}
+                        className="px-6 py-3 rounded-2xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-purple-200"
+                    >
+                        {isGeminiLoading ? "✨ Analyzing..." : "✨ Analyze with AI"}
+                    </button>
+                </div>
+
+                {analysis && (
+                    <div className="p-6 rounded-3xl bg-purple-50 border border-purple-100 text-[var(--text-primary)] leading-relaxed shadow-inner">
+                        <div className="text-purple-600 font-bold text-xs uppercase tracking-widest mb-3">Reflection</div>
+                        <div className="whitespace-pre-line italic">"{analysis}"</div>
+                    </div>
+                )}
+            </div>
+        )}
+      </div>
     </div>
   );
 };

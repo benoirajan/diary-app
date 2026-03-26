@@ -9,6 +9,8 @@ const moodColors = {
   happy: "bg-[var(--accent-happy)]",
   sad: "bg-[var(--accent-sad)]",
   angry: "bg-[var(--accent-angry)]",
+  excited: "bg-[var(--accent-excited)]",
+  calm: "bg-[var(--accent-calm)]",
   neutral: "bg-[var(--accent-neutral)]",
 }
 
@@ -44,56 +46,56 @@ const EntryList = ({
 
   return (
     <div className="bg-[var(--bg-card)]
-    rounded-2xl
-    p-6
+    rounded-3xl
+    p-8
     shadow-[var(--shadow-soft)]
-    border border-gray-100
-    hover:shadow-md
+    border border-[var(--bg-soft)]
     transition-all">
       {/* Search */}
-      <div className="mb-6">
+      <div className="mb-8">
         <input
           type="text"
-          placeholder="Search entries..."
+          placeholder="Search your thoughts..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full p-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-5 py-4 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)]"
         />
       </div>
 
       {/* Empty State */}
       {!hasEntries && (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          No entries found.
+        <div className="text-center py-16 text-[var(--text-secondary)]">
+          <div className="text-4xl mb-4">📖</div>
+          <p>No entries found. Start writing your story.</p>
         </div>
       )}
 
       {/* Grouped Entries */}
       {Object.entries(groupedEntries).map(([date, items]) => (
-        <div key={date} className="mb-8">
+        <div key={date} className="mb-10 last:mb-0">
           {/* Date Header */}
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 border-b pb-2 dark:border-gray-700">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-6 border-b border-[var(--bg-soft)] pb-3">
             {date}
           </h3>
 
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {items.map((entry) => (
               <div
                 key={entry.id}
                 onClick={() => onSelectEntry(entry)}
-                className="p-4 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:shadow-md hover:scale-[1.01] transition cursor-pointer"
+                className="group p-6 rounded-2xl bg-[var(--bg-soft)]/30 hover:bg-[var(--bg-soft)] transition-all cursor-pointer border border-transparent hover:border-[var(--accent-happy)]/20"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold text-gray-800 dark:text-gray-100">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="text-xl font-bold text-[var(--text-primary)] group-hover:text-black transition-colors">
                     {entry.title}
                   </h4>
-                  <span className={`px-3 py-1 rounded-full text-xs text-white ${moodColors[entry.mood]}`}>
+                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-sm ${moodColors[entry.mood] || moodColors.neutral}`}>
                     {entry.mood}
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {truncateText(entry.content)}
+                <p className="text-[var(--text-secondary)] leading-relaxed">
+                  {truncateText(entry.content, 150)}
                 </p>
               </div>
             ))}
