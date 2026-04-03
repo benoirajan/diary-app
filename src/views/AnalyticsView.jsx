@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { moods, moodColors } from '../constants/moods';
 
 const AnalyticsView = ({ entries = [] }) => {
   /*
@@ -36,36 +37,36 @@ const AnalyticsView = ({ entries = [] }) => {
   }, [entries]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg transition-all space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-        Analytics
+    <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-8">
+      <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
+        📊 Analytics Dashboard
       </h2>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
+          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
             Total Entries
           </p>
-          <p className="text-2xl font-bold text-blue-600">
+          <p className="text-4xl font-black text-[var(--accent-happy)] drop-shadow-[0_0_5px_var(--accent-happy)]">
             {analytics.totalEntries}
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
+          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
             Most Common Mood
           </p>
-          <p className="text-2xl font-bold text-purple-600 capitalize">
-            {analytics.mostCommonMood}
+          <p className="text-4xl font-black text-[var(--accent-excited)] capitalize drop-shadow-[0_0_5px_var(--accent-excited)]">
+            {moods.find(m => m.value === analytics.mostCommonMood)?.emoji || '😊'} {analytics.mostCommonMood}
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
+          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
             Unique Days Written
           </p>
-          <p className="text-2xl font-bold text-green-600">
+          <p className="text-4xl font-black text-[var(--accent-calm)] drop-shadow-[0_0_5px_var(--accent-calm)]">
             {Object.keys(analytics.entriesPerDay).length}
           </p>
         </div>
@@ -73,27 +74,28 @@ const AnalyticsView = ({ entries = [] }) => {
 
       {/* Mood Distribution */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_3px_var(--glow-color)] mb-4">
           Mood Distribution
         </h3>
 
         {Object.keys(analytics.moodCount).length === 0 && (
-          <p className="text-gray-500 dark:text-gray-400">
-            No data available.
+          <p className="text-[var(--text-secondary)]">
+            No data available. Start writing to see your mood patterns!
           </p>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {Object.entries(analytics.moodCount).map(
             ([mood, count]) => (
               <div
                 key={mood}
-                className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                className="flex justify-between items-center p-4 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_10px_var(--glow-color)] transition-all"
+                style={{ '--mood-color': `var(--accent-${mood})` }}
               >
-                <span className="capitalize text-gray-700 dark:text-gray-200">
-                  {mood}
+                <span className="capitalize text-[var(--text-primary)] font-semibold flex items-center gap-2">
+                  {moods.find(m => m.value === mood)?.emoji || '😊'} {mood}
                 </span>
-                <span className="font-semibold text-gray-800 dark:text-gray-100">
+                <span className="font-black text-2xl text-[var(--mood-color)] drop-shadow-[0_0_3px_var(--mood-color)]">
                   {count}
                 </span>
               </div>

@@ -11,7 +11,7 @@ const Header = ({
     return (
       <header className="flex justify-between items-center mb-6 px-2">
         {/* Left Side - Title */}
-        <h1 className="text-4xl font-black tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[var(--text-primary)]">
           {title}<span className="text-[var(--accent-happy)]">.</span>
         </h1>
   
@@ -21,9 +21,10 @@ const Header = ({
           {onPrimaryAction && primaryActionLabel && (
             <button
               onClick={onPrimaryAction}
-              className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-bold hover:scale-105 transition-all active:scale-95 shadow-lg shadow-amber-200/40"
+              className="px-4 md:px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-bold hover:scale-105 transition-all active:scale-95 shadow-lg shadow-amber-200/40 flex items-center gap-2"
             >
-              {primaryActionLabel}
+              <span className="text-lg">+</span>
+              <span className="hidden sm:inline">{primaryActionLabel}</span>
             </button>
           )}
   
@@ -31,7 +32,8 @@ const Header = ({
             onClick={() => signOut(auth)}
             className="px-4 py-3 rounded-2xl bg-[var(--bg-soft)] text-[var(--text-secondary)] font-medium hover:text-[var(--text-primary)] transition-all"
           >
-            Sign Out
+            <span className="hidden sm:inline">Sign Out</span>
+            <span className="sm:hidden">Out</span>
           </button>
 
           {/* Dark Mode Toggle */}

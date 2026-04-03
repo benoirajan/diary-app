@@ -28,21 +28,23 @@ export default function AuthPage({ onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center p-6 relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#03040a] via-[#070b1e] to-[#0f132e] flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,.2),transparent_50%)]" />
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,.2),transparent_50%)]" />
       {onBack && (
         <button 
           onClick={onBack}
-          className="absolute top-8 left-8 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          className="absolute top-8 left-8 text-sm font-bold text-slate-300 hover:text-cyan-300 transition-colors z-10"
         >
           ← Back
         </button>
       )}
-      <div className="w-full max-w-md bg-[var(--bg-card)] rounded-3xl shadow-[var(--shadow-soft)] p-8 md:p-10">
+      <div className="w-full max-w-md bg-gradient-to-t from-[#0d1223] to-[#161b33] rounded-3xl border border-cyan-400/20 shadow-[0_0_30px_rgba(34,211,238,.25)] p-8 md:p-10 relative z-10">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
+          <h1 className="text-3xl font-black text-white mb-2 drop-shadow-[0_0_8px_rgba(34,211,238,.6)]">
             {isRegistering ? "Create Account" : "Welcome Back"}
           </h1>
-          <p className="text-[var(--text-secondary)]">
+          <p className="text-slate-300">
             {isRegistering 
               ? "Start your personal AI diary journey today." 
               : "Your thoughts are waiting for you."}
@@ -87,20 +89,25 @@ export default function AuthPage({ onBack }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-[var(--accent-happy)] hover:opacity-90 text-[var(--text-primary)] font-bold rounded-2xl shadow-lg shadow-amber-200/50 transition-all active:scale-[0.98] disabled:opacity-50"
+            className="w-full py-4 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-2xl shadow-[0_0_20px_rgba(34,211,238,.45)] hover:shadow-[0_0_30px_rgba(34,211,238,.65)] transition-all active:scale-[0.98] disabled:opacity-60"
           >
-            {loading ? "Processing..." : (isRegistering ? "Sign Up" : "Sign In")}
+            {loading ? "Processing..." : isRegistering ? "Sign Up" : "Sign In"}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <button
             onClick={() => setIsRegistering(!isRegistering)}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm font-medium transition-colors"
+            className="text-slate-300 hover:text-cyan-300 text-sm font-medium transition-all"
           >
-            {isRegistering 
-              ? "Already have an account? Sign In" 
-              : "Don't have an account? Sign Up"}
+            <span className="hidden sm:inline">
+              {isRegistering 
+                ? "Already have an account? Sign In" 
+                : "Don't have an account? Sign Up"}
+            </span>
+            <span className="sm:hidden">
+              {isRegistering ? "Sign In" : "Sign Up"}
+            </span>
           </button>
         </div>
       </div>

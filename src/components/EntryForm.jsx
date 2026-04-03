@@ -1,23 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-const moods = [
-  { label: "Happy", value: "happy", emoji: "😊" },
-  { label: "Sad", value: "sad", emoji: "😔" },
-  { label: "Excited", value: "excited", emoji: "🤩" },
-  { label: "Angry", value: "angry", emoji: "😡" },
-  { label: "Calm", value: "calm", emoji: "😌" },
-];
-
-const moodColors = {
-  happy: "bg-[var(--accent-happy)]",
-  sad: "bg-[var(--accent-sad)]",
-  angry: "bg-[var(--accent-angry)]",
-  excited: "bg-[var(--accent-excited)]",
-  calm: "bg-[var(--accent-calm)]",
-  neutral: "bg-[var(--accent-neutral)]",
-}
+import { moods, moodColors } from '../constants/moods';
 
 const EntryForm = ({
   onSubmit,
@@ -60,7 +44,7 @@ const EntryForm = ({
   return (
     <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
       <div className="flex justify-between items-center mb-6 px-1">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">
             Create New Entry<span className="text-[var(--accent-happy)]">.</span>
         </h2>
         
@@ -69,7 +53,7 @@ const EntryForm = ({
             onClick={() => setIsPreview(!isPreview)}
             className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--accent-happy)] transition-colors"
         >
-            {isPreview ? "✍️ Edit Mode" : "👁️ Preview Mode"}
+            {isPreview ? "✍️ Edit" : "👁️ Preview"}
         </button>
       </div>
 
@@ -150,7 +134,7 @@ const EntryForm = ({
               disabled={isGeminiLoading || !content.trim()}
               className="w-full py-3.5 rounded-2xl bg-white border-2 border-purple-100 text-purple-600 font-bold text-sm hover:bg-purple-50 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
             >
-              {isGeminiLoading ? "✨ Thinking..." : "✨ Generate AI Affirmation"}
+              {isGeminiLoading ? "✨ Thinking..." : <><span className="hidden sm:inline">Generate AI </span>Affirmation</>}
             </button>
           )}
 
@@ -166,7 +150,7 @@ const EntryForm = ({
             disabled={isSubmitting}
             className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
           >
-            {isSubmitting ? "Saving to your diary..." : "Save Entry"}
+            {isSubmitting ? "Saving to your diary..." : <span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span>}
           </button>
         </div>
       </form>

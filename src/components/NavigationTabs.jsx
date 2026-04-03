@@ -13,7 +13,7 @@ const NavigationTabs = ({
               <button
                 key={tab.value}
                 onClick={() => onTabChange(tab.value)}
-                className={`relative px-8 py-3 rounded-2xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                className={`relative px-4 md:px-8 py-2 md:py-3 rounded-2xl text-xs md:text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
                   isActive
                     ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-md ring-1 ring-black/5 scale-[1.02]"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]/50"
