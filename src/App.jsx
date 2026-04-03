@@ -9,6 +9,7 @@ import EntryDetail from "./components/EntryDetail";
 import AnalyticsView from "./views/AnalyticsView";
 import { useAuth } from "./context/AuthContext";
 import AuthPage from "./views/AuthPage";
+import LandingPage from "./views/LandingPage";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
     const [selectedEntry, setSelectedEntry] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [darkMode, setDarkMode] = useState(false);
+    const [showAuth, setShowAuth] = useState(false);
 
     /*
       =========================
@@ -114,7 +116,9 @@ function App() {
     };
 
     if (!user) {
-        return <AuthPage />;
+        return showAuth 
+            ? <AuthPage onBack={() => setShowAuth(false)} /> 
+            : <LandingPage onGetStarted={() => setShowAuth(true)} />;
     }
     return (
         <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>

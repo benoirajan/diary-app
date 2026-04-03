@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 
-export default function AuthPage() {
+export default function AuthPage({ onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -28,7 +28,15 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center p-6 relative">
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="absolute top-8 left-8 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          ← Back
+        </button>
+      )}
       <div className="w-full max-w-md bg-[var(--bg-card)] rounded-3xl shadow-[var(--shadow-soft)] p-8 md:p-10">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
