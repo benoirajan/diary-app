@@ -5,12 +5,18 @@ import { moods, moodColors } from '../constants/moods';
 
 const EntryForm = ({
   onSubmit,
+  initialData = null,
+  onCancel = null,
   isSubmitting = false,
 }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [mood, setMood] = useState("happy");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [content, setContent] = useState(initialData?.content || "");
+  const [mood, setMood] = useState(initialData?.mood || "happy");
+  const [date, setDate] = useState(
+    initialData?.date 
+      ? new Date(initialData.date).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0]
+  );
   const [isPreview, setIsPreview] = useState(false);
 
   const handleSubmit = (e) => {
@@ -25,11 +31,13 @@ const EntryForm = ({
       date: new Date(date).toISOString(),
     });
 
-    // Reset form after submit
-    setTitle("");
-    setContent("");
-    setMood("happy");
-    setDate(new Date().toISOString().split('T')[0]);
+    if (!initialData) {
+      // Reset form after submit ONLY if it's a new entry
+      setTitle("");
+      setContent("");
+      setMood("happy");
+      setDate(new Date().toISOString().split('T')[0]);
+    }
   };
 
   const handleGenerate = async () => {
@@ -40,16 +48,27 @@ const EntryForm = ({
     <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
       <div className="flex justify-between items-center mb-6 px-1">
         <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">
-            Create New Entry<span className="text-[var(--accent-happy)]">.</span>
+            {initialData ? "Edit Entry" : "Create New Entry"}<span className="text-[var(--accent-happy)]">.</span>
         </h2>
-        
-        <button 
-            type="button"
-            onClick={() => setIsPreview(!isPreview)}
-            className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--accent-happy)] transition-colors"
-        >
-            {isPreview ? "✍️ Edit" : "👁️ Preview"}
-        </button>
+
+        <div className="flex gap-4 items-center">
+            {onCancel && (
+                <button 
+                    type="button"
+                    onClick={onCancel}
+                    className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors"
+                >
+                    Cancel
+                </button>
+            )}
+            <button 
+                type="button"
+                onClick={() => setIsPreview(!isPreview)}
+                className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--accent-happy)] transition-colors"
+            >
+                {isPreview ? "✍️ Edit" : "👁️ Preview"}
+            </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -72,7 +91,7 @@ const EntryForm = ({
             <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Your Story</label>
             <span className="text-[10px] text-[var(--text-secondary)] opacity-50 italic">Markdown supported</span>
           </div>
-          
+
           {isPreview ? (
             <div className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)]/50 min-h-[160px] border border-dashed border-[var(--bg-soft)]">
                 <article className="prose prose-sm prose-stone dark:prose-invert max-w-none 
@@ -109,6 +128,28 @@ const EntryForm = ({
         </div>
 
         {/* Mood Selector */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">How do you feel?</label>
+          <div className="flex gap-2.5 flex-wrap">
+            {moods.map((m) => {
+              const isActive = mood === m.value;
+              return (
+                <button
+                  type="button"
+                  key={m.value}
+                  onClick={() => setMood(m.value)}
+                  className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
+                    isActive
+                      ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
+                      : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
+                  }`}
+                >
+                  <span className="text-base">{m.emoji}</span> {m.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="pt-2 flex flex-col gap-3">
           {/* Submit */}
@@ -117,7 +158,11 @@ const EntryForm = ({
             disabled={isSubmitting}
             className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
           >
-            {isSubmitting ? "Saving to your diary..." : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
+            {isSubmitting 
+                ? "Saving..." 
+                : initialData 
+                    ? "Update Entry" 
+                    : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
           </button>
         </div>
       </form>

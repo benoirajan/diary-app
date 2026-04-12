@@ -31,14 +31,14 @@ function App() {
     } = useEntries();
 
     const [currentView, setCurrentView] = useState("list");
-    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [selectedEntryId, setSelectedEntryId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [darkMode, setDarkMode] = useState(false);
     const [showAuth, setShowAuth] = useState(false);
 
     /*
       =========================
-      Derived Filtered Entries
+      Derived State
       =========================
     */
     const filteredEntries = useMemo(() => {
@@ -49,6 +49,11 @@ function App() {
             entry.content.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [entries, searchTerm]);
+
+    const selectedEntry = useMemo(() => {
+        if (!selectedEntryId) return null;
+        return entries.find(e => e.id === selectedEntryId);
+    }, [entries, selectedEntryId]);
 
     /*
       =========================
@@ -83,13 +88,29 @@ function App() {
                     />
                 );
 
+            case "edit":
+                return (
+                    <EntryForm
+                        initialData={selectedEntry}
+                        onSubmit={(data) => {
+                            updateEntry(selectedEntry.id, data);
+                            setCurrentView("list");
+                        }}
+                        onCancel={() => setCurrentView("list")}
+                    />
+                );
+
             case "detail":
                 return (
                     <EntryDetail
                         entry={selectedEntry}
-                        onBack={() => setCurrentView("list")}
+                        onBack={() => {
+                            setSelectedEntryId(null);
+                            setCurrentView("list");
+                        }}
                         onDelete={(id) => {
                             deleteEntry(id);
+                            setSelectedEntryId(null);
                             setCurrentView("list");
                         }}
                         onUpdate={updateEntry}
@@ -107,8 +128,12 @@ function App() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         onSelectEntry={(entry) => {
-                            setSelectedEntry(entry);
+                            setSelectedEntryId(entry.id);
                             setCurrentView("detail");
+                        }}
+                        onEditEntry={(entry) => {
+                            setSelectedEntryId(entry.id);
+                            setCurrentView("edit");
                         }}
                     />
                 );

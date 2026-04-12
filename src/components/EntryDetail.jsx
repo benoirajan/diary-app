@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import EntryForm from "./EntryForm";
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -32,20 +33,12 @@ const EntryDetail = ({
   isGeminiLoading = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(entry?.title || "");
-  const [editedContent, setEditedContent] = useState(entry?.content || "");
   const [analysis, setAnalysis] = useState("");
 
   if (!entry) return null;
 
-  const handleUpdate = () => {
-    if (!editedTitle.trim() || !editedContent.trim()) return;
-
-    onUpdate(entry.id,{
-      title: editedTitle,
-      content: editedContent,
-    });
-
+  const handleUpdate = (updatedData) => {
+    onUpdate(entry.id, updatedData);
     setIsEditing(false);
   };
 
@@ -54,6 +47,16 @@ const EntryDetail = ({
     const result = await onAnalyze(entry);
     if (result) setAnalysis(result);
   };
+
+  if (isEditing) {
+    return (
+      <EntryForm 
+        initialData={entry}
+        onSubmit={handleUpdate}
+        onCancel={() => setIsEditing(false)}
+      />
+    );
+  }
 
   return (
     <div className="bg-[var(--bg-card)] rounded-3xl p-8 md:p-10 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
@@ -68,14 +71,10 @@ const EntryDetail = ({
 
         <div className="flex gap-3">
           <button
-            onClick={() => setIsEditing(!isEditing)}
-            className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                isEditing 
-                ? "bg-gray-100 text-gray-600 hover:bg-gray-200" 
-                : "bg-[var(--bg-soft)] text-[var(--text-primary)] hover:bg-gray-200"
-            }`}
+            onClick={() => setIsEditing(true)}
+            className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--bg-soft)] text-[var(--text-primary)] hover:bg-gray-200 transition-all"
           >
-            {isEditing ? "Cancel" : "Edit Entry"}
+            Edit Entry
           </button>
 
           <button
@@ -103,56 +102,23 @@ const EntryDetail = ({
         </div>
 
         {/* Title */}
-        {isEditing ? (
-            <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider px-1">Title</label>
-                <input
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    className="w-full p-4 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-bold text-2xl"
-                />
-            </div>
-        ) : (
-            <h2 className="text-4xl font-black text-[var(--text-primary)] leading-tight">
-            {entry.title}
-            </h2>
-        )}
+        <h2 className="text-4xl font-black text-[var(--text-primary)] leading-tight">
+          {entry.title}
+        </h2>
 
         {/* Content */}
-        {isEditing ? (
-            <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider px-1">Content</label>
-                <textarea
-                    value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
-                    rows={10}
-                    className="w-full p-5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium resize-none leading-relaxed"
-                />
-            </div>
-        ) : (
-            <article className="prose prose-stone dark:prose-invert max-w-none 
-              prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)]
-              prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
-              prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]
-              leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {entry.content}
-                </ReactMarkdown>
-            </article>
-        )}
-
-        {/* Save Button (Editing Mode) */}
-        {isEditing && (
-            <button
-            onClick={handleUpdate}
-            className="w-full mt-4 py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-lg hover:opacity-90 transition-all shadow-lg"
-            >
-            Save Changes
-            </button>
-        )}
+        <article className="prose prose-stone dark:prose-invert max-w-none 
+          prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)]
+          prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
+          prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]
+          leading-relaxed">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {entry.content}
+            </ReactMarkdown>
+        </article>
 
         {/* AI Analysis Section */}
-        {!isEditing && onAnalyze && (
+        {onAnalyze && (
             <div className="mt-12 pt-10 border-t border-[var(--bg-soft)]">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>
