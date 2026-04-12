@@ -69,7 +69,7 @@ export default function LandingPage({ onGetStarted }) {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center glow-border animate-pulse">
             <span className="text-white text-xl">✨</span>
           </div>
-          <span className="text-2xl font-black tracking-tighter glow-text">AI Diary<span className="text-cyan-400">.</span></span>
+          <span className="text-2xl font-black tracking-tighter glow-text">SoulScript<span className="text-cyan-400">.</span></span>
         </div>
         <button
           onClick={onGetStarted}
@@ -160,7 +160,7 @@ export default function LandingPage({ onGetStarted }) {
       </section>
 
       <footer className="py-12 border-t border-slate-700 text-center relative z-10">
-        <p className="text-sm text-slate-400 font-medium glow-text">© 2026 AI Diary. Built for thoughtful reflection.</p>
+        <p className="text-sm text-slate-400 font-medium glow-text">© 2026 SoulScript. Built for thoughtful reflection.</p>
       </footer>
     </div>
   );

@@ -1,8 +1,8 @@
-# ✨ AI Diary - Your Intelligent Memory Hub
+# ✨ SoulScript - Your Intelligent Memory Hub
 
-A modern, minimal, and intelligent personal diary application built with **React**, **Vite**, and **Firebase**. AI Diary helps you capture your daily thoughts while providing AI-driven insights and mood-based reflections.
+A modern, minimal, and intelligent personal diary application built with **React**, **Vite**, and **Firebase**. SoulScript helps you capture your daily thoughts while providing AI-driven insights and mood-based reflections.
 
-![AI Diary Icon](./public/favicon.svg)
+![SoulScript Icon](./public/favicon.svg)
 
 ## 🌟 Key Features
 

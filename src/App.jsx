@@ -151,7 +151,7 @@ function App() {
                 <div className="max-w-4xl mx-auto px-6 py-6">
                     {/* Header */}
                     <Header
-                        title="AI Diary"
+                        title="SoulScript"
                         isDarkMode={darkMode}
                         onToggleDarkMode={() => setDarkMode(!darkMode)}
                         onPrimaryAction={() => setCurrentView("create")}
@@ -167,7 +167,7 @@ function App() {
                         ]}
                         activeTab={currentView === "detail" ? "list" : currentView}
                         onTabChange={(value) => {
-                            setSelectedEntry(null);
+                            setSelectedEntryId(null);
                             setCurrentView(value);
                         }}
                     />
