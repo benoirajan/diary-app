@@ -17,6 +17,11 @@ const EntryForm = ({
       ? new Date(initialData.date).toISOString().split('T')[0] 
       : new Date().toISOString().split('T')[0]
   );
+  const [time, setTime] = useState(
+    initialData?.date
+      ? new Date(initialData.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  );
   const [isPreview, setIsPreview] = useState(false);
 
   const handleSubmit = (e) => {
@@ -24,11 +29,14 @@ const EntryForm = ({
 
     if (!title.trim() || !content.trim()) return;
 
+    // Combine date and time
+    const combinedDateTime = new Date(`${date}T${time}`);
+
     onSubmit({
       title,
       content,
       mood,
-      date: new Date(date).toISOString(),
+      date: combinedDateTime.toISOString(),
     });
 
     if (!initialData) {
@@ -36,7 +44,9 @@ const EntryForm = ({
       setTitle("");
       setContent("");
       setMood("happy");
-      setDate(new Date().toISOString().split('T')[0]);
+      const now = new Date();
+      setDate(now.toISOString().split('T')[0]);
+      setTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
     }
   };
 
@@ -115,16 +125,28 @@ const EntryForm = ({
           )}
         </div>
 
-        {/* Date Selector */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
-          />
+        {/* Date & Time Selector */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Time</label>
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+            />
+          </div>
         </div>
 
         {/* Mood Selector */}
