@@ -5,14 +5,12 @@ import { moods, moodColors } from '../constants/moods';
 
 const EntryForm = ({
   onSubmit,
-  onGenerateAffirmation,
   isSubmitting = false,
-  isGeminiLoading = false,
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mood, setMood] = useState("happy");
-  const [affirmation, setAffirmation] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isPreview, setIsPreview] = useState(false);
 
   const handleSubmit = (e) => {
@@ -24,21 +22,18 @@ const EntryForm = ({
       title,
       content,
       mood,
-      date: new Date().toISOString(),
+      date: new Date(date).toISOString(),
     });
 
     // Reset form after submit
     setTitle("");
     setContent("");
     setMood("happy");
-    setAffirmation("");
+    setDate(new Date().toISOString().split('T')[0]);
   };
 
   const handleGenerate = async () => {
     if (!content.trim()) return;
-
-    const result = await onGenerateAffirmation(content, mood);
-    if (result) setAffirmation(result);
   };
 
   return (
@@ -101,56 +96,28 @@ const EntryForm = ({
           )}
         </div>
 
-        {/* Mood Selector */}
-        <div className="space-y-3">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">How do you feel?</label>
-          <div className="flex gap-2.5 flex-wrap">
-            {moods.map((m) => {
-              const isActive = mood === m.value;
-              return (
-                <button
-                  type="button"
-                  key={m.value}
-                  onClick={() => setMood(m.value)}
-                  className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
-                    isActive
-                      ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
-                      : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
-                  }`}
-                >
-                  <span className="text-base">{m.emoji}</span> {m.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Date Selector */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+          />
         </div>
 
+        {/* Mood Selector */}
+
         <div className="pt-2 flex flex-col gap-3">
-          {/* AI Affirmation */}
-          {onGenerateAffirmation && (
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={isGeminiLoading || !content.trim()}
-              className="w-full py-3.5 rounded-2xl bg-white border-2 border-purple-100 text-purple-600 font-bold text-sm hover:bg-purple-50 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
-            >
-              {isGeminiLoading ? "✨ Thinking..." : <><span className="hidden sm:inline">Generate AI </span>Affirmation</>}
-            </button>
-          )}
-
-          {affirmation && (
-            <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-sm text-[var(--text-primary)] italic leading-relaxed shadow-sm">
-              "{affirmation}"
-            </div>
-          )}
-
           {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
           >
-            {isSubmitting ? "Saving to your diary..." : <span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span>}
+            {isSubmitting ? "Saving to your diary..." : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
           </button>
         </div>
       </form>
