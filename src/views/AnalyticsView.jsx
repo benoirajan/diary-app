@@ -324,7 +324,9 @@ const AnalyticsView = ({ entries = [] }) => {
       bestWritingDay,
       consistencyScore,
       consistencyInsight,
-      moodChartData
+      moodChartData,
+      habitPerformance,
+      mostConsistentHabit
     };
   }, [entries, habits]);
 
