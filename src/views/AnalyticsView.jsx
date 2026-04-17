@@ -185,6 +185,38 @@ const AnalyticsView = ({ entries = [] }) => {
         }
     }
 
+    // Consistency and Patterns
+    const allDays = Object.keys(entriesPerDay).map(d => new Date(d));
+    let avgEntriesPerWeek = 0;
+    let consistencyScore = 0;
+    let bestWritingDay = "N/A";
+    let consistencyInsight = "Keep writing to see patterns!";
+
+    if (allDays.length > 0) {
+        const firstDate = new Date(Math.min(...allDays));
+        const lastDate = new Date(Math.max(...allDays));
+        const totalDaysDiff = Math.max(1, Math.ceil((lastDate - firstDate) / 86400000) + 1);
+        const totalWeeks = Math.max(1, totalDaysDiff / 7);
+        
+        avgEntriesPerWeek = (totalEntries / totalWeeks).toFixed(1);
+        consistencyScore = Math.round((allDays.length / totalDaysDiff) * 100);
+
+        // Best writing day
+        const dayCounts = [0, 0, 0, 0, 0, 0, 0];
+        entries.forEach(e => {
+            dayCounts[new Date(e.date).getDay()]++;
+        });
+        const maxDayIdx = dayCounts.indexOf(Math.max(...dayCounts));
+        bestWritingDay = dayNames[maxDayIdx];
+
+        // Consistency Insight
+        const weekdayEntries = dayCounts.slice(1, 6).reduce((a, b) => a + b, 0);
+        const weekendEntries = dayCounts[0] + dayCounts[6];
+        if (weekdayEntries > weekendEntries * 2) consistencyInsight = "You write most consistently on weekdays 💼";
+        else if (weekendEntries > weekdayEntries) consistencyInsight = "You're a weekend writer! 🌟";
+        else consistencyInsight = "You have a balanced writing habit ⚖️";
+    }
+
     return {
       totalEntries,
       moodCount,
@@ -195,7 +227,11 @@ const AnalyticsView = ({ entries = [] }) => {
       breakPattern,
       habitInsights,
       weeklySummary,
-      moodTrend
+      moodTrend,
+      avgEntriesPerWeek,
+      bestWritingDay,
+      consistencyScore,
+      consistencyInsight
     };
   }, [entries, habits]);
 
@@ -213,15 +249,20 @@ const AnalyticsView = ({ entries = [] }) => {
         <h3 className="text-xl font-black text-[var(--text-primary)] mb-4 flex items-center gap-2">
             Weekly Summary <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-soft)] text-[var(--text-secondary)]">Insights</span>
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-3">
             <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)] leading-tight">
                 “{analytics.weeklySummary}”
             </p>
-            {analytics.moodTrend && (
-                <p className="text-lg text-[var(--accent-happy)] font-semibold flex items-center gap-2">
-                    {analytics.moodTrend}
+            <div className="flex flex-col gap-1">
+                {analytics.moodTrend && (
+                    <p className="text-lg text-[var(--accent-happy)] font-semibold flex items-center gap-2">
+                        {analytics.moodTrend}
+                    </p>
+                )}
+                <p className="text-sm text-[var(--text-secondary)] font-medium italic">
+                    💡 {analytics.consistencyInsight}
                 </p>
-            )}
+            </div>
         </div>
       </div>
 
@@ -290,31 +331,40 @@ const AnalyticsView = ({ entries = [] }) => {
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
+          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
             Total Entries
           </p>
-          <p className="text-4xl font-black text-[var(--accent-happy)] drop-shadow-[0_0_5px_var(--accent-happy)]">
+          <p className="text-3xl font-black text-[var(--accent-happy)] drop-shadow-[0_0_5px_var(--accent-happy)]">
             {analytics.totalEntries}
           </p>
         </div>
 
         <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
-            Most Common Mood
+          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
+            Consistency
           </p>
-          <p className="text-4xl font-black text-[var(--accent-excited)] capitalize drop-shadow-[0_0_5px_var(--accent-excited)]">
-            {moods.find(m => m.value === analytics.mostCommonMood)?.emoji || '😊'} {analytics.mostCommonMood}
+          <p className="text-3xl font-black text-[var(--accent-calm)] drop-shadow-[0_0_5px_var(--accent-calm)]">
+            {analytics.consistencyScore}%
           </p>
         </div>
 
         <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wider">
-            Unique Days Written
+          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
+            Avg Per Week
           </p>
-          <p className="text-4xl font-black text-[var(--accent-calm)] drop-shadow-[0_0_5px_var(--accent-calm)]">
-            {Object.keys(analytics.entriesPerDay).length}
+          <p className="text-3xl font-black text-[var(--accent-excited)] drop-shadow-[0_0_5px_var(--accent-excited)]">
+            {analytics.avgEntriesPerWeek}
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
+          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
+            Best Day
+          </p>
+          <p className="text-3xl font-black text-[var(--accent-sad)] drop-shadow-[0_0_5px_var(--accent-sad)]">
+            {analytics.bestWritingDay.substring(0, 3)}
           </p>
         </div>
       </div>
