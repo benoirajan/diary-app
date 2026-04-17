@@ -416,13 +416,13 @@ const AnalyticsView = ({ entries = [] }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-12">
+      {/* Header & Smart Insights */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
             📊 Analytics Dashboard
         </h2>
 
-        {/* Smart Insights Banner */}
         {analytics.smartMessages.length > 0 && (
             <div className="flex flex-col gap-2">
                 {analytics.smartMessages.slice(0, 2).map((msg, i) => (
@@ -434,252 +434,182 @@ const AnalyticsView = ({ entries = [] }) => {
         )}
       </div>
 
-      {/* Well-being Score Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 p-8 rounded-[2.5rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-soft)] border-2 border-[var(--accent-happy)]/30 shadow-2xl relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[var(--accent-happy)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent-happy)]/20 transition-all duration-700"></div>
-            
-            <div className="relative flex flex-col md:flex-row items-center gap-8">
-                {/* Circular Score Visual */}
-                <div className="relative flex items-center justify-center">
-                    <svg className="w-32 h-32 transform -rotate-90">
-                        <circle cx="64" cy="64" r="58" stroke="var(--bg-soft)" strokeWidth="10" fill="transparent" />
-                        <circle cx="64" cy="64" r="58" stroke="var(--accent-happy)" strokeWidth="10" fill="transparent" 
-                            strokeDasharray={364} 
-                            strokeDashoffset={364 - (364 * analytics.wellBeingScore) / 100} 
-                            strokeLinecap="round"
-                            className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_var(--accent-happy)]"
-                        />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                        <span className="text-4xl font-black text-[var(--text-primary)]">{analytics.wellBeingScore}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Score</span>
+      {/* 1. 🔥 Insight Card (Well-being & Weekly Summary) */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 p-8 rounded-[2.5rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-soft)] border-2 border-[var(--accent-happy)]/30 shadow-2xl relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-32 h-32 bg-[var(--accent-happy)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent-happy)]/20 transition-all duration-700"></div>
+                <div className="relative flex flex-col md:flex-row items-center gap-8">
+                    <div className="relative flex items-center justify-center">
+                        <svg className="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="58" stroke="var(--bg-soft)" strokeWidth="10" fill="transparent" />
+                            <circle cx="64" cy="64" r="58" stroke="var(--accent-happy)" strokeWidth="10" fill="transparent" 
+                                strokeDasharray={364} 
+                                strokeDashoffset={364 - (364 * analytics.wellBeingScore) / 100} 
+                                strokeLinecap="round"
+                                className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_var(--accent-happy)]"
+                            />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                            <span className="text-4xl font-black text-[var(--text-primary)]">{analytics.wellBeingScore}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Score</span>
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex-1 text-center md:text-left space-y-2">
-                    <div className="flex items-center justify-center md:justify-start gap-2">
-                        <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">Well-being Status</h3>
-                        <span className="px-3 py-1 rounded-full bg-[var(--bg-soft)] text-[var(--accent-happy)] text-xs font-bold border border-[var(--accent-happy)]/20">BETA</span>
+                    <div className="flex-1 text-center md:text-left space-y-2">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                            <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">Well-being Status</h3>
+                        </div>
+                        <p className="text-4xl font-black" style={{ color: analytics.currentLevel.color }}>
+                            {analytics.currentLevel.label} {analytics.currentLevel.emoji}
+                        </p>
+                        <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-md">
+                            Your score is calculated from writing consistency, habit streaks, and emotional trends.
+                        </p>
                     </div>
-                    <p className="text-4xl font-black transition-all" style={{ color: analytics.currentLevel.color }}>
-                        {analytics.currentLevel.label} {analytics.currentLevel.emoji}
-                    </p>
-                    <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-md">
-                        Your score is calculated from writing consistency, habit streaks, and emotional trends. Keep it up!
-                    </p>
+                    <button 
+                        onClick={shareWellBeing}
+                        className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--bg-main)] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_var(--accent-happy)]/40 flex items-center gap-2"
+                    >
+                        Share Progress 🚀
+                    </button>
                 </div>
+            </div>
 
-                <button 
-                    onClick={shareWellBeing}
-                    className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--bg-main)] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_var(--accent-happy)]/40 flex items-center gap-2"
-                >
-                    Share Progress 🚀
-                </button>
+            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-soft)] border border-[var(--accent-happy)]/20 shadow-lg relative overflow-hidden flex flex-col justify-center">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                    <span className="text-6xl">📅</span>
+                </div>
+                <h3 className="text-lg font-black text-[var(--text-primary)] mb-3 flex items-center gap-2 uppercase tracking-tighter">
+                    Weekly Summary
+                </h3>
+                <p className="text-xl font-bold text-[var(--text-primary)] leading-tight mb-2">
+                    “{analytics.weeklySummary}”
+                </p>
+                {analytics.moodTrend && (
+                    <p className="text-sm text-[var(--accent-happy)] font-bold flex items-center gap-2">
+                        {analytics.moodTrend}
+                    </p>
+                )}
             </div>
-        </div>
-
-        {/* Quick Stats Helper */}
-        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] flex flex-col justify-center space-y-4 shadow-inner">
-            <div className="space-y-1">
-                <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)] uppercase">
-                    <span>Consistency</span>
-                    <span>{analytics.consistencyScore}%</span>
-                </div>
-                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[var(--accent-calm)] h-full" style={{ width: `${analytics.consistencyScore}%` }}></div>
-                </div>
-            </div>
-            <div className="space-y-1">
-                <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)] uppercase">
-                    <span>Mood Trend</span>
-                    <span>{Math.round(analytics.moodNormalized || 50)}%</span>
-                </div>
-                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[var(--accent-excited)] h-full" style={{ width: `${analytics.moodNormalized || 50}%` }}></div>
-                </div>
-            </div>
-            <p className="text-[10px] text-[var(--text-secondary)] italic text-center">
-                Refining your inner glow, day by day.
-            </p>
         </div>
       </div>
 
-      {/* Mood Over Time Chart */}
-      <div className="p-7 rounded-3xl bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
-        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
-            Mood Journey <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-soft)] text-[var(--text-secondary)]">Trends</span>
+      {/* 2. 📈 Mood Trend Graph */}
+      <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
+        <h3 className="text-xl font-black text-[var(--text-primary)] mb-8 flex items-center gap-3 uppercase tracking-widest">
+            <span className="w-8 h-8 rounded-lg bg-[var(--accent-happy)]/20 flex items-center justify-center text-sm">📈</span>
+            Mood Journey
         </h3>
         <MoodChart data={analytics.moodChartData} />
       </div>
 
-      {/* Weekly Summary Card */}
-      <div className="p-7 rounded-3xl bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-soft)] border border-[var(--accent-happy)]/20 shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-6 opacity-10">
-            <span className="text-7xl">📅</span>
-        </div>
-        <h3 className="text-xl font-black text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            Weekly Summary <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-soft)] text-[var(--text-secondary)]">Insights</span>
-        </h3>
-        <div className="space-y-3">
-            <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)] leading-tight">
-                “{analytics.weeklySummary}”
-            </p>
-            <div className="flex flex-col gap-1">
-                {analytics.moodTrend && (
-                    <p className="text-lg text-[var(--accent-happy)] font-semibold flex items-center gap-2">
-                        {analytics.moodTrend}
-                    </p>
-                )}
-                <div className="space-y-1">
-                    <p className="text-sm text-[var(--text-secondary)] font-medium italic">
-                        💡 {analytics.consistencyInsight}
-                    </p>
-                    {analytics.mostConsistentHabit && (
-                        <p className="text-sm text-[var(--text-secondary)] font-medium italic">
-                            🏆 You are most consistent with <span className="text-[var(--accent-happy)] font-bold">{analytics.mostConsistentHabit.name}</span> {analytics.mostConsistentHabit.percentage > 80 ? '🙏' : '✨'}
-                        </p>
-                    )}
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* 3. 🧠 Habit vs Mood Insights */}
+        <div className="p-8 rounded-[2.5rem] bg-[var(--accent-excited)]/5 border border-[var(--accent-excited)]/20 space-y-4 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <span className="text-7xl">🧠</span>
             </div>
-        </div>
-      </div>
-
-      {/* Motivational Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="p-6 rounded-3xl bg-[var(--accent-happy)]/10 border border-[var(--accent-happy)]/30 space-y-3 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
-                <span className="text-6xl">🔥</span>
-            </div>
-            <h3 className="text-xl font-black text-[var(--accent-happy)] flex items-center gap-2">
-                Streaks <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-happy)]/20 text-[var(--accent-happy)]">Motivational</span>
+            <h3 className="text-xl font-black text-[var(--accent-excited)] flex items-center gap-3 uppercase tracking-widest">
+                Self-Awareness
             </h3>
-            <p className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
-                “You’re on a <span className="text-[var(--accent-happy)] font-bold">{analytics.currentStreak}-day</span> streak. 
-                Your longest is <span className="text-[var(--accent-happy)] font-bold">{analytics.longestStreak} days</span> 
-                {analytics.currentStreak >= analytics.longestStreak && analytics.currentStreak > 0 ? " — You're at your best!" : " — almost there."}”
-            </p>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] font-semibold italic">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent-sad)]"></span>
-                📉 {analytics.breakPattern}
-            </div>
-        </div>
-
-        {/* Habit-Mood Correlation Insights */}
-        <div className="p-6 rounded-3xl bg-[var(--accent-excited)]/10 border border-[var(--accent-excited)]/30 space-y-3 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
-                <span className="text-6xl">🧠</span>
-            </div>
-            <h3 className="text-xl font-black text-[var(--accent-excited)] flex items-center gap-2">
-                Self-Awareness <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-excited)]/20 text-[var(--accent-excited)]">AI Insights</span>
-            </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {analytics.habitInsights.length > 0 ? (
                     analytics.habitInsights.map((insight, idx) => (
-                        <p key={idx} className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
+                        <p key={idx} className="text-[var(--text-primary)] font-medium text-lg leading-relaxed bg-[var(--bg-card)]/50 p-4 rounded-2xl border border-[var(--accent-excited)]/10">
                             {insight.insight}
                         </p>
                     ))
                 ) : (
-                    <p className="text-[var(--text-secondary)] italic">
+                    <p className="text-[var(--text-secondary)] italic p-4">
                         Keep tracking habits and mood to see correlations here!
                     </p>
                 )}
             </div>
         </div>
+
+        {/* 6. 🔁 Streak Section (Moved into grid for balance) */}
+        <div className="p-8 rounded-[2.5rem] bg-[var(--accent-happy)]/5 border border-[var(--accent-happy)]/20 space-y-4 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <span className="text-7xl">🔥</span>
+            </div>
+            <h3 className="text-xl font-black text-[var(--accent-happy)] flex items-center gap-3 uppercase tracking-widest">
+                Streaks
+            </h3>
+            <div className="bg-[var(--bg-card)]/50 p-6 rounded-[2rem] border border-[var(--accent-happy)]/10 space-y-4">
+                <p className="text-[var(--text-primary)] font-medium text-xl leading-relaxed">
+                    “You’re on a <span className="text-[var(--accent-happy)] font-black text-2xl">{analytics.currentStreak}-day</span> streak. 
+                    Your longest is <span className="text-[var(--accent-happy)] font-bold">{analytics.longestStreak} days</span>!”
+                </p>
+                <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] font-bold uppercase tracking-tighter">
+                    <span className="w-2 h-2 rounded-full bg-[var(--accent-sad)]"></span>
+                    {analytics.breakPattern}
+                </div>
+            </div>
+        </div>
       </div>
 
-      {/* Habit Performance */}
+      {/* 4. 📊 Habit Completion Rates */}
       {analytics.habitPerformance.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_3px_var(--glow-color)]">
+        <div className="space-y-6">
+          <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-[var(--accent-calm)]/20 flex items-center justify-center text-sm">📊</span>
             Habit Performance
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {analytics.habitPerformance.map(habit => (
-              <div key={habit.id} className="p-4 rounded-2xl bg-[var(--bg-soft)]/50 border border-[var(--bg-soft)] group hover:border-[var(--accent-happy)]/50 transition-all">
-                <div className="flex justify-between items-start mb-1">
-                    <p className="text-xs text-[var(--text-secondary)] uppercase font-bold">{habit.name}</p>
-                    <p className="text-lg font-black text-[var(--accent-happy)]">{habit.percentage}%</p>
+              <div key={habit.id} className="p-6 rounded-[2rem] bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] group hover:border-[var(--accent-happy)]/50 transition-all">
+                <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-[var(--text-secondary)] uppercase font-black tracking-widest">{habit.name}</p>
+                    <p className="text-xl font-black text-[var(--accent-happy)]">{habit.percentage}%</p>
                 </div>
-                <p className="text-[10px] text-[var(--text-secondary)] mb-2">{habit.completions} total completions</p>
-                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-[var(--bg-soft)] h-2 rounded-full overflow-hidden mb-2">
                     <div className="bg-[var(--accent-happy)] h-full transition-all duration-1000" style={{ width: `${habit.percentage}%` }}></div>
                 </div>
+                <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-tighter">{habit.completions} total completions</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
-            Total Entries
-          </p>
-          <p className="text-3xl font-black text-[var(--accent-happy)] drop-shadow-[0_0_5px_var(--accent-happy)]">
-            {analytics.totalEntries}
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
-            Consistency
-          </p>
-          <p className="text-3xl font-black text-[var(--accent-calm)] drop-shadow-[0_0_5px_var(--accent-calm)]">
-            {analytics.consistencyScore}%
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
-            Avg Per Week
-          </p>
-          <p className="text-3xl font-black text-[var(--accent-excited)] drop-shadow-[0_0_5px_var(--accent-excited)]">
-            {analytics.avgEntriesPerWeek}
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
-          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mb-1">
-            Best Day
-          </p>
-          <p className="text-3xl font-black text-[var(--accent-sad)] drop-shadow-[0_0_5px_var(--accent-sad)]">
-            {analytics.bestWritingDay.substring(0, 3)}
-          </p>
+      {/* 5. ✍️ Writing Stats */}
+      <div className="space-y-6">
+        <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-[var(--accent-excited)]/20 flex items-center justify-center text-sm">✍️</span>
+            Writing Stats
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+                { label: 'Total Entries', value: analytics.totalEntries, color: 'happy' },
+                { label: 'Consistency', value: `${analytics.consistencyScore}%`, color: 'calm' },
+                { label: 'Avg Per Week', value: analytics.avgEntriesPerWeek, color: 'excited' },
+                { label: 'Best Day', value: analytics.bestWritingDay.substring(0, 3), color: 'sad' }
+            ].map((stat, i) => (
+                <div key={i} className="p-6 rounded-[2rem] bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/10 shadow-sm hover:shadow-[0_0_15px_var(--glow-color)] transition-all">
+                    <p className="text-[10px] text-[var(--text-secondary)] font-black uppercase tracking-widest mb-1">
+                        {stat.label}
+                    </p>
+                    <p className={`text-3xl font-black text-[var(--accent-${stat.color})]`}>
+                        {stat.value}
+                    </p>
+                </div>
+            ))}
         </div>
       </div>
 
-      {/* Mood Distribution */}
-      <div>
-        <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_3px_var(--glow-color)] mb-4">
+      {/* Mood Distribution (Footer Section) */}
+      <div className="pt-8 border-t border-[var(--bg-soft)]">
+        <h3 className="text-lg font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] mb-6 text-center">
           Mood Distribution
         </h3>
-
-        {Object.keys(analytics.moodCount).length === 0 && (
-          <p className="text-[var(--text-secondary)]">
-            No data available. Start writing to see your mood patterns!
-          </p>
-        )}
-
-        <div className="space-y-4">
-          {Object.entries(analytics.moodCount).map(
-            ([mood, count]) => (
-              <div
-                key={mood}
-                className="flex justify-between items-center p-4 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_10px_var(--glow-color)] transition-all"
-                style={{ '--mood-color': `var(--accent-${mood})` }}
-              >
-                <span className="capitalize text-[var(--text-primary)] font-semibold flex items-center gap-2">
-                  {moods.find(m => m.value === mood)?.emoji || '😊'} {mood}
-                </span>
-                <span className="font-black text-2xl text-[var(--mood-color)] drop-shadow-[0_0_3px_var(--mood-color)]">
-                  {count}
-                </span>
-              </div>
-            )
-          )}
+        <div className="flex flex-wrap justify-center gap-4">
+          {Object.entries(analytics.moodCount).map(([mood, count]) => (
+            <div key={mood} className="px-6 py-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] flex items-center gap-3">
+                <span className="text-xl">{moods.find(m => m.value === mood)?.emoji}</span>
+                <span className="text-sm font-black text-[var(--text-primary)] uppercase tracking-tighter">{mood}</span>
+                <span className="text-xl font-black text-[var(--accent-happy)]">{count}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
