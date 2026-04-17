@@ -309,6 +309,31 @@ const AnalyticsView = ({ entries = [] }) => {
             score: dailyAvgMood[dateStr]
         }));
 
+    // Smart Messages Logic
+    const smartMessages = [];
+    
+    // 1. Consistency vs Mood
+    if (consistencyScore > 70 && thisWeekStats?.avgScore > 3.5) {
+        smartMessages.push("✨ You tend to feel better on days you write consistently.");
+    }
+
+    // 2. Sleep Correlation (Looking for habits containing "Sleep")
+    const sleepHabit = habitPerformance.find(h => h.name.toLowerCase().includes('sleep'));
+    if (sleepHabit) {
+        const sleepInsight = habitInsights.find(i => i.habitName === sleepHabit.name);
+        if (sleepInsight) {
+            smartMessages.push(`💤 Your mood ${sleepInsight.isPositive ? 'lifts' : 'drops'} when your ${sleepHabit.name} is ${sleepInsight.isPositive ? 'consistent' : 'low'}.`);
+        }
+    }
+
+    // 3. General Positive Correlation fallback
+    if (smartMessages.length < 2 && habitInsights.length > 0) {
+        const bestInsight = habitInsights.sort((a, b) => (b.isPositive ? 1 : 0) - (a.isPositive ? 1 : 0))[0];
+        if (bestInsight.isPositive) {
+            smartMessages.push(`🌟 You're noticeably more positive on days you ${bestInsight.habitName}.`);
+        }
+    }
+
     return {
       totalEntries,
       moodCount,
@@ -326,15 +351,29 @@ const AnalyticsView = ({ entries = [] }) => {
       consistencyInsight,
       moodChartData,
       habitPerformance,
-      mostConsistentHabit
+      mostConsistentHabit,
+      smartMessages
     };
   }, [entries, habits]);
 
   return (
     <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-8">
-      <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
-        📊 Analytics Dashboard
-      </h2>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
+            📊 Analytics Dashboard
+        </h2>
+
+        {/* Smart Insights Banner */}
+        {analytics.smartMessages.length > 0 && (
+            <div className="flex flex-col gap-2">
+                {analytics.smartMessages.slice(0, 2).map((msg, i) => (
+                    <div key={i} className="px-4 py-2 rounded-xl bg-[var(--accent-happy)]/10 border border-[var(--accent-happy)]/20 text-[var(--accent-happy)] text-sm font-bold animate-in slide-in-from-right-4 duration-500 delay-75">
+                        {msg}
+                    </div>
+                ))}
+            </div>
+        )}
+      </div>
 
       {/* Mood Over Time Chart */}
       <div className="p-7 rounded-3xl bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
