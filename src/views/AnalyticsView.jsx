@@ -326,7 +326,23 @@ const AnalyticsView = ({ entries = [] }) => {
         }
     }
 
-    // 3. General Positive Correlation fallback
+    // 3. Comeback / Recovery Insight
+    if (sortedUniqueDays.length >= 2) {
+        const latestEntryMs = sortedUniqueDays[0];
+        const prevEntryMs = sortedUniqueDays[1];
+        const gapDays = Math.round((latestEntryMs - prevEntryMs) / 86400000);
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const yesterdayMs = today.getTime() - 86400000;
+
+        // If latest entry is today/yesterday and there was a break of 2+ days
+        if (latestEntryMs >= yesterdayMs && gapDays >= 2) {
+            smartMessages.push(`🔹 You returned after a ${gapDays} day break — great consistency 🙌`);
+        }
+    }
+
+    // 4. General Positive Correlation fallback
     if (smartMessages.length < 2 && habitInsights.length > 0) {
         const bestInsight = habitInsights.sort((a, b) => (b.isPositive ? 1 : 0) - (a.isPositive ? 1 : 0))[0];
         if (bestInsight.isPositive) {
