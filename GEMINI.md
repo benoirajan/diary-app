@@ -24,10 +24,18 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 
 ## Analytics Engine
 - **Mood Scoring:** Map moods to a 1-5 scale (Excited=5, Happy=4, Calm=3, Sad=2, Angry=1) for calculating averages and trends.
-- **Smart Insights:** Prioritize narrative "takeaways" over raw data. Always calculate:
-    - Habit vs Mood correlation (avg mood when habit=true vs false).
-    - Weekly summaries with trend indicators (improved/steady/tougher).
-    - Consistency scores and "Best Writing Day" analysis.
+- **Well-being Score (0-100):** A composite metric weighted as:
+    - **Habit Completion (40%):** Discipline and routine.
+    - **Writing Consistency (30%):** Self-reflection frequency.
+    - **Mood Trend (30%):** Emotional trajectory.
+- **Dashboard Layout:** Always structure the Analytics view following this 6-point hierarchy:
+    1. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
+    2. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.
+    3. 🧠 **Habit vs Mood Insights:** Correlations between specific habits and mood improvements.
+    4. 📊 **Habit Completion Rates:** Progress bars for individual habit performance.
+    5. ✍️ **Writing Stats:** Total entries, consistency %, and avg per week.
+    6. 🔁 **Streak Section:** Current/Longest streaks and break pattern analysis.
+- **Smart Insights:** Prioritize narrative "takeaways". Include "Comeback Insights" when users return after a 2+ day break to encourage consistency without guilt.
 - **Visualizations:** Prefer custom SVG components (like the `MoodChart`) to maintain the project's unique aesthetic without external charting dependencies.
 
 ## Common Commands
