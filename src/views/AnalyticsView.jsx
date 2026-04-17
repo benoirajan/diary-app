@@ -277,6 +277,29 @@ const AnalyticsView = ({ entries = [] }) => {
         else consistencyInsight = "You have a balanced writing habit ⚖️";
     }
 
+    // Habit Analytics
+    const habitPerformance = habits.map(habit => {
+        const completions = habit.completions || [];
+        const createdDate = habit.createdAt?.toDate() || sevenDaysAgo;
+        const daysSinceCreation = Math.max(1, Math.ceil((now - createdDate) / 86400000));
+        const windowDays = Math.min(30, daysSinceCreation);
+        
+        const windowStart = new Date(now.getTime() - windowDays * 86400000);
+        const windowCompletions = completions.filter(d => new Date(d) >= windowStart).length;
+        const percentage = Math.round((windowCompletions / windowDays) * 100);
+
+        return {
+            id: habit.id,
+            name: habit.name,
+            percentage,
+            completions: completions.length
+        };
+    });
+
+    const mostConsistentHabit = habitPerformance.length > 0 
+        ? [...habitPerformance].sort((a, b) => b.percentage - a.percentage)[0]
+        : null;
+
     // Mood Chart Data (Last 14 unique days with entries)
     const moodChartData = Object.keys(dailyAvgMood)
         .sort((a, b) => new Date(a) - new Date(b))
@@ -337,9 +360,16 @@ const AnalyticsView = ({ entries = [] }) => {
                         {analytics.moodTrend}
                     </p>
                 )}
-                <p className="text-sm text-[var(--text-secondary)] font-medium italic">
-                    💡 {analytics.consistencyInsight}
-                </p>
+                <div className="space-y-1">
+                    <p className="text-sm text-[var(--text-secondary)] font-medium italic">
+                        💡 {analytics.consistencyInsight}
+                    </p>
+                    {analytics.mostConsistentHabit && (
+                        <p className="text-sm text-[var(--text-secondary)] font-medium italic">
+                            🏆 You are most consistent with <span className="text-[var(--accent-happy)] font-bold">{analytics.mostConsistentHabit.name}</span> {analytics.mostConsistentHabit.percentage > 80 ? '🙏' : '✨'}
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
       </div>
@@ -388,19 +418,22 @@ const AnalyticsView = ({ entries = [] }) => {
         </div>
       </div>
 
-      {/* Habit Highlights */}
-      {habits.length > 0 && (
+      {/* Habit Performance */}
+      {analytics.habitPerformance.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_3px_var(--glow-color)]">
-            Habit Overview
+            Habit Performance
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {habits.map(habit => (
-              <div key={habit.id} className="p-4 rounded-2xl bg-[var(--bg-soft)]/50 border border-[var(--bg-soft)]">
-                <p className="text-xs text-[var(--text-secondary)] uppercase font-bold">{habit.name}</p>
-                <p className="text-2xl font-black text-[var(--accent-happy)]">{habit.completions?.length || 0} days</p>
-                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full mt-2 overflow-hidden">
-                    <div className="bg-[var(--accent-happy)] h-full" style={{ width: `${Math.min(100, ((habit.completions?.length || 0) / 30) * 100)}%` }}></div>
+            {analytics.habitPerformance.map(habit => (
+              <div key={habit.id} className="p-4 rounded-2xl bg-[var(--bg-soft)]/50 border border-[var(--bg-soft)] group hover:border-[var(--accent-happy)]/50 transition-all">
+                <div className="flex justify-between items-start mb-1">
+                    <p className="text-xs text-[var(--text-secondary)] uppercase font-bold">{habit.name}</p>
+                    <p className="text-lg font-black text-[var(--accent-happy)]">{habit.percentage}%</p>
+                </div>
+                <p className="text-[10px] text-[var(--text-secondary)] mb-2">{habit.completions} total completions</p>
+                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-[var(--accent-happy)] h-full transition-all duration-1000" style={{ width: `${habit.percentage}%` }}></div>
                 </div>
               </div>
             ))}
