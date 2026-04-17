@@ -30,11 +30,77 @@ const AnalyticsView = ({ entries = [] }) => {
         (a, b) => b[1] - a[1]
       )[0]?.[0] || "N/A";
 
+    // Streak and Patterns
+    const sortedUniqueDays = Object.keys(entriesPerDay)
+      .map(d => new Date(d).getTime())
+      .sort((a, b) => b - a);
+
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    
+    if (sortedUniqueDays.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayMs = today.getTime();
+      const yesterdayMs = todayMs - 86400000;
+
+      // Current Streak
+      if (sortedUniqueDays[0] >= yesterdayMs) {
+        let expected = sortedUniqueDays[0];
+        for (const day of sortedUniqueDays) {
+          if (day === expected) {
+            currentStreak++;
+            expected -= 86400000;
+          } else break;
+        }
+      }
+
+      // Longest Streak
+      let expected = sortedUniqueDays[0];
+      for (const day of sortedUniqueDays) {
+        if (day === expected) {
+          tempStreak++;
+          expected -= 86400000;
+        } else {
+          longestStreak = Math.max(longestStreak, tempStreak);
+          tempStreak = 1;
+          expected = day - 86400000;
+        }
+      }
+      longestStreak = Math.max(longestStreak, tempStreak);
+    }
+
+    // Break Pattern
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const missedDaysCount = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    
+    if (sortedUniqueDays.length > 1) {
+      for (let i = 0; i < sortedUniqueDays.length - 1; i++) {
+        const diff = (sortedUniqueDays[i] - sortedUniqueDays[i+1]) / 86400000;
+        if (diff > 1) {
+          // Check which days were missed
+          for (let j = 1; j < diff; j++) {
+            const missedDate = new Date(sortedUniqueDays[i+1] + (j * 86400000));
+            missedDaysCount[missedDate.getDay()]++;
+          }
+        }
+      }
+    }
+
+    const mostMissedDayIdx = Object.entries(missedDaysCount).sort((a, b) => b[1] - a[1])[0][0];
+    const breakPattern = missedDaysCount[mostMissedDayIdx] > 0 
+      ? `You usually miss on ${dayNames[mostMissedDayIdx]}s` 
+      : "No clear break pattern yet!";
+
     return {
       totalEntries,
       moodCount,
       entriesPerDay,
       mostCommonMood,
+      currentStreak,
+      longestStreak,
+      breakPattern,
     };
   }, [entries]);
 
@@ -43,6 +109,25 @@ const AnalyticsView = ({ entries = [] }) => {
       <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
         📊 Analytics Dashboard
       </h2>
+
+      {/* Motivational Insights */}
+      <div className="p-6 rounded-3xl bg-[var(--accent-happy)]/10 border border-[var(--accent-happy)]/30 space-y-3 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+            <span className="text-6xl">🔥</span>
+        </div>
+        <h3 className="text-xl font-black text-[var(--accent-happy)] flex items-center gap-2">
+            Insights <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-happy)]/20 text-[var(--accent-happy)]">Motivational</span>
+        </h3>
+        <p className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
+            “You’re on a <span className="text-[var(--accent-happy)] font-bold">{analytics.currentStreak}-day</span> streak. 
+            Your longest is <span className="text-[var(--accent-happy)] font-bold">{analytics.longestStreak} days</span> 
+            {analytics.currentStreak >= analytics.longestStreak && analytics.currentStreak > 0 ? " — You're at your best!" : " — almost there."}”
+        </p>
+        <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] font-semibold italic">
+            <span className="w-2 h-2 rounded-full bg-[var(--accent-sad)]"></span>
+            📉 {analytics.breakPattern}
+        </div>
+      </div>
 
       {/* Habit Highlights */}
       {habits.length > 0 && (
