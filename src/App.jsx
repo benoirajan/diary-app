@@ -36,6 +36,7 @@ function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [darkMode, setDarkMode] = useState(false);
     const [showAuth, setShowAuth] = useState(false);
+    const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
 
     /*
       =========================
@@ -114,16 +115,6 @@ function App() {
         }
 
         switch (currentView) {
-            case "create":
-                return (
-                    <EntryForm
-                        onSubmit={(data) => {
-                            addEntry(data);
-                            setCurrentView("list");
-                        }}
-                    />
-                );
-
             case "edit":
                 return (
                     <EntryForm
@@ -200,7 +191,6 @@ function App() {
                     <nav className="flex-1 space-y-2">
                         {[
                             { label: "Entries", value: "list", icon: "📑" },
-                            { label: "Create", value: "create", icon: "✍️" },
                             { label: "Habits", value: "habits", icon: "🎯" },
                             { label: "Analytics", value: "analytics", icon: "📊" },
                         ].map((tab) => {
@@ -246,7 +236,7 @@ function App() {
                                 title="SoulScript"
                                 isDarkMode={darkMode}
                                 onToggleDarkMode={() => setDarkMode(!darkMode)}
-                                onPrimaryAction={() => setCurrentView("create")}
+                                onPrimaryAction={() => setIsEntryFormOpen(true)}
                                 primaryActionLabel="New Entry"
                                 streak={streak}
                             />
@@ -259,7 +249,7 @@ function App() {
                                 isDarkMode={darkMode}
                                 hideTitle={true}
                                 hideToggle={true}
-                                onPrimaryAction={() => setCurrentView("create")}
+                                onPrimaryAction={() => setIsEntryFormOpen(true)}
                                 primaryActionLabel="New Entry"
                                 streak={streak}
                             />
@@ -270,7 +260,6 @@ function App() {
                             <NavigationTabs
                                 tabs={[
                                     { label: "Entries", value: "list" },
-                                    { label: "Create", value: "create" },
                                     { label: "Habits", value: "habits" },
                                     { label: "Analytics", value: "analytics" },
                                 ]}
@@ -289,8 +278,29 @@ function App() {
                     </div>
                 </div>
             </div>
-        </div>
 
+            {/* Popup Dialog for Entry Creation */}
+            {isEntryFormOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
+                        onClick={() => setIsEntryFormOpen(false)}
+                    ></div>
+                    
+                    {/* Dialog Content */}
+                    <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+                        <EntryForm
+                            onSubmit={(data) => {
+                                addEntry(data);
+                                setIsEntryFormOpen(false);
+                            }}
+                            onCancel={() => setIsEntryFormOpen(false)}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
