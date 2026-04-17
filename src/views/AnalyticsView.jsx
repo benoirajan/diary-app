@@ -300,6 +300,33 @@ const AnalyticsView = ({ entries = [] }) => {
         ? [...habitPerformance].sort((a, b) => b.percentage - a.percentage)[0]
         : null;
 
+    // Well-being Score Calculation (0-100)
+    // Weights: Consistency (30%), Habits (40%), Mood (30%)
+    const avgHabitCompletion = habitPerformance.length > 0
+        ? habitPerformance.reduce((acc, h) => acc + h.percentage, 0) / habitPerformance.length
+        : 0;
+    
+    const moodNormalized = thisWeekStats 
+        ? ((thisWeekStats.avgScore - 1) / 4) * 100 
+        : (Object.values(dailyAvgMood).length > 0 
+            ? ((Object.values(dailyAvgMood).reduce((a, b) => a + b, 0) / Object.values(dailyAvgMood).length - 1) / 4) * 100
+            : 50);
+
+    const wellBeingScore = Math.round(
+        (consistencyScore * 0.3) + 
+        (avgHabitCompletion * 0.4) + 
+        (moodNormalized * 0.3)
+    );
+
+    const wellBeingLevels = [
+        { min: 90, label: "Radiant", color: "var(--accent-happy)", emoji: "✨" },
+        { min: 70, label: "Balanced", color: "var(--accent-calm)", emoji: "⚖️" },
+        { min: 50, label: "Growing", color: "var(--accent-excited)", emoji: "🌱" },
+        { min: 0, label: "Recovering", color: "var(--accent-sad)", emoji: "🌊" }
+    ];
+
+    const currentLevel = wellBeingLevels.find(l => wellBeingScore >= l.min) || wellBeingLevels[3];
+
     // Mood Chart Data (Last 14 unique days with entries)
     const moodChartData = Object.keys(dailyAvgMood)
         .sort((a, b) => new Date(a) - new Date(b))
@@ -368,9 +395,25 @@ const AnalyticsView = ({ entries = [] }) => {
       moodChartData,
       habitPerformance,
       mostConsistentHabit,
-      smartMessages
+      smartMessages,
+      wellBeingScore,
+      currentLevel
     };
   }, [entries, habits]);
+
+  const shareWellBeing = () => {
+    const text = `My SoulScript Well-being Score is ${analytics.wellBeingScore} (${analytics.currentLevel.label} ${analytics.currentLevel.emoji})! 📊✨\n\nTrack your mood and habits with SoulScript.`;
+    if (navigator.share) {
+        navigator.share({
+            title: 'My SoulScript Well-being',
+            text: text,
+            url: window.location.origin
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text);
+        alert('Score copied to clipboard! 🚀');
+    }
+  };
 
   return (
     <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-8">
@@ -389,6 +432,77 @@ const AnalyticsView = ({ entries = [] }) => {
                 ))}
             </div>
         )}
+      </div>
+
+      {/* Well-being Score Card */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 p-8 rounded-[2.5rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-soft)] border-2 border-[var(--accent-happy)]/30 shadow-2xl relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[var(--accent-happy)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent-happy)]/20 transition-all duration-700"></div>
+            
+            <div className="relative flex flex-col md:flex-row items-center gap-8">
+                {/* Circular Score Visual */}
+                <div className="relative flex items-center justify-center">
+                    <svg className="w-32 h-32 transform -rotate-90">
+                        <circle cx="64" cy="64" r="58" stroke="var(--bg-soft)" strokeWidth="10" fill="transparent" />
+                        <circle cx="64" cy="64" r="58" stroke="var(--accent-happy)" strokeWidth="10" fill="transparent" 
+                            strokeDasharray={364} 
+                            strokeDashoffset={364 - (364 * analytics.wellBeingScore) / 100} 
+                            strokeLinecap="round"
+                            className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_var(--accent-happy)]"
+                        />
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                        <span className="text-4xl font-black text-[var(--text-primary)]">{analytics.wellBeingScore}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Score</span>
+                    </div>
+                </div>
+
+                <div className="flex-1 text-center md:text-left space-y-2">
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                        <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">Well-being Status</h3>
+                        <span className="px-3 py-1 rounded-full bg-[var(--bg-soft)] text-[var(--accent-happy)] text-xs font-bold border border-[var(--accent-happy)]/20">BETA</span>
+                    </div>
+                    <p className="text-4xl font-black transition-all" style={{ color: analytics.currentLevel.color }}>
+                        {analytics.currentLevel.label} {analytics.currentLevel.emoji}
+                    </p>
+                    <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-md">
+                        Your score is calculated from writing consistency, habit streaks, and emotional trends. Keep it up!
+                    </p>
+                </div>
+
+                <button 
+                    onClick={shareWellBeing}
+                    className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--bg-main)] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_var(--accent-happy)]/40 flex items-center gap-2"
+                >
+                    Share Progress 🚀
+                </button>
+            </div>
+        </div>
+
+        {/* Quick Stats Helper */}
+        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] flex flex-col justify-center space-y-4 shadow-inner">
+            <div className="space-y-1">
+                <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)] uppercase">
+                    <span>Consistency</span>
+                    <span>{analytics.consistencyScore}%</span>
+                </div>
+                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-[var(--accent-calm)] h-full" style={{ width: `${analytics.consistencyScore}%` }}></div>
+                </div>
+            </div>
+            <div className="space-y-1">
+                <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)] uppercase">
+                    <span>Mood Trend</span>
+                    <span>{Math.round(analytics.moodNormalized || 50)}%</span>
+                </div>
+                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-[var(--accent-excited)] h-full" style={{ width: `${analytics.moodNormalized || 50}%` }}></div>
+                </div>
+            </div>
+            <p className="text-[10px] text-[var(--text-secondary)] italic text-center">
+                Refining your inner glow, day by day.
+            </p>
+        </div>
       </div>
 
       {/* Mood Over Time Chart */}
