@@ -38,7 +38,7 @@ const EntryList = ({
   const hasEntries = entries.length > 0;
 
   return (
-    <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all">
+    <div className="p-8  transition-all">
       {/* Search */}
       <div className="mb-8">
         <input

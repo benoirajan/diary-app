@@ -236,21 +236,17 @@ function App() {
                                 title="SoulScript"
                                 isDarkMode={darkMode}
                                 onToggleDarkMode={() => setDarkMode(!darkMode)}
-                                onPrimaryAction={() => setIsEntryFormOpen(true)}
-                                primaryActionLabel="New Entry"
                                 streak={streak}
                             />
                         </div>
 
-                        {/* Desktop Header Content (Just the actions/streak part) */}
+                        {/* Desktop Header Content */}
                         <div className="hidden lg:flex justify-end items-center mb-10 gap-4">
                             <Header
                                 title=""
                                 isDarkMode={darkMode}
                                 hideTitle={true}
                                 hideToggle={true}
-                                onPrimaryAction={() => setIsEntryFormOpen(true)}
-                                primaryActionLabel="New Entry"
                                 streak={streak}
                             />
                         </div>
@@ -289,7 +285,7 @@ function App() {
                     ></div>
                     
                     {/* Dialog Content */}
-                    <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+                    <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
                         <EntryForm
                             onSubmit={(data) => {
                                 addEntry(data);
@@ -300,6 +296,15 @@ function App() {
                     </div>
                 </div>
             )}
+
+            {/* Sticky "New Entry" FAB */}
+            <button
+                onClick={() => setIsEntryFormOpen(true)}
+                className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black shadow-[0_0_30px_rgba(0,255,255,0.5)] hover:scale-110 hover:shadow-[0_0_40px_rgba(0,255,255,0.7)] active:scale-95 transition-all group"
+            >
+                <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">+</span>
+                <span className="text-sm uppercase tracking-widest hidden sm:inline">New Entry</span>
+            </button>
         </div>
     );
 }

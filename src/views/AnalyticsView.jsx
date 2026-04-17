@@ -143,6 +143,48 @@ const AnalyticsView = ({ entries = [] }) => {
         return null;
     }).filter(Boolean);
 
+    // Weekly Summary Logic
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 86400000);
+
+    const thisWeekEntries = entries.filter(e => new Date(e.date) >= sevenDaysAgo);
+    const lastWeekEntries = entries.filter(e => {
+        const d = new Date(e.date);
+        return d >= fourteenDaysAgo && d < sevenDaysAgo;
+    });
+
+    const getWeeklyStats = (weekEntries) => {
+        if (weekEntries.length === 0) return null;
+        const counts = {};
+        let totalScore = 0;
+        weekEntries.forEach(e => {
+            counts[e.mood] = (counts[e.mood] || 0) + 1;
+            totalScore += moodScores[e.mood] || 3;
+        });
+        const topMood = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+        const avgScore = totalScore / weekEntries.length;
+        return { topMood, avgScore };
+    };
+
+    const thisWeekStats = getWeeklyStats(thisWeekEntries);
+    const lastWeekStats = getWeeklyStats(lastWeekEntries);
+
+    let weeklySummary = "Keep writing to see your weekly emotional summary!";
+    let moodTrend = null;
+
+    if (thisWeekStats) {
+        const moodObj = moods.find(m => m.value === thisWeekStats.topMood);
+        weeklySummary = `This week you felt mostly ${thisWeekStats.topMood} ${moodObj?.emoji || '😊'}`;
+        
+        if (lastWeekStats) {
+            const diff = thisWeekStats.avgScore - lastWeekStats.avgScore;
+            if (diff > 0.2) moodTrend = "Your mood improved compared to last week 📈";
+            else if (diff < -0.2) moodTrend = "You've had a tougher week than last one 📉";
+            else moodTrend = "Your mood has been steady compared to last week ⚖️";
+        }
+    }
+
     return {
       totalEntries,
       moodCount,
@@ -151,7 +193,9 @@ const AnalyticsView = ({ entries = [] }) => {
       currentStreak,
       longestStreak,
       breakPattern,
-      habitInsights
+      habitInsights,
+      weeklySummary,
+      moodTrend
     };
   }, [entries, habits]);
 
@@ -160,6 +204,26 @@ const AnalyticsView = ({ entries = [] }) => {
       <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
         📊 Analytics Dashboard
       </h2>
+
+      {/* Weekly Summary Card */}
+      <div className="p-7 rounded-3xl bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-soft)] border border-[var(--accent-happy)]/20 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-6 opacity-10">
+            <span className="text-7xl">📅</span>
+        </div>
+        <h3 className="text-xl font-black text-[var(--text-primary)] mb-4 flex items-center gap-2">
+            Weekly Summary <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--bg-soft)] text-[var(--text-secondary)]">Insights</span>
+        </h3>
+        <div className="space-y-2">
+            <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)] leading-tight">
+                “{analytics.weeklySummary}”
+            </p>
+            {analytics.moodTrend && (
+                <p className="text-lg text-[var(--accent-happy)] font-semibold flex items-center gap-2">
+                    {analytics.moodTrend}
+                </p>
+            )}
+        </div>
+      </div>
 
       {/* Motivational Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -55,7 +55,7 @@ const EntryForm = ({
   };
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
+    <div className="bg-[var(--bg-card)] rounded-3xl p-7  border border-[var(--bg-soft)] transition-all">
       <div className="flex justify-between items-center mb-6 px-1">
         <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">
             {initialData ? "Edit Entry" : "Create New Entry"}<span className="text-[var(--accent-happy)]">.</span>
