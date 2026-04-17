@@ -186,37 +186,107 @@ function App() {
     }
     return (
         <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>
-            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-happy)]/30">
-                <div className="max-w-4xl mx-auto px-6 py-6">
-                    {/* Header */}
-                    <Header
-                        title="SoulScript"
-                        isDarkMode={darkMode}
-                        onToggleDarkMode={() => setDarkMode(!darkMode)}
-                        onPrimaryAction={() => setCurrentView("create")}
-                        primaryActionLabel="New Entry"
-                        streak={streak}
-                    />
-                    
-                    {/* Tabs */}
-                    <NavigationTabs
-                        tabs={[
-                            { label: "Entries", value: "list" },
-                            { label: "Create", value: "create" },
-                            { label: "Habits", value: "habits" },
-                            { label: "Analytics", value: "analytics" },
-                        ]}
-                        activeTab={currentView === "detail" ? "list" : currentView}
-                        onTabChange={(value) => {
-                            setSelectedEntryId(null);
-                            setCurrentView(value);
-                        }}
-                    />
+            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-happy)]/30 lg:flex">
+                
+                {/* Desktop Sidebar */}
+                <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--bg-soft)] p-6 z-40">
+                    <div className="mb-10">
+                        <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)]">
+                            SoulScript<span className="text-[var(--accent-happy)]">.</span>
+                        </h1>
+                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] mt-1 opacity-50">Digital Soul Journal</p>
+                    </div>
 
-                    {/* Main Content */}
-                    <main className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {renderView()}
-                    </main>
+                    <nav className="flex-1 space-y-2">
+                        {[
+                            { label: "Entries", value: "list", icon: "📑" },
+                            { label: "Create", value: "create", icon: "✍️" },
+                            { label: "Habits", value: "habits", icon: "🎯" },
+                            { label: "Analytics", value: "analytics", icon: "📊" },
+                        ].map((tab) => {
+                            const isActive = (currentView === "detail" ? "list" : currentView) === tab.value;
+                            return (
+                                <button
+                                    key={tab.value}
+                                    onClick={() => {
+                                        setSelectedEntryId(null);
+                                        setCurrentView(tab.value);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all ${
+                                        isActive
+                                            ? "bg-[var(--accent-happy)]/10 text-[var(--accent-happy)] border border-[var(--accent-happy)]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]"
+                                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)]"
+                                    }`}
+                                >
+                                    <span className="text-xl">{tab.icon}</span>
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+
+                    <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-4">
+                        <div className="flex items-center justify-between px-2">
+                            <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">Dark Mode</span>
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-soft)] hover:border-[var(--accent-happy)] transition-all text-lg"
+                            >
+                                {darkMode ? "🌙" : "☀️"}
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                <div className="flex-1 flex flex-col min-h-screen">
+                    <div className="max-w-5xl w-full mx-auto px-6 py-6 flex-1">
+                        {/* Mobile Header */}
+                        <div className="lg:hidden">
+                            <Header
+                                title="SoulScript"
+                                isDarkMode={darkMode}
+                                onToggleDarkMode={() => setDarkMode(!darkMode)}
+                                onPrimaryAction={() => setCurrentView("create")}
+                                primaryActionLabel="New Entry"
+                                streak={streak}
+                            />
+                        </div>
+
+                        {/* Desktop Header Content (Just the actions/streak part) */}
+                        <div className="hidden lg:flex justify-end items-center mb-10 gap-4">
+                            <Header
+                                title=""
+                                isDarkMode={darkMode}
+                                hideTitle={true}
+                                hideToggle={true}
+                                onPrimaryAction={() => setCurrentView("create")}
+                                primaryActionLabel="New Entry"
+                                streak={streak}
+                            />
+                        </div>
+                        
+                        {/* Mobile Tabs */}
+                        <div className="lg:hidden">
+                            <NavigationTabs
+                                tabs={[
+                                    { label: "Entries", value: "list" },
+                                    { label: "Create", value: "create" },
+                                    { label: "Habits", value: "habits" },
+                                    { label: "Analytics", value: "analytics" },
+                                ]}
+                                activeTab={currentView === "detail" ? "list" : currentView}
+                                onTabChange={(value) => {
+                                    setSelectedEntryId(null);
+                                    setCurrentView(value);
+                                }}
+                            />
+                        </div>
+
+                        {/* Main Content */}
+                        <main className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            {renderView()}
+                        </main>
+                    </div>
                 </div>
             </div>
         </div>
