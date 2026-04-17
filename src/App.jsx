@@ -229,7 +229,7 @@ function App() {
                 </aside>
 
                 <div className="flex-1 flex flex-col min-h-screen">
-                    <div className="max-w-5xl w-full mx-auto px-6 py-6 flex-1">
+                    <div className=" w-full mx-auto px-6 py-6 flex-1">
                         {/* Mobile Header */}
                         <div className="lg:hidden">
                             <Header

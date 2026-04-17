@@ -46,7 +46,7 @@ const EntryList = ({
           placeholder="Search your thoughts..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full px-5 py-4 rounded-2xl bg-[var(--bg-soft)] border border-[var(--accent-neutral)]/30 focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] placeholder-[var(--text-secondary)]"
+          className="w-full  px-5 py-4 rounded-2xl bg-[var(--bg-soft)] border border-[var(--accent-neutral)]/30 focus:bg-[var(--bg-card)] focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] placeholder-[var(--text-secondary)]"
         />
       </div>
 
@@ -76,7 +76,7 @@ const EntryList = ({
               <article
                 key={entry.id}
                 onClick={() => onSelectEntry(entry)}
-                className="relative group pl-14 pr-5 py-5 rounded-2xl bg-gradient-to-r from-[var(--bg-soft)] to-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_20px_var(--glow-color)] hover:border-[var(--mood-color)]/50 hover:scale-105 transition-all duration-300 cursor-pointer"
+                className="relative group pl-14 pr-5 py-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--accent-neutral)]/20 shadow-sm hover:shadow-[0_0_20px_var(--glow-color)] hover:border-[var(--mood-color)]/50 hover:scale-105 transition-all duration-300 cursor-pointer"
                 style={{ '--mood-color': `var(--accent-${entry.mood})` }}
               >
                 <div className="flex justify-between items-start mb-2 gap-3">

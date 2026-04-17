@@ -416,7 +416,7 @@ const AnalyticsView = ({ entries = [] }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-12">
+    <div className="rounded-3xl p-8 transition-all space-y-12">
       {/* Header & Smart Insights */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
