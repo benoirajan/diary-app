@@ -61,9 +61,9 @@ const EntryList = ({
       {/* Grouped Entries */}
       {Object.entries(groupedEntries).map(([date, items]) => (
         <section key={date} className="relative mb-10">
-          <div className="absolute left-6 top-6 h-[calc(100%-1.5rem)] w-0.5 bg-gradient-to-b from-[var(--accent-happy)] to-[var(--accent-calm)] shadow-[0_0_10px_var(--glow-color)]" />
+          <div className="absolute left-4 top-8 h-[calc(100%-2.1rem)] w-0.5 bg-gradient-to-b from-[var(--accent-happy)] to-[var(--accent-calm)] shadow-[0_0_10px_var(--glow-color)]" />
           <div className="flex items-center gap-3 mb-5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[var(--accent-excited)] to-[var(--accent-happy)] text-xs font-black text-black animate-pulse">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[var(--accent-excited)] to-[var(--accent-happy)] text-xs font-black text-black">
               ⚡
             </span>
             <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">

@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "diary360"
-  }
+  },
+  "targets": {
+    "diary360": {
+      "hosting": {
+        "default": [
+          "diary360"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

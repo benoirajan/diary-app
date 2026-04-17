@@ -7,6 +7,7 @@ import EntryForm from "./components/EntryForm";
 import EntryList from "./components/EntryList";
 import EntryDetail from "./components/EntryDetail";
 import AnalyticsView from "./views/AnalyticsView";
+import HabitsView from "./views/HabitsView";
 import { useAuth } from "./context/AuthContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
@@ -41,6 +42,41 @@ function App() {
       Derived State
       =========================
     */
+    const streak = useMemo(() => {
+        if (!entries || entries.length === 0) return 0;
+
+        const daysWithEntries = [...new Set(entries
+            .filter(e => e.createdAt)
+            .map(e => {
+                const date = e.createdAt.toDate();
+                return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+            })
+        )].sort((a, b) => b - a);
+
+        if (daysWithEntries.length === 0) return 0;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
+        const yesterdayMs = todayMs - 86400000;
+
+        if (daysWithEntries[0] < yesterdayMs) return 0;
+
+        let currentStreak = 0;
+        let expectedDay = daysWithEntries[0];
+
+        for (const day of daysWithEntries) {
+            if (day === expectedDay) {
+                currentStreak++;
+                expectedDay -= 86400000;
+            } else {
+                break;
+            }
+        }
+
+        return currentStreak;
+    }, [entries]);
+
     const filteredEntries = useMemo(() => {
         if (!searchTerm.trim()) return entries;
 
@@ -120,6 +156,9 @@ function App() {
             case "analytics":
                 return <AnalyticsView entries={entries} />;
 
+            case "habits":
+                return <HabitsView />;
+
             case "list":
             default:
                 return (
@@ -156,6 +195,7 @@ function App() {
                         onToggleDarkMode={() => setDarkMode(!darkMode)}
                         onPrimaryAction={() => setCurrentView("create")}
                         primaryActionLabel="New Entry"
+                        streak={streak}
                     />
                     
                     {/* Tabs */}
@@ -163,6 +203,7 @@ function App() {
                         tabs={[
                             { label: "Entries", value: "list" },
                             { label: "Create", value: "create" },
+                            { label: "Habits", value: "habits" },
                             { label: "Analytics", value: "analytics" },
                         ]}
                         activeTab={currentView === "detail" ? "list" : currentView}

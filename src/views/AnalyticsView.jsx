@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { moods, moodColors } from '../constants/moods';
+import useHabits from "../hooks/useHabits";
 
 const AnalyticsView = ({ entries = [] }) => {
+  const { habits } = useHabits();
   /*
     =========================
     Derived Analytics
@@ -41,6 +43,26 @@ const AnalyticsView = ({ entries = [] }) => {
       <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
         📊 Analytics Dashboard
       </h2>
+
+      {/* Habit Highlights */}
+      {habits.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_3px_var(--glow-color)]">
+            Habit Overview
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {habits.map(habit => (
+              <div key={habit.id} className="p-4 rounded-2xl bg-[var(--bg-soft)]/50 border border-[var(--bg-soft)]">
+                <p className="text-xs text-[var(--text-secondary)] uppercase font-bold">{habit.name}</p>
+                <p className="text-2xl font-black text-[var(--accent-happy)]">{habit.completions?.length || 0} days</p>
+                <div className="w-full bg-[var(--bg-soft)] h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div className="bg-[var(--accent-happy)] h-full" style={{ width: `${Math.min(100, ((habit.completions?.length || 0) / 30) * 100)}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
