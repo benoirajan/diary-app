@@ -93,6 +93,56 @@ const AnalyticsView = ({ entries = [] }) => {
       ? `You usually miss on ${dayNames[mostMissedDayIdx]}s` 
       : "No clear break pattern yet!";
 
+    // Habit vs Mood Correlation
+    const moodScores = { excited: 5, happy: 4, calm: 3, sad: 2, angry: 1 };
+    const dailyAvgMood = {};
+    entries.forEach(entry => {
+        const dateKey = new Date(entry.date).toDateString();
+        if (!dailyAvgMood[dateKey]) dailyAvgMood[dateKey] = [];
+        dailyAvgMood[dateKey].push(moodScores[entry.mood] || 3);
+    });
+
+    Object.keys(dailyAvgMood).forEach(date => {
+        const scores = dailyAvgMood[date];
+        dailyAvgMood[date] = scores.reduce((a, b) => a + b, 0) / scores.length;
+    });
+
+    const habitInsights = habits.map(habit => {
+        const completedDays = habit.completions || [];
+        const moodWhenCompleted = [];
+        const moodWhenNotCompleted = [];
+
+        Object.entries(dailyAvgMood).forEach(([dateStr, avgMood]) => {
+            const dateObj = new Date(dateStr);
+            const dateIso = dateObj.toISOString().split('T')[0];
+            if (completedDays.includes(dateIso)) {
+                moodWhenCompleted.push(avgMood);
+            } else {
+                moodWhenNotCompleted.push(avgMood);
+            }
+        });
+
+        if (moodWhenCompleted.length > 0) {
+            const avgCompleted = moodWhenCompleted.reduce((a, b) => a + b, 0) / moodWhenCompleted.length;
+            const avgNotCompleted = moodWhenNotCompleted.length > 0 
+                ? moodWhenNotCompleted.reduce((a, b) => a + b, 0) / moodWhenNotCompleted.length 
+                : null;
+
+            if (avgNotCompleted !== null && Math.abs(avgCompleted - avgNotCompleted) > 0.5) {
+                const isPositive = avgCompleted > avgNotCompleted;
+                const topMoodValue = Object.entries(moodScores).find(([_, score]) => score === Math.round(avgCompleted))?.[0] || 'happy';
+                const emoji = moods.find(m => m.value === topMoodValue)?.emoji || '😊';
+                
+                return {
+                    habitName: habit.name,
+                    insight: `${emoji} You feel ${isPositive ? 'happier' : 'more down'} on days you complete ${habit.name}`,
+                    isPositive
+                };
+            }
+        }
+        return null;
+    }).filter(Boolean);
+
     return {
       totalEntries,
       moodCount,
@@ -101,8 +151,9 @@ const AnalyticsView = ({ entries = [] }) => {
       currentStreak,
       longestStreak,
       breakPattern,
+      habitInsights
     };
-  }, [entries]);
+  }, [entries, habits]);
 
   return (
     <div className="bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-card)] rounded-3xl p-8 shadow-[var(--shadow-soft)] border border-[var(--accent-neutral)]/20 transition-all space-y-8">
@@ -111,21 +162,46 @@ const AnalyticsView = ({ entries = [] }) => {
       </h2>
 
       {/* Motivational Insights */}
-      <div className="p-6 rounded-3xl bg-[var(--accent-happy)]/10 border border-[var(--accent-happy)]/30 space-y-3 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
-            <span className="text-6xl">🔥</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="p-6 rounded-3xl bg-[var(--accent-happy)]/10 border border-[var(--accent-happy)]/30 space-y-3 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                <span className="text-6xl">🔥</span>
+            </div>
+            <h3 className="text-xl font-black text-[var(--accent-happy)] flex items-center gap-2">
+                Streaks <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-happy)]/20 text-[var(--accent-happy)]">Motivational</span>
+            </h3>
+            <p className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
+                “You’re on a <span className="text-[var(--accent-happy)] font-bold">{analytics.currentStreak}-day</span> streak. 
+                Your longest is <span className="text-[var(--accent-happy)] font-bold">{analytics.longestStreak} days</span> 
+                {analytics.currentStreak >= analytics.longestStreak && analytics.currentStreak > 0 ? " — You're at your best!" : " — almost there."}”
+            </p>
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] font-semibold italic">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent-sad)]"></span>
+                📉 {analytics.breakPattern}
+            </div>
         </div>
-        <h3 className="text-xl font-black text-[var(--accent-happy)] flex items-center gap-2">
-            Insights <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-happy)]/20 text-[var(--accent-happy)]">Motivational</span>
-        </h3>
-        <p className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
-            “You’re on a <span className="text-[var(--accent-happy)] font-bold">{analytics.currentStreak}-day</span> streak. 
-            Your longest is <span className="text-[var(--accent-happy)] font-bold">{analytics.longestStreak} days</span> 
-            {analytics.currentStreak >= analytics.longestStreak && analytics.currentStreak > 0 ? " — You're at your best!" : " — almost there."}”
-        </p>
-        <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] font-semibold italic">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-sad)]"></span>
-            📉 {analytics.breakPattern}
+
+        {/* Habit-Mood Correlation Insights */}
+        <div className="p-6 rounded-3xl bg-[var(--accent-excited)]/10 border border-[var(--accent-excited)]/30 space-y-3 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                <span className="text-6xl">🧠</span>
+            </div>
+            <h3 className="text-xl font-black text-[var(--accent-excited)] flex items-center gap-2">
+                Self-Awareness <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-lg bg-[var(--accent-excited)]/20 text-[var(--accent-excited)]">AI Insights</span>
+            </h3>
+            <div className="space-y-3">
+                {analytics.habitInsights.length > 0 ? (
+                    analytics.habitInsights.map((insight, idx) => (
+                        <p key={idx} className="text-[var(--text-primary)] font-medium text-lg leading-relaxed">
+                            {insight.insight}
+                        </p>
+                    ))
+                ) : (
+                    <p className="text-[var(--text-secondary)] italic">
+                        Keep tracking habits and mood to see correlations here!
+                    </p>
+                )}
+            </div>
         </div>
       </div>
 
