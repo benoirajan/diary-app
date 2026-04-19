@@ -8,6 +8,7 @@ import EntryList from "./components/EntryList";
 import EntryDetail from "./components/EntryDetail";
 import AnalyticsView from "./views/AnalyticsView";
 import HabitsView from "./views/HabitsView";
+import AdminView from "./views/AdminView";
 import { useAuth } from "./context/AuthContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
@@ -15,7 +16,7 @@ import LandingPage from "./views/LandingPage";
 
 function App() {
 
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     // console.log(user)
     /*
       =========================
@@ -92,6 +93,18 @@ function App() {
         return entries.find(e => e.id === selectedEntryId);
     }, [entries, selectedEntryId]);
 
+    const tabs = useMemo(() => {
+        const baseTabs = [
+            { label: "Entries", value: "list", icon: "📑" },
+            { label: "Habits", value: "habits", icon: "🎯" },
+            { label: "Analytics", value: "analytics", icon: "📊" },
+        ];
+        if (isAdmin) {
+            baseTabs.push({ label: "Admin", value: "admin", icon: "🛡️" });
+        }
+        return baseTabs;
+    }, [isAdmin]);
+
     /*
       =========================
       View Renderer
@@ -150,6 +163,9 @@ function App() {
             case "habits":
                 return <HabitsView />;
 
+            case "admin":
+                return <AdminView />;
+
             case "list":
             default:
                 return (
@@ -189,11 +205,7 @@ function App() {
                     </div>
 
                     <nav className="flex-1 space-y-2">
-                        {[
-                            { label: "Entries", value: "list", icon: "📑" },
-                            { label: "Habits", value: "habits", icon: "🎯" },
-                            { label: "Analytics", value: "analytics", icon: "📊" },
-                        ].map((tab) => {
+                        {tabs.map((tab) => {
                             const isActive = (currentView === "detail" ? "list" : currentView) === tab.value;
                             return (
                                 <button
@@ -254,11 +266,7 @@ function App() {
                         {/* Mobile Tabs */}
                         <div className="lg:hidden">
                             <NavigationTabs
-                                tabs={[
-                                    { label: "Entries", value: "list" },
-                                    { label: "Habits", value: "habits" },
-                                    { label: "Analytics", value: "analytics" },
-                                ]}
+                                tabs={tabs}
                                 activeTab={currentView === "detail" ? "list" : currentView}
                                 onTabChange={(value) => {
                                     setSelectedEntryId(null);

@@ -21,7 +21,7 @@
   --glow-color: #00ffff;
 }
 
-/* � Enhanced Dark Mode */
+/*  Enhanced Dark Mode */
 .dark {
   --bg-main: #f0f0f0;
   --bg-card: #ffffff;
@@ -39,4 +39,21 @@
 
   --shadow-soft: 0 0 20px rgba(250, 250, 250, 0.2);
   --glow-color: #c6c6c6;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--bg-soft);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-happy);
 }
