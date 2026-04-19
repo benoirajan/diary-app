@@ -7,11 +7,14 @@ const HabitsView = () => {
     loading,
     error,
     addHabit,
+    updateHabit,
     deleteHabit,
     toggleHabitCompletion,
   } = useHabits();
 
   const [newHabitName, setNewHabitName] = useState("");
+  const [editingHabitId, setEditingHabitId] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
   const today = new Date().toISOString().split("T")[0];
 
   // Helper to get last 7 days for the tracker
@@ -32,6 +35,24 @@ const HabitsView = () => {
     if (!newHabitName.trim()) return;
     addHabit({ name: newHabitName.trim() });
     setNewHabitName("");
+  };
+
+  const handleUpdateHabit = (e) => {
+    e.preventDefault();
+    if (!editingValue.trim() || !editingHabitId) return;
+    updateHabit(editingHabitId, { name: editingValue.trim() });
+    setEditingHabitId(null);
+    setEditingValue("");
+  };
+
+  const startEditing = (habit) => {
+    setEditingHabitId(habit.id);
+    setEditingValue(habit.name);
+  };
+
+  const cancelEditing = () => {
+    setEditingHabitId(null);
+    setEditingValue("");
   };
 
   if (loading) return <div className="p-6 text-center text-gray-500">Loading habits...</div>;
@@ -71,13 +92,57 @@ const HabitsView = () => {
               key={habit.id}
               className="bg-[var(--bg-card)] rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] flex flex-col md:flex-row md:items-center justify-between gap-6 group"
             >
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-happy)] transition-colors">
-                  {habit.name}
-                </h3>
-                <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
-                  Streak: {calculateStreak(habit.completions)} days
-                </p>
+              <div className="flex-1 space-y-1">
+                {editingHabitId === habit.id ? (
+                  <form onSubmit={handleUpdateHabit} className="flex gap-2">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      className="flex-1 px-4 py-2 rounded-xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+                    />
+                    <button
+                      type="submit"
+                      className="p-2 text-[var(--accent-happy)] hover:scale-110 transition-transform"
+                      title="Save"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditing}
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Cancel"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-happy)] transition-colors">
+                        {habit.name}
+                      </h3>
+                      <button
+                        onClick={() => startEditing(habit)}
+                        className="p-1 text-gray-400 hover:text-[var(--accent-happy)] opacity-0 group-hover:opacity-100 transition-all"
+                        title="Edit Habit"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                      Streak: {calculateStreak(habit.completions)} days
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
@@ -87,7 +152,7 @@ const HabitsView = () => {
                   const dayName = new Date(date).toLocaleDateString("en-US", { weekday: "narrow" });
 
                   return (
-                    <div key={date} className="flex flex-col items-center gap-1">
+                    <div key={date} className="flex flex-col items-center gap-1 pb-2">
                       <span className={`text-[9px] font-bold ${isToday ? 'text-[var(--accent-happy)]' : 'text-[var(--text-secondary)]'}`}>
                         {dayName}
                       </span>
