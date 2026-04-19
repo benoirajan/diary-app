@@ -12,30 +12,38 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       if (firebaseUser) {
-        // Fetch or create user profile
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        try {
+          // Fetch or create user profile
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
 
-        if (!userDoc.exists()) {
-          const newProfile = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName || "",
-            photoURL: firebaseUser.photoURL || "",
-            isAdmin: false,
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-          };
-          await setDoc(userDocRef, newProfile);
-          setProfile(newProfile);
-        } else {
-          const existingProfile = userDoc.data();
-          // Update last login
-          await setDoc(userDocRef, { lastLogin: serverTimestamp() }, { merge: true });
-          setProfile({ ...existingProfile, lastLogin: new Date() });
+          if (!userDoc.exists()) {
+            const newProfile = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName || "",
+              photoURL: firebaseUser.photoURL || "",
+              isAdmin: false,
+              createdAt: serverTimestamp(),
+              lastLogin: serverTimestamp(),
+            };
+            await setDoc(userDocRef, newProfile);
+            setProfile(newProfile);
+          } else {
+            const existingProfile = userDoc.data();
+            // Update last login
+            await setDoc(userDocRef, { lastLogin: serverTimestamp() }, { merge: true });
+            setProfile({ ...existingProfile, lastLogin: new Date() });
+          }
+          setUser(firebaseUser);
+        } catch (err) {
+          console.error("Error managing user profile:", err);
+          // Still allow user to log in but profile will be null
+          setUser(firebaseUser);
+          setProfile(null);
         }
-        setUser(firebaseUser);
       } else {
         setUser(null);
         setProfile(null);
