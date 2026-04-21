@@ -23,6 +23,40 @@ const EntryForm = ({
       : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   );
   const [isPreview, setIsPreview] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
+  const startVoiceRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setContent((prev) => prev + (prev ? " " : "") + transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -99,7 +133,21 @@ const EntryForm = ({
         <div className="space-y-1.5">
           <div className="flex justify-between items-center px-1">
             <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Your Story</label>
-            <span className="text-[10px] text-[var(--text-secondary)] opacity-50 italic">Markdown supported</span>
+            <div className="flex items-center gap-3">
+                <button 
+                    type="button"
+                    onClick={startVoiceRecording}
+                    disabled={isPreview || isRecording}
+                    className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                        isRecording 
+                            ? "text-red-500 animate-pulse" 
+                            : "text-[var(--text-secondary)] hover:text-[var(--accent-happy)]"
+                    } disabled:opacity-30`}
+                >
+                    {isRecording ? "🔴 Listening..." : "🎙️ Voice to Text"}
+                </button>
+                <span className="text-[10px] text-[var(--text-secondary)] opacity-50 italic">Markdown supported</span>
+            </div>
           </div>
 
           {isPreview ? (

@@ -36,6 +36,7 @@ export const getUserStats = async (userId) => {
   const entries = entriesSnapshot.docs.map(doc => doc.data());
   const moods = entries.map(e => e.mood).filter(Boolean);
   const moodAvg = moods.length > 0 ? moods.reduce((a, b) => a + b, 0) / moods.length : 0;
+  console.log(moodAvg, moods);
 
   return {
     totalEntries,

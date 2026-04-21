@@ -193,13 +193,13 @@ function App() {
     }
     return (
         <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>
-            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-happy)]/30 lg:flex">
+            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--ui-accent)]/30 lg:flex">
                 
                 {/* Desktop Sidebar */}
                 <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--bg-soft)] p-6 z-40">
                     <div className="mb-10">
                         <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)]">
-                            SoulScript<span className="text-[var(--accent-happy)]">.</span>
+                            SoulScript<span className="text-[var(--ui-accent)]">.</span>
                         </h1>
                         <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] mt-1 opacity-50">Digital Soul Journal</p>
                     </div>
@@ -216,7 +216,7 @@ function App() {
                                     }}
                                     className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all ${
                                         isActive
-                                            ? "bg-[var(--accent-happy)]/10 text-[var(--accent-happy)] border border-[var(--accent-happy)]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]"
+                                            ? "bg-[var(--ui-accent-soft)] text-[var(--ui-active)] border border-[var(--ui-accent)]/20 shadow-[0_0_15px_rgba(0,0,0,0.02)]"
                                             : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)]"
                                     }`}
                                 >
@@ -232,7 +232,7 @@ function App() {
                             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">Dark Mode</span>
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-soft)] hover:border-[var(--accent-happy)] transition-all text-lg"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-soft)] hover:border-[var(--ui-accent)] transition-all text-lg"
                             >
                                 {darkMode ? "🌙" : "☀️"}
                             </button>
@@ -276,7 +276,7 @@ function App() {
                         </div>
 
                         {/* Main Content */}
-                        <main className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <main className="animate-in mb-15 fade-in slide-in-from-bottom-4 duration-700">
                             {renderView()}
                         </main>
                     </div>
@@ -308,7 +308,7 @@ function App() {
             {/* Sticky "New Entry" FAB */}
             <button
                 onClick={() => setIsEntryFormOpen(true)}
-                className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black shadow-[0_0_30px_rgba(0,255,255,0.5)] hover:scale-110 hover:shadow-[0_0_40px_rgba(0,255,255,0.7)] active:scale-95 transition-all group"
+                className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-main)] text-black font-black shadow-xl shadow-[var(--accent-main)]/20 hover:scale-110 hover:shadow-[var(--accent-main)]/40 active:scale-95 transition-all group"
             >
                 <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">+</span>
                 <span className="text-sm uppercase tracking-widest hidden sm:inline">New Entry</span>
