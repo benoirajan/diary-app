@@ -3,6 +3,8 @@ import {
   getDocs, 
   query, 
   orderBy, 
+  limit,
+  startAfter,
   doc, 
   getDoc,
   where
@@ -43,16 +45,41 @@ export const getUserStats = async (userId) => {
   };
 };
 
-export const getUserActivity = async (userId) => {
+export const getUserActivity = async (userId, lastVisibleEntry = null, pageSize = 15) => {
     const entriesRef = collection(db, "users", userId, "entries");
-    const qEntries = query(entriesRef, orderBy("createdAt", "desc"));
-    const entriesSnapshot = await getDocs(qEntries);
     
-    const habitsRef = collection(db, "users", userId, "habits");
-    const habitsSnapshot = await getDocs(habitsRef);
+    let qEntries;
+    if (lastVisibleEntry) {
+        qEntries = query(
+            entriesRef, 
+            orderBy("createdAt", "desc"), 
+            startAfter(lastVisibleEntry),
+            limit(pageSize)
+        );
+    } else {
+        qEntries = query(
+            entriesRef, 
+            orderBy("createdAt", "desc"), 
+            limit(pageSize)
+        );
+    }
+    
+    const entriesSnapshot = await getDocs(qEntries);
+    const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const lastDoc = entriesSnapshot.docs[entriesSnapshot.docs.length - 1];
+
+    // For habits, we usually want to see all active ones as they are few
+    let habits = [];
+    if (!lastVisibleEntry) {
+        const habitsRef = collection(db, "users", userId, "habits");
+        const habitsSnapshot = await getDocs(habitsRef);
+        habits = habitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
 
     return {
-        entries: entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
-        habits: habitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        entries,
+        habits,
+        lastDoc,
+        hasMore: entries.length === pageSize
     };
 }

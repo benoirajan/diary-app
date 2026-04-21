@@ -10,8 +10,9 @@ export default function AdminView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userStats, setUserStats] = useState(null);
-  const [userActivity, setUserActivity] = useState(null);
+  const [userActivity, setUserActivity] = useState({ entries: [], habits: [], lastDoc: null, hasMore: false });
   const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -44,6 +45,25 @@ export default function AdminView() {
       console.error("Failed to load user stats", err);
     } finally {
       setLoadingStats(false);
+    }
+  };
+
+  const loadMoreEntries = async () => {
+    if (!selectedUserId || !userActivity.lastDoc || loadingMore) return;
+    
+    setLoadingMore(true);
+    try {
+      const result = await adminService.getUserActivity(selectedUserId, userActivity.lastDoc);
+      setUserActivity(prev => ({
+        ...prev,
+        entries: [...prev.entries, ...result.entries],
+        lastDoc: result.lastDoc,
+        hasMore: result.hasMore
+      }));
+    } catch (err) {
+      console.error("Failed to load more entries", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -239,21 +259,33 @@ export default function AdminView() {
                 <div className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-3xl overflow-hidden shadow-xl">
                     <div className="p-6 border-b border-[var(--bg-soft)] bg-[var(--bg-soft)]/20 flex items-center justify-between">
                         <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Recent Entries</h3>
-                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{userActivity?.entries?.length || 0} Total</span>
+                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{userStats?.totalEntries || 0} Total</span>
                     </div>
-                    <div className="max-h-[300px] overflow-y-auto p-4 space-y-3">
-                        {userActivity?.entries?.length === 0 ? (
+                    <div className="max-h-[400px] overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                        {userActivity.entries.length === 0 ? (
                             <p className="text-center py-10 text-[var(--text-secondary)] font-medium">No entries yet.</p>
                         ) : (
-                            userActivity?.entries?.map((entry, i) => (
-                                <div key={i} className="p-4 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-2xl hover:border-cyan-400/20 transition-all">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-bold text-white">{entry.title}</h4>
-                                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{new Date(entry.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+                            <>
+                                {userActivity.entries.map((entry, i) => (
+                                    <div key={i} className="p-4 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-2xl hover:border-cyan-400/20 transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold text-white">{entry.title}</h4>
+                                            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{new Date(entry.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+                                        </div>
+                                        <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{entry.content}</p>
                                     </div>
-                                    <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{entry.content}</p>
-                                </div>
-                            ))
+                                ))}
+
+                                {userActivity.hasMore && (
+                                    <button
+                                        onClick={loadMoreEntries}
+                                        disabled={loadingMore}
+                                        className="w-full py-3 mt-2 bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-white text-xs font-black uppercase tracking-widest rounded-xl border border-transparent hover:border-[var(--accent-happy)] transition-all disabled:opacity-50"
+                                    >
+                                        {loadingMore ? "Fetching Data..." : "Load Older Entries ↓"}
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
