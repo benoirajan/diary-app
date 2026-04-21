@@ -38,6 +38,15 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Smart Insights:** Prioritize narrative "takeaways". Include "Comeback Insights" when users return after a 2+ day break to encourage consistency without guilt.
 - **Visualizations:** Prefer custom SVG components (like the `MoodChart`) to maintain the project's unique aesthetic without external charting dependencies.
 
+## Admin Module
+- **Access Control:** Restricted to users with `isAdmin: true` in their Firestore document (`/users/{uid}`).
+- **Features:** 
+    - **User Directory:** Searchable list of all registered users with filters for "Admins" and "Active Today".
+    - **User Profiles:** View aggregated stats (total entries, habits, avg mood) and last activity date.
+    - **Paginated Activity:** View a scrollable, paginated history of user entries (15 entries per load).
+- **Service Integration:** Use `adminService.js` for all administrative Firestore queries.
+- **Security:** Administrative access is enforced both via UI (`isAdmin` flag in `AuthContext`) and Backend (`firestore.rules`).
+
 ## Common Commands
 - **Start Development Server:** `npm run dev`
 - **Build for Production:** `npm run build`
@@ -46,6 +55,8 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 ## Agent Mandates
 - **Rename Integrity:** Ensure the name "SoulScript" is used in all user-facing strings and documentation.
 - **Auth Support:** Maintain support for both Email/Password and Google Authentication.
+- **User Profiles:** Ensure every authenticated user has a corresponding document in the `users` collection.
+- **Admin Security:** Never expose administrative functionality or user data to non-admin users. Always verify the `isAdmin` flag from `AuthContext`.
 - **Data Integrity:** Always ensure new Firestore queries are supported by appropriate indexes in `firestore.indexes.json` and rules in `firestore.rules`.
 - **UI/UX:** Maintain the established glow-based futuristic aesthetic. Use `animate-in` utilities for all major view transitions.
 - **Habit Tracking:** Ensure habit completions are stored with ISO date strings (YYYY-MM-DD).
