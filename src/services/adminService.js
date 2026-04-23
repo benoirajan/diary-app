@@ -84,3 +84,13 @@ export const getUserActivity = async (userId, lastVisibleEntry = null, pageSize 
         hasMore: entries.length === pageSize
     };
 }
+
+export const getFeedbacks = async () => {
+  const feedbackRef = collection(db, "feedback");
+  const q = query(feedbackRef, orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+};

@@ -5,7 +5,9 @@ import { useAuth } from "../context/AuthContext";
 export default function AdminView() {
   const { isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -13,10 +15,12 @@ export default function AdminView() {
   const [userActivity, setUserActivity] = useState({ entries: [], habits: [], lastDoc: null, hasMore: false });
   const [loadingStats, setLoadingStats] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [activeTab, setActiveTab] = useState("users"); // users, feedbacks
 
   useEffect(() => {
     if (!isAdmin) return;
     loadUsers();
+    loadFeedbacks();
   }, [isAdmin]);
 
   const loadUsers = async () => {
@@ -28,6 +32,18 @@ export default function AdminView() {
       setError("Failed to load users: " + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const allFeedbacks = await adminService.getFeedbacks();
+      setFeedbacks(allFeedbacks);
+    } catch (err) {
+      console.error("Failed to load feedbacks", err);
+    } finally {
+      setLoadingFeedbacks(false);
     }
   };
 
@@ -312,6 +328,67 @@ export default function AdminView() {
           )}
         </div>
       </div>
+    </div>
+  );
+}text-secondary)] uppercase">{userActivity?.habits?.length || 0} Active</span>
+                    </div>
+                    <div className="p-4 flex flex-wrap gap-2">
+                        {userActivity?.habits?.length === 0 ? (
+                            <p className="text-center w-full py-6 text-[var(--text-secondary)] font-medium">No habits configured.</p>
+                        ) : (
+                            userActivity?.habits?.map((habit, i) => (
+                                <div key={i} className="px-4 py-2 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-xl flex items-center gap-2">
+                                    <span>{habit.icon || "✨"}</span>
+                                    <span className="text-sm font-bold text-white">{habit.name}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}                   <span className={`text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider border ${typeColors[item.type] || 'bg-gray-500/20 text-gray-300'}`}>
+                                        {item.type}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">
+                                        {item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}
+                                    </span>
+                                </div>
+                                
+                                <p className="text-[var(--text-primary)] font-medium leading-relaxed mb-6 flex-1">
+                                    “{item.feedback}”
+                                </p>
+
+                                <div className="pt-4 border-t border-[var(--bg-soft)] flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--bg-soft)] flex items-center justify-center text-xs font-bold text-white">
+                                        {user?.displayName?.charAt(0) || user?.email?.charAt(0) || "?"}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-xs font-bold text-white truncate">{user?.displayName || "Anonymous"}</div>
+                                        <div className="text-[10px] text-[var(--text-secondary)] truncate">{user?.email || item.userId}</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            setActiveTab("users");
+                                            handleSelectUser(item.userId);
+                                        }}
+                                        className="ml-auto w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] text-xs transition-all"
+                                        title="View User"
+                                    >
+                                        👤
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }
