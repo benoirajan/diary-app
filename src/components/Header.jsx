@@ -2,12 +2,12 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 const Header = ({
-    title = "My Diary",
     isDarkMode = false,
     hideTitle = false,
     hideToggle = false,
     onToggleDarkMode,
     onPrimaryAction,
+    onFeedback,
     primaryActionLabel = "",
     streak = 0,
   }) => {
@@ -16,12 +16,23 @@ const Header = ({
         {/* Left Side - Title */}
         {!hideTitle && (
           <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[var(--text-primary)]">
-            {title}<span className="text-[var(--accent-happy)]">.</span>
+            SoulScript<span className="text-[var(--accent-happy)]">.</span>
           </h1>
         )}
   
         {/* Right Side - Actions */}
         <div className="flex items-center gap-3">
+          {/* Feedback Button */}
+          {onFeedback && (
+            <button
+              onClick={onFeedback}
+              title="Share Feedback"
+              className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] hover:border-[var(--accent-happy)] transition-all shadow-sm text-xl"
+            >
+              💬
+            </button>
+          )}
+
           {/* Streak View */}
           {streak > 0 && (
             <div className="relative group flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] cursor-default transition-all hover:border-[var(--accent-happy)]/50 shadow-sm">

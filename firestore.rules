@@ -28,5 +28,12 @@ service cloud.firestore {
                          && request.auth.uid == userId;
       allow read: if isAdmin();
     }
+
+    match /feedback/{feedbackId} {
+      // Allow any authenticated user to create feedback
+      allow create: if request.auth != null;
+      // Only allow admins to read feedback
+      allow read: if isAdmin();
+    }
   }
 }

@@ -4,6 +4,7 @@ import useEntries from "./hooks/useEntries";
 import Header from "./components/Header";
 import NavigationTabs from "./components/NavigationTabs";
 import EntryForm from "./components/EntryForm";
+import FeedbackForm from "./components/FeedbackForm";
 import EntryList from "./components/EntryList";
 import EntryDetail from "./components/EntryDetail";
 import AnalyticsView from "./views/AnalyticsView";
@@ -12,6 +13,7 @@ import AdminView from "./views/AdminView";
 import { useAuth } from "./context/AuthContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
+import { submitFeedback } from "./services/feedbackService";
 
 
 function App() {
@@ -38,6 +40,8 @@ function App() {
     const [darkMode, setDarkMode] = useState(true);
     const [showAuth, setShowAuth] = useState(false);
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
+    const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false);
+    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
     /*
       =========================
@@ -104,6 +108,20 @@ function App() {
         }
         return baseTabs;
     }, [isAdmin]);
+
+    const handleFeedbackSubmit = async (feedbackData) => {
+        setIsSubmittingFeedback(true);
+        try {
+            await submitFeedback(user.uid, feedbackData);
+            setIsFeedbackFormOpen(false);
+            alert("Thank you for your feedback!");
+        } catch (err) {
+            console.error("Error submitting feedback:", err);
+            alert("Failed to submit feedback. Please try again.");
+        } finally {
+            setIsSubmittingFeedback(false);
+        }
+    };
 
     /*
       =========================
@@ -228,6 +246,13 @@ function App() {
                     </nav>
 
                     <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-4">
+                        <button
+                            onClick={() => setIsFeedbackFormOpen(true)}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all"
+                        >
+                            <span className="text-lg">💬</span>
+                            <span className="text-sm">Feedback</span>
+                        </button>
                         <div className="flex items-center justify-between px-2">
                             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">Dark Mode</span>
                             <button
@@ -245,9 +270,9 @@ function App() {
                         {/* Mobile Header */}
                         <div className="lg:hidden">
                             <Header
-                                title="SoulScript"
                                 isDarkMode={darkMode}
                                 onToggleDarkMode={() => setDarkMode(!darkMode)}
+                                onFeedback={() => setIsFeedbackFormOpen(true)}
                                 streak={streak}
                             />
                         </div>
@@ -255,7 +280,6 @@ function App() {
                         {/* Desktop Header Content */}
                         <div className="hidden lg:flex justify-end items-center mb-10 gap-4">
                             <Header
-                                title=""
                                 isDarkMode={darkMode}
                                 hideTitle={true}
                                 hideToggle={true}
@@ -300,6 +324,23 @@ function App() {
                                 setIsEntryFormOpen(false);
                             }}
                             onCancel={() => setIsEntryFormOpen(false)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Feedback Modal */}
+            {isFeedbackFormOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+                    <div 
+                        className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
+                        onClick={() => setIsFeedbackFormOpen(false)}
+                    ></div>
+                    <div className="relative w-full max-w-lg animate-in zoom-in-95 duration-300">
+                        <FeedbackForm
+                            onSubmit={handleFeedbackSubmit}
+                            onCancel={() => setIsFeedbackFormOpen(false)}
+                            isSubmitting={isSubmittingFeedback}
                         />
                     </div>
                 </div>
