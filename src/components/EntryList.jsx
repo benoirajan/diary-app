@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { moods, moodColors } from '../constants/moods';
+import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
 
 const formatGroupDate = (dateString) => {
   const date = new Date(dateString);
@@ -81,7 +81,7 @@ const EntryList = ({
               >
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <h4 className="text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--ui-accent)] transition-colors">
-                    {moods.find(m => m.value === entry.mood)?.emoji || '😊'} {entry.title}
+                    {getMoodEmoji(entry.mood)} {entry.title}
                   </h4>
                   <div className="flex items-center gap-2">
                     <button
@@ -97,7 +97,7 @@ const EntryList = ({
                       </svg>
                     </button>
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-sm ${moodColors[entry.mood] || moodColors.neutral}`}>
-                      {entry.mood}
+                      {getMoodLabel(entry.mood)}
                     </span>
                   </div>
                 </div>

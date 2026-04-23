@@ -52,29 +52,40 @@ function App() {
         if (!entries || entries.length === 0) return 0;
 
         const daysWithEntries = [...new Set(entries
-            .filter(e => e.createdAt)
+            .filter(e => e.date || e.createdAt)
             .map(e => {
-                const date = e.createdAt.toDate();
+                let date;
+                if (e.date) {
+                    date = new Date(e.date);
+                } else if (e.createdAt && typeof e.createdAt.toDate === 'function') {
+                    date = e.createdAt.toDate();
+                } else {
+                    date = new Date(e.createdAt);
+                }
                 return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
             })
         )].sort((a, b) => b - a);
 
         if (daysWithEntries.length === 0) return 0;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayMs = today.getTime();
-        const yesterdayMs = todayMs - 86400000;
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
 
-        if (daysWithEntries[0] < yesterdayMs) return 0;
+        // If the latest entry is before yesterday, the streak is broken
+        if (daysWithEntries[0] < yesterday) return 0;
 
         let currentStreak = 0;
         let expectedDay = daysWithEntries[0];
 
         for (const day of daysWithEntries) {
-            if (day === expectedDay) {
+            // Use a small buffer (1 hour) for comparison to be safe against DST shifts if they somehow creep in
+            if (Math.abs(day - expectedDay) < 3600000) {
                 currentStreak++;
-                expectedDay -= 86400000;
+                // Set expectedDay to exactly midnight of the previous day
+                const prevDay = new Date(expectedDay);
+                prevDay.setDate(prevDay.getDate() - 1);
+                expectedDay = prevDay.getTime();
             } else {
                 break;
             }

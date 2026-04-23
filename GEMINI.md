@@ -24,11 +24,18 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Git Flow:** After every successful task/feature, stage the changes (`git add .`) and commit with a concise, descriptive message.
 
 ## Analytics Engine
-- **Mood Scoring:** Map moods to a 1-5 scale (Excited=5, Happy=4, Calm=3, Sad=2, Angry=1) for calculating averages and trends.
+- **Mood Scale:** SoulScript uses a specialized mindful scale for mapping human emotions (1-5):
+    - **Radiant (5):** Peak energy and joy.
+    - **Joyful (4):** Positive and light.
+    - **Peaceful (3):** Balanced and steady (Baseline/Default).
+    - **Down (2):** Low energy or heavy.
+    - **Rough (1):** High distress or overwhelmed (Replaces "Angry").
+- **Centralized Moods:** Always use helper functions from `src/constants/moods.js` (`getMoodLabel`, `getMoodEmoji`, `getMoodScore`) to maintain consistency.
 - **Well-being Score (0-100):** A composite metric weighted as:
     - **Habit Completion (40%):** Discipline and routine.
     - **Writing Consistency (30%):** Self-reflection frequency.
     - **Mood Trend (30%):** Emotional trajectory.
+- **Streak Calculation:** Streaks are calculated using the user-selected `date` field (ISO string) and normalized to midnight. Calculation must be robust against Daylight Saving Time shifts.
 - **Dashboard Layout:** Always structure the Analytics view following this 6-point hierarchy:
     1. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
     2. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.
@@ -44,9 +51,10 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Features:** 
     - **User Directory:** Searchable list of all registered users with filters for "Admins" and "Active Today".
     - **User Profiles:** View aggregated stats (total entries, habits, avg mood) and last activity date.
-    - **User Feedback:** View a list of categorized feedback submissions (Suggestions, Bugs, Praise) with quick links back to the user's profile.
+    - **User Feedback:** View a list of categorized feedback submissions (Suggestions, Bugs, Praise).
+    - **Mood Migration:** Bulk update old mood labels (happy, sad, etc.) to the new SoulScript scale across all user entries.
     - **Paginated Activity:** View a scrollable, paginated history of user entries (15 entries per load).
-- **Service Integration:** Use `adminService.js` for administrative queries (users/feedback). Use `feedbackService.js` for submissions.
+- **Service Integration:** Use `adminService.js` for administrative queries and data migrations.
 - **Security:** Administrative access is enforced both via UI (`isAdmin` flag in `AuthContext`) and Backend (`firestore.rules`).
 
 ## Common Commands

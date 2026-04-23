@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { moods } from '../constants/moods';
+import { moods, getMoodLabel, getMoodEmoji, getMoodScore } from '../constants/moods';
 import useHabits from "../hooks/useHabits";
 
 const MoodChart = ({ data = [] }) => {
@@ -13,7 +13,10 @@ const MoodChart = ({ data = [] }) => {
   const height = 200;
   const padding = 40;
   
-  const moodEmojis = { 5: "🤩", 4: "😊", 3: "😌", 2: "😔", 1: "😡" };
+  const moodEmojis = moods.reduce((acc, m) => {
+    acc[getMoodScore(m.value)] = m.emoji;
+    return acc;
+  }, {});
 
   const maxValue = 5;
   const minValue = 1;
@@ -153,12 +156,11 @@ const AnalyticsView = ({ entries = [] }) => {
       : "No clear break pattern yet!";
 
     // Habit vs Mood Correlation
-    const moodScores = { excited: 5, happy: 4, calm: 3, sad: 2, angry: 1 };
     const dailyAvgMood = {};
     entries.forEach(entry => {
         const dateKey = new Date(entry.date).toDateString();
         if (!dailyAvgMood[dateKey]) dailyAvgMood[dateKey] = [];
-        dailyAvgMood[dateKey].push(moodScores[entry.mood] || 3);
+        dailyAvgMood[dateKey].push(getMoodScore(entry.mood));
     });
 
     Object.keys(dailyAvgMood).forEach(date => {
@@ -189,8 +191,8 @@ const AnalyticsView = ({ entries = [] }) => {
 
             if (avgNotCompleted !== null && Math.abs(avgCompleted - avgNotCompleted) > 0.5) {
                 const isPositive = avgCompleted > avgNotCompleted;
-                const topMoodValue = Object.entries(moodScores).find(([, score]) => score === Math.round(avgCompleted))?.[0] || 'happy';
-                const emoji = moods.find(m => m.value === topMoodValue)?.emoji || '😊';
+                const topMoodValue = moods.find(m => getMoodScore(m.value) === Math.round(avgCompleted))?.value || 'joyful';
+                const emoji = getMoodEmoji(topMoodValue);
                 
                 return {
                     habitName: habit.name,
@@ -219,7 +221,7 @@ const AnalyticsView = ({ entries = [] }) => {
         let totalScore = 0;
         weekEntries.forEach(e => {
             counts[e.mood] = (counts[e.mood] || 0) + 1;
-            totalScore += moodScores[e.mood] || 3;
+            totalScore += getMoodScore(e.mood);
         });
         const topMood = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
         const avgScore = totalScore / weekEntries.length;
@@ -233,8 +235,9 @@ const AnalyticsView = ({ entries = [] }) => {
     let moodTrend = null;
 
     if (thisWeekStats) {
-        const moodObj = moods.find(m => m.value === thisWeekStats.topMood);
-        weeklySummary = `This week you felt mostly ${thisWeekStats.topMood} ${moodObj?.emoji || '😊'}`;
+        const moodLabel = getMoodLabel(thisWeekStats.topMood);
+        const emoji = getMoodEmoji(thisWeekStats.topMood);
+        weeklySummary = `This week you felt mostly ${moodLabel} ${emoji}`;
         
         if (lastWeekStats) {
             const diff = thisWeekStats.avgScore - lastWeekStats.avgScore;

@@ -8,6 +8,7 @@ export default function AdminView() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userStats, setUserStats] = useState(null);
@@ -44,6 +45,23 @@ export default function AdminView() {
       console.error("Failed to load feedbacks", err);
     } finally {
       setLoadingFeedbacks(false);
+    }
+  };
+
+  const handleMigrateMoods = async () => {
+    if (!window.confirm("This will scan all user entries and update old mood labels (happy, sad, etc.) to new ones (joyful, down, etc.). This is a one-time operation. Proceed?")) return;
+    
+    setIsMigrating(true);
+    try {
+      const count = await adminService.migrateOldMoods();
+      alert(`Migration complete! Successfully updated ${count} entries.`);
+      // Refresh current view if needed
+      if (selectedUserId) handleSelectUser(selectedUserId);
+    } catch (err) {
+      console.error("Migration failed:", err);
+      alert("Migration failed. Check console for details.");
+    } finally {
+      setIsMigrating(false);
     }
   };
 
@@ -128,6 +146,14 @@ export default function AdminView() {
                 <span className="font-bold text-white">{feedbacks.length}</span>
                 <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Feedbacks</span>
             </div>
+            <button 
+                onClick={handleMigrateMoods}
+                disabled={isMigrating}
+                className="px-4 py-2 flex items-center justify-center rounded-2xl bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] transition-all border border-transparent hover:border-amber-400/50 text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-amber-400 gap-2 disabled:opacity-50"
+                title="Migrate old mood labels to new ones"
+            >
+                <span>🛠️</span> {isMigrating ? "Migrating..." : "Migrate Moods"}
+            </button>
             <button 
                 onClick={() => { loadUsers(); loadFeedbacks(); }}
                 className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] transition-all border border-transparent hover:border-[var(--accent-happy)]"

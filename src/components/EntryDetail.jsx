@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { moods, moodColors, getMoodLabel } from '../constants/moods';
 import EntryForm from "./EntryForm";
 
 const formatDate = (dateString) => {
@@ -14,15 +15,6 @@ const formatDate = (dateString) => {
     minute: '2-digit'
   });
 };
-
-const moodColors = {
-  happy: "bg-[var(--accent-happy)]",
-  sad: "bg-[var(--accent-sad)]",
-  angry: "bg-[var(--accent-angry)]",
-  excited: "bg-[var(--accent-excited)]",
-  calm: "bg-[var(--accent-calm)]",
-  neutral: "bg-[var(--accent-neutral)]",
-}
 
 const EntryDetail = ({
   entry,
@@ -94,7 +86,7 @@ const EntryDetail = ({
         {/* Mood Badge */}
         <div className="flex items-center gap-3">
             <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-sm ${moodColors[entry.mood] || moodColors.neutral}`}>
-                {entry.mood}
+                {getMoodLabel(entry.mood)}
             </span>
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                 {formatDate(entry.date)}

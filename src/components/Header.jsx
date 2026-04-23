@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
@@ -11,6 +12,8 @@ const Header = ({
     primaryActionLabel = "",
     streak = 0,
   }) => {
+    const [showStreakInfo, setShowStreakInfo] = useState(false);
+
     return (
       <header className={`flex justify-between items-center mb-6 px-2 ${hideTitle ? 'justify-end' : ''}`}>
         {/* Left Side - Title */}
@@ -35,12 +38,17 @@ const Header = ({
 
           {/* Streak View */}
           {streak > 0 && (
-            <div className="relative group flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] cursor-default transition-all hover:border-[var(--accent-happy)]/50 shadow-sm">
+            <div 
+              className="relative group flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] cursor-pointer transition-all hover:border-[var(--accent-happy)]/50 shadow-sm"
+              onClick={() => setShowStreakInfo(!showStreakInfo)}
+            >
               <span className="text-lg">🔥</span>
               <span className="font-bold text-[var(--text-primary)]">{streak}</span>
               
-              {/* Expanded View on Hover */}
-              <div className="absolute top-full right-0 mt-2 w-40 p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center scale-95 group-hover:scale-100">
+              {/* Expanded View on Hover/Click */}
+              <div className={`absolute top-full right-0 mt-2 w-40 p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-2xl transition-all z-50 text-center 
+                ${showStreakInfo ? 'opacity-100 visible scale-100' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible scale-95 group-hover:scale-100'}`}
+              >
                 <div className="text-sm font-bold text-[var(--text-primary)] mb-1">🔥 {streak}-day streak</div>
                 <div className="text-xs text-[var(--text-secondary)]">“You’re doing great”</div>
                 <div className="absolute -top-1 right-5 w-2 h-2 bg-[var(--bg-card)] border-t border-l border-[var(--bg-soft)] rotate-45"></div>

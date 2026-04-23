@@ -11,7 +11,7 @@ const EntryForm = ({
 }) => {
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.content || "");
-  const [mood, setMood] = useState(initialData?.mood || "happy");
+  const [mood, setMood] = useState(initialData?.mood || "peaceful");
   const [date, setDate] = useState(
     initialData?.date 
       ? new Date(initialData.date).toISOString().split('T')[0] 
@@ -77,7 +77,7 @@ const EntryForm = ({
       // Reset form after submit ONLY if it's a new entry
       setTitle("");
       setContent("");
-      setMood("happy");
+      setMood("peaceful");
       const now = new Date();
       setDate(now.toISOString().split('T')[0]);
       setTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));

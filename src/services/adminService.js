@@ -4,9 +4,60 @@ import {
   query, 
   orderBy, 
   limit,
-  startAfter
+  startAfter,
+  writeBatch,
+  doc,
+  where
 } from "firebase/firestore";
 import { db } from "../firebase";
+
+const MOOD_MAPPING = {
+  happy: "joyful",
+  sad: "down",
+  excited: "radiant",
+  angry: "rough",
+  calm: "peaceful"
+};
+
+/**
+ * Bulk updates all entries from old mood values to new ones.
+ * WARNING: This is a heavy operation. Use with caution.
+ */
+export const migrateOldMoods = async () => {
+  const usersRef = collection(db, "users");
+  const usersSnapshot = await getDocs(usersRef);
+  let totalUpdated = 0;
+
+  for (const userDoc of usersSnapshot.docs) {
+    const userId = userDoc.id;
+    const entriesRef = collection(db, "users", userId, "entries");
+    
+    // Find entries that still have old mood values
+    const q = query(entriesRef, where("mood", "in", Object.keys(MOOD_MAPPING)));
+    const entriesSnapshot = await getDocs(q);
+
+    if (entriesSnapshot.empty) continue;
+
+    const batch = writeBatch(db);
+    entriesSnapshot.docs.forEach((entryDoc) => {
+      const oldMood = entryDoc.data().mood;
+      const newMood = MOOD_MAPPING[oldMood];
+      
+      if (newMood) {
+        batch.update(doc(db, "users", userId, "entries", entryDoc.id), {
+          mood: newMood,
+          updatedAt: new Date()
+        });
+        totalUpdated++;
+      }
+    });
+
+    await batch.commit();
+    console.log(`Migrated entries for user: ${userId}`);
+  }
+
+  return totalUpdated;
+};
 
 export const getAllUsers = async () => {
   const usersRef = collection(db, "users");
