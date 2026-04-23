@@ -16,9 +16,10 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Imports:** Group imports logically (React/Libraries first, then local components, then assets/styles).
 - **State Management:** When dealing with lists and details, prefer storing a `selectedId` and using `useMemo` to find the object in the main list.
 - **Responsive Layout:**
-    - **Mobile:** Uses a bottom-navigation tab system and full-width header.
-    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation and an optimized wide-content area.
+    - **Mobile:** Uses a bottom-navigation tab system and full-width header with a "Feedback" icon (💬).
+    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation and an optimized wide-content area. Feedback trigger is located in the sidebar's footer.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
+- **Feedback Loop:** Use the `FeedbackForm.jsx` modal for collecting user suggestions, bug reports, and praise. Submissions are stored in the global `feedback` collection.
 - **Sticky Actions:** The "New Entry" action is permanently accessible via a Floating Action Button (FAB) at the bottom-right.
 - **Git Flow:** After every successful task/feature, stage the changes (`git add .`) and commit with a concise, descriptive message.
 
@@ -43,14 +44,16 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Features:** 
     - **User Directory:** Searchable list of all registered users with filters for "Admins" and "Active Today".
     - **User Profiles:** View aggregated stats (total entries, habits, avg mood) and last activity date.
+    - **User Feedback:** View a list of categorized feedback submissions (Suggestions, Bugs, Praise) with quick links back to the user's profile.
     - **Paginated Activity:** View a scrollable, paginated history of user entries (15 entries per load).
-- **Service Integration:** Use `adminService.js` for all administrative Firestore queries.
+- **Service Integration:** Use `adminService.js` for administrative queries (users/feedback). Use `feedbackService.js` for submissions.
 - **Security:** Administrative access is enforced both via UI (`isAdmin` flag in `AuthContext`) and Backend (`firestore.rules`).
 
 ## Common Commands
 - **Start Development Server:** `npm run dev`
 - **Build for Production:** `npm run build`
 - **Deploy to Firebase:** `firebase deploy`
+- **Deploy Rules Only:** `firebase deploy --only firestore:rules`
 
 ## Agent Mandates
 - **Rename Integrity:** Ensure the name "SoulScript" is used in all user-facing strings and documentation.
