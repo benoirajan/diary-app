@@ -35,7 +35,7 @@ function App() {
     const [currentView, setCurrentView] = useState("list");
     const [selectedEntryId, setSelectedEntryId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
     const [showAuth, setShowAuth] = useState(false);
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
 
