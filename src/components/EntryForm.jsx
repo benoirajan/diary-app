@@ -84,10 +84,6 @@ const EntryForm = ({
     }
   };
 
-  const handleGenerate = async () => {
-    if (!content.trim()) return;
-  };
-
   return (
     <div className="bg-[var(--bg-card)] rounded-3xl p-7  border border-[var(--bg-soft)] transition-all">
       <div className="flex justify-between items-center mb-6 px-1">

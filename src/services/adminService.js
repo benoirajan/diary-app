@@ -4,10 +4,7 @@ import {
   query, 
   orderBy, 
   limit,
-  startAfter,
-  doc, 
-  getDoc,
-  where
+  startAfter
 } from "firebase/firestore";
 import { db } from "../firebase";
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { moods, moodColors } from '../constants/moods';
+import { moods } from '../constants/moods';
 import useHabits from "../hooks/useHabits";
 
 const MoodChart = ({ data = [] }) => {
@@ -13,7 +13,6 @@ const MoodChart = ({ data = [] }) => {
   const height = 200;
   const padding = 40;
   
-  const moodScores = { excited: 5, happy: 4, calm: 3, sad: 2, angry: 1 };
   const moodEmojis = { 5: "🤩", 4: "😊", 3: "😌", 2: "😔", 1: "😡" };
 
   const maxValue = 5;
@@ -190,7 +189,7 @@ const AnalyticsView = ({ entries = [] }) => {
 
             if (avgNotCompleted !== null && Math.abs(avgCompleted - avgNotCompleted) > 0.5) {
                 const isPositive = avgCompleted > avgNotCompleted;
-                const topMoodValue = Object.entries(moodScores).find(([_, score]) => score === Math.round(avgCompleted))?.[0] || 'happy';
+                const topMoodValue = Object.entries(moodScores).find(([, score]) => score === Math.round(avgCompleted))?.[0] || 'happy';
                 const emoji = moods.find(m => m.value === topMoodValue)?.emoji || '😊';
                 
                 return {
