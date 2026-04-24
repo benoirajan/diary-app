@@ -3,7 +3,8 @@ import {
     addDoc,
     serverTimestamp,
   } from "firebase/firestore";
-  import { db } from "../firebase";
+  import { logEvent } from "firebase/analytics";
+  import { db, analytics } from "../firebase";
   
   export const submitFeedback = async (userId, feedbackData) => {
     const ref = collection(db, "feedback");
@@ -12,5 +13,9 @@ import {
       ...feedbackData,
       userId,
       createdAt: serverTimestamp(),
+    });
+
+    logEvent(analytics, "submit_feedback", {
+      type: feedbackData.type
     });
   };

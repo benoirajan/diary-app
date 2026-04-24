@@ -6,7 +6,8 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 ## Project Context
 - **Project Name:** SoulScript (formerly AI Diary)
 - **Project Type:** React (Vite) Single Page Application (Journaling + Habit Tracking + Emotional Analytics)
-- **Backend:** Firebase (Firestore, Authentication, Hosting)
+- **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics)
+- **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Google Gemini AI (via client-side or functions)
     - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx` using `gemini-flash-lite-latest` and `systemInstruction`.
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
@@ -48,6 +49,16 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     6. 🔁 **Streak Section:** Current/Longest streaks and break pattern analysis.
 - **Smart Insights:** Prioritize narrative "takeaways". Include "Comeback Insights" when users return after a 2+ day break to encourage consistency without guilt.
 - **Visualizations:** Prefer custom SVG components (like the `MoodChart`) to maintain the project's unique aesthetic without external charting dependencies.
+
+## Google Analytics
+- **Implementation:** Firebase Analytics (GA4). Initialized in `src/firebase.js`.
+- **Core Events Tracked:**
+    - `login` / `sign_up`: Captured in `AuthContext.jsx`.
+    - `create_entry`: Tracked in `entryService.js` (includes mood and AI status).
+    - `add_habit` / `complete_habit`: Tracked in `habitService.js`.
+    - `submit_feedback`: Tracked in `feedbackService.js`.
+    - `screen_view`: Automatically tracked in `App.jsx` based on `currentView` state.
+- **Privacy:** Tracking is focused on feature usage and navigation to improve the UX. Personal journal content is NEVER sent to Analytics.
 
 ## Admin Module
 - **Access Control:** Restricted to users with `isAdmin: true` in their Firestore document (`/users/{uid}`).

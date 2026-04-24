@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
+import { moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
 
 const formatGroupDate = (dateString) => {
   const date = new Date(dateString);

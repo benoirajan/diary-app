@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "./firebase";
 import useEntries from "./hooks/useEntries";
 
 import Header from "./components/Header";
@@ -45,6 +47,18 @@ function App() {
 
     /*
       =========================
+      Analytics Tracking
+      =========================
+    */
+    useEffect(() => {
+        logEvent(analytics, "screen_view", {
+            screen_name: currentView,
+            screen_class: "App",
+        });
+    }, [currentView]);
+
+    /*
+      =========================
       Derived State
       =========================
     */
@@ -69,8 +83,8 @@ function App() {
         if (daysWithEntries.length === 0) return 0;
 
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
+
 
         // If the latest entry is before yesterday, the streak is broken
         if (daysWithEntries[0] < yesterday) return 0;

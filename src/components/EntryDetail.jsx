@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { moods, moodColors, getMoodLabel } from '../constants/moods';
+import { moodColors, getMoodLabel } from '../constants/moods';
 import EntryForm from "./EntryForm";
 
 const formatDate = (dateString) => {

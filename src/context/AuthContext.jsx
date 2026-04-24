@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { logEvent } from "firebase/analytics";
+import { auth, db, analytics } from "../firebase";
 
 const AuthContext = createContext();
 
@@ -31,11 +32,13 @@ export function AuthProvider({ children }) {
             };
             await setDoc(userDocRef, newProfile);
             setProfile(newProfile);
+            logEvent(analytics, "sign_up", { method: firebaseUser.providerData[0]?.providerId || "unknown" });
           } else {
             const existingProfile = userDoc.data();
             // Update last login
             await setDoc(userDocRef, { lastLogin: serverTimestamp() }, { merge: true });
             setProfile({ ...existingProfile, lastLogin: new Date() });
+            logEvent(analytics, "login", { method: firebaseUser.providerData[0]?.providerId || "unknown" });
           }
           setUser(firebaseUser);
         } catch (err) {

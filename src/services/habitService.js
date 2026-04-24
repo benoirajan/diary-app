@@ -12,7 +12,8 @@ import {
   arrayRemove,
   getDoc,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { logEvent } from "firebase/analytics";
+import { db, analytics } from "../firebase";
 
 export const listenToHabits = (userId, callback) => {
   const ref = query(
@@ -38,6 +39,10 @@ export const addHabit = async (userId, habit) => {
     completions: [],
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+  });
+
+  logEvent(analytics, "add_habit", {
+    habit_name: habit.name
   });
 };
 
@@ -68,5 +73,12 @@ export const toggleHabitCompletion = async (userId, habitId, date) => {
       completions: isCompleted ? arrayRemove(date) : arrayUnion(date),
       updatedAt: serverTimestamp(),
     });
+
+    if (!isCompleted) {
+      logEvent(analytics, "complete_habit", {
+        habit_id: habitId,
+        date: date
+      });
+    }
   }
 };
