@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { moods, moodColors } from '../constants/moods';
+import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
+import { discoverMood } from '../services/aiService';
 
 const EntryForm = ({
   onSubmit,
@@ -24,6 +25,37 @@ const EntryForm = ({
   );
   const [isPreview, setIsPreview] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+
+  // AI Mood Discovery State
+  const [suggestedMood, setSuggestedMood] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const debounceTimer = useRef(null);
+
+  // Effect for automatic mood discovery
+  useEffect(() => {
+    // Only analyze if content is long enough and not just whitespace
+    if (content.trim().length < 30) {
+      setSuggestedMood(null);
+      return;
+    }
+
+    // Clear previous timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Set a new timer for 1.5 seconds
+    debounceTimer.current = setTimeout(async () => {
+      setIsAnalyzing(true);
+      const discovered = await discoverMood(content);
+      setSuggestedMood(discovered);
+      setIsAnalyzing(false);
+    }, 1500);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [content]);
 
   const startVoiceRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -78,6 +110,7 @@ const EntryForm = ({
       setTitle("");
       setContent("");
       setMood("peaceful");
+      setSuggestedMood(null);
       const now = new Date();
       setDate(now.toISOString().split('T')[0]);
       setTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
@@ -195,10 +228,27 @@ const EntryForm = ({
 
         {/* Mood Selector */}
         <div className="space-y-3">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">How do you feel?</label>
+          <div className="flex justify-between items-end px-1">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">How do you feel?</label>
+            {isAnalyzing && (
+              <span className="text-[10px] font-bold text-[var(--accent-main)] animate-pulse uppercase tracking-widest">
+                ✨ Discovering Mood...
+              </span>
+            )}
+            {!isAnalyzing && suggestedMood && suggestedMood !== mood && (
+              <button 
+                type="button"
+                onClick={() => setMood(suggestedMood)}
+                className="text-[10px] font-bold text-[var(--accent-main)] hover:underline uppercase tracking-widest flex items-center gap-1"
+              >
+                ✨ AI thinks you feel {getMoodLabel(suggestedMood)} {getMoodEmoji(suggestedMood)}
+              </button>
+            )}
+          </div>
           <div className="flex gap-2.5 flex-wrap">
             {moods.map((m) => {
               const isActive = mood === m.value;
+              const isSuggested = suggestedMood === m.value;
               return (
                 <button
                   type="button"
@@ -207,7 +257,9 @@ const EntryForm = ({
                   className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
                     isActive
                       ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
-                      : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
+                      : isSuggested
+                        ? "bg-[var(--bg-soft)] border-[var(--accent-main)] text-[var(--text-primary)] animate-glow"
+                        : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
                   }`}
                 >
                   <span className="text-base">{m.emoji}</span> {m.label}
