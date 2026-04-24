@@ -21,6 +21,8 @@ export const discoverMood = async (content) => {
     
     const config = {
       temperature: 0.1,
+      topP: 0.1,
+      maxOutputTokens: 10,
       systemInstruction: `
         Analyze the diary entry below and categorize it into EXACTLY ONE of these five moods:
         - radiant (extreme joy, success, high energy)
