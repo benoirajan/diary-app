@@ -8,7 +8,8 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Project Type:** React (Vite) Single Page Application (Journaling + Habit Tracking + Emotional Analytics)
 - **Backend:** Firebase (Firestore, Authentication, Hosting)
 - **AI Integration:** Google Gemini AI (via client-side or functions)
-    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx` using `gemini-1.5-flash`.
+    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx` using `gemini-flash-lite-latest` and `systemInstruction`.
+    - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
     - **Debounce Logic:** Analysis is triggered after a 1.5s delay and 30+ character input to optimize API usage.
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
 
