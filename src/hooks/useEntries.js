@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useSecurity } from "../context/SecurityContext";
 import {
   listenToEntries,
   addEntry as addEntryService,
@@ -9,6 +10,7 @@ import {
 
 export default function useEntries() {
   const { user } = useAuth();
+  const { encryptEntry, decryptEntry, vaultPassword } = useSecurity();
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,22 +18,28 @@ export default function useEntries() {
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = listenToEntries(user.uid, (data) => {
-      setEntries(data);
+    const unsubscribe = listenToEntries(user.uid, async (data) => {
+      // Decrypt entries if necessary
+      const processedEntries = await Promise.all(
+        data.map(entry => decryptEntry(entry))
+      );
+      setEntries(processedEntries);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, decryptEntry, vaultPassword]);
 
   const addEntry = async (entry) => {
     if (!user) return;
-    await addEntryService(user.uid, entry);
+    const processedEntry = await encryptEntry(entry);
+    await addEntryService(user.uid, processedEntry);
   };
 
   const updateEntry = async (id, updatedData) => {
     if (!user) return;
-    await updateEntryService(user.uid, id, updatedData);
+    const processedData = await encryptEntry(updatedData);
+    await updateEntryService(user.uid, id, processedData);
   };
 
   const deleteEntry = async (id) => {

@@ -339,10 +339,14 @@ export default function AdminView() {
                                     {userActivity.entries.map((entry, i) => (
                                         <div key={i} className="p-4 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-2xl hover:border-cyan-400/20 transition-all">
                                             <div className="flex justify-between items-start mb-2">
-                                                <h4 className="font-bold text-white">{entry.title}</h4>
+                                                <h4 className="font-bold text-white">
+                                                    {entry.isEncrypted ? "🔒 [Encrypted Title]" : entry.title}
+                                                </h4>
                                                 <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{new Date(entry.createdAt?.seconds * 1000).toLocaleDateString()}</span>
                                             </div>
-                                            <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{entry.content}</p>
+                                            <p className="text-sm text-[var(--text-secondary)] line-clamp-2">
+                                                {entry.isEncrypted ? "Content is protected by client-side encryption and is unavailable to administrators." : entry.content}
+                                            </p>
                                         </div>
                                     ))}
 

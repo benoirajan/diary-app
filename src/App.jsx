@@ -12,7 +12,9 @@ import EntryDetail from "./components/EntryDetail";
 import AnalyticsView from "./views/AnalyticsView";
 import HabitsView from "./views/HabitsView";
 import AdminView from "./views/AdminView";
+import SettingsView from "./views/SettingsView";
 import { useAuth } from "./context/AuthContext";
+import { useSecurity } from "./context/SecurityContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
 import { submitFeedback } from "./services/feedbackService";
@@ -21,6 +23,8 @@ import { submitFeedback } from "./services/feedbackService";
 function App() {
 
     const { user, isAdmin } = useAuth();
+    const { vaultPassword, unlock, lock, isLocked } = useSecurity();
+    const [vaultInput, setVaultInput] = useState("");
     // console.log(user)
     /*
       =========================
@@ -127,6 +131,7 @@ function App() {
             { label: "Entries", value: "list", icon: "📑" },
             { label: "Habits", value: "habits", icon: "🎯" },
             { label: "Analytics", value: "analytics", icon: "📊" },
+            { label: "Settings", value: "settings", icon: "⚙️" },
         ];
         if (isAdmin) {
             baseTabs.push({ label: "Admin", value: "admin", icon: "🛡️" });
@@ -208,6 +213,9 @@ function App() {
 
             case "admin":
                 return <AdminView />;
+
+            case "settings":
+                return <SettingsView />;
 
             case "list":
             default:

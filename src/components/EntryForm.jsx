@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
 import { discoverMood } from '../services/aiService';
+import { useSecurity } from '../context/SecurityContext';
 
 const EntryForm = ({
   onSubmit,
@@ -10,9 +11,19 @@ const EntryForm = ({
   onCancel = null,
   isSubmitting = false,
 }) => {
+  const { encryptAll } = useSecurity();
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [mood, setMood] = useState(initialData?.mood || "peaceful");
+  const [isEncrypted, setIsEncrypted] = useState(initialData?.isEncrypted || encryptAll);
+  
+  // Sync with global setting if it changes or when creating new
+  useEffect(() => {
+    if (!initialData && encryptAll) {
+        setIsEncrypted(true);
+    }
+  }, [encryptAll, initialData]);
+
   const [date, setDate] = useState(
     initialData?.date 
       ? new Date(initialData.date).toISOString().split('T')[0] 
@@ -102,6 +113,7 @@ const EntryForm = ({
       title,
       content,
       mood,
+      isEncrypted,
       date: combinedDateTime.toISOString(),
     });
 
@@ -224,6 +236,33 @@ const EntryForm = ({
               className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
             />
           </div>
+        </div>
+
+        {/* Encryption Toggle */}
+        <div className="flex items-center justify-between px-2 py-3 bg-[var(--bg-soft)]/50 rounded-2xl border border-[var(--bg-soft)]">
+            <div className="flex items-center gap-3">
+                <span className="text-xl">{isEncrypted ? "🔒" : "🔓"}</span>
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">Encrypt this entry</span>
+                    <span className="text-[10px] text-[var(--text-secondary)]">
+                        {encryptAll ? "Forced by global settings" : "Protect with your private vault key"}
+                    </span>
+                </div>
+            </div>
+            <button
+                type="button"
+                disabled={encryptAll}
+                onClick={() => setIsEncrypted(!isEncrypted)}
+                className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors focus:outline-none ${
+                    isEncrypted ? 'bg-[var(--ui-accent)]' : 'bg-gray-600'
+                } ${encryptAll ? 'opacity-50' : ''}`}
+            >
+                <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isEncrypted ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                />
+            </button>
         </div>
 
         {/* Mood Selector */}

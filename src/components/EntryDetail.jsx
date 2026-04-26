@@ -95,7 +95,7 @@ const EntryDetail = ({
 
         {/* Title */}
         <h2 className="text-4xl font-black text-[var(--text-primary)] leading-tight">
-          {entry.title}
+          {entry.isLocked ? "🔒 Encrypted Entry" : entry.title}
         </h2>
 
         {/* Content */}
@@ -104,13 +104,23 @@ const EntryDetail = ({
           prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
           prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]
           leading-relaxed">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {entry.content}
-            </ReactMarkdown>
+            {entry.isLocked ? (
+                <div className="p-8 bg-[var(--bg-soft)] rounded-2xl border border-dashed border-[var(--ui-border)] text-center">
+                    <p className="text-[var(--text-secondary)] font-medium">
+                        This memory is protected by client-side encryption.
+                        <br />
+                        Please unlock your vault to view the content.
+                    </p>
+                </div>
+            ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {entry.content}
+                </ReactMarkdown>
+            )}
         </article>
 
         {/* AI Analysis Section */}
-        {onAnalyze && (
+        {onAnalyze && !entry.isLocked && (
             <div className="mt-12 pt-10 border-t border-[var(--bg-soft)]">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div>

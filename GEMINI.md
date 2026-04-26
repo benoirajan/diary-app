@@ -71,6 +71,20 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Service Integration:** Use `adminService.js` for administrative queries and data migrations.
 - **Security:** Administrative access is enforced both via UI (`isAdmin` flag in `AuthContext`) and Backend (`firestore.rules`).
 
+## Security & Privacy
+- **Client-Side Encryption (Zero-Knowledge):** SoulScript uses the Web Crypto API (AES-GCM 256-bit) to encrypt entry titles and content before they are sent to Firestore.
+- **Managed Vault Key:** 
+    - A unique, high-entropy 32-character key is automatically generated for every user upon sign-up.
+    - The key is stored in the user's private profile document.
+    - Encryption/Decryption happens entirely on the client side; the server only ever sees the encrypted ciphertext.
+- **Encryption Modes:**
+    - **Global:** "Always Encrypt Entries" can be enabled in the Settings view to protect all future entries automatically.
+    - **Per-Entry:** Users can manually toggle encryption for specific entries within the `EntryForm.jsx`.
+- **Admin Transparency:** 
+    - Administrators can view user analytics, mood trends, and activity stats.
+    - Encrypted content and titles are masked in the Admin Dashboard (`🔒 [Encrypted]`) to preserve user privacy.
+- **Real-time Synchronization:** User settings and profile changes are synced in real-time using Firestore `onSnapshot` listeners in `AuthContext.jsx`.
+
 ## Common Commands
 - **Start Development Server:** `npm run dev`
 - **Build for Production:** `npm run build`

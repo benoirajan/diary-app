@@ -81,21 +81,23 @@ const EntryList = ({
               >
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <h4 className="text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--ui-accent)] transition-colors">
-                    {getMoodEmoji(entry.mood)} {entry.title}
+                    {entry.isLocked ? "🔒 Encrypted Entry" : `${getMoodEmoji(entry.mood)} ${entry.title}`}
                   </h4>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditEntry(entry);
-                      }}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--ui-accent)] transition-all"
-                      title="Edit Entry"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
+                    {!entry.isLocked && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditEntry(entry);
+                          }}
+                          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--ui-accent)] transition-all"
+                          title="Edit Entry"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                    )}
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-sm ${moodColors[entry.mood] || moodColors.neutral}`}>
                       {getMoodLabel(entry.mood)}
                     </span>
@@ -103,7 +105,9 @@ const EntryList = ({
                 </div>
 
                 <p className="text-[var(--text-secondary)] leading-relaxed mb-3">
-                  {truncateText(entry.content, 150)}
+                  {entry.isLocked 
+                    ? "This entry is encrypted. Please unlock your vault to view the content." 
+                    : truncateText(entry.content, 150)}
                 </p>
 
                 <small className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider drop-shadow-[0_0_2px_var(--glow-color)]">
