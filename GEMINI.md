@@ -10,6 +10,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Google Gemini AI (via client-side or functions)
     - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx` using `gemini-flash-lite-latest` and `systemInstruction`.
+    - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/{date}`).
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
     - **Debounce Logic:** Analysis is triggered after a 1.5s delay and 30+ character input to optimize API usage.
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
@@ -40,13 +41,14 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Writing Consistency (30%):** Self-reflection frequency.
     - **Mood Trend (30%):** Emotional trajectory.
 - **Streak Calculation:** Streaks are calculated using the user-selected `date` field (ISO string) and normalized to midnight. Calculation must be robust against Daylight Saving Time shifts.
-- **Dashboard Layout:** Always structure the Analytics view following this 6-point hierarchy:
-    1. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
-    2. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.
-    3. 🧠 **Habit vs Mood Insights:** Correlations between specific habits and mood improvements.
-    4. 📊 **Habit Completion Rates:** Progress bars for individual habit performance.
-    5. ✍️ **Writing Stats:** Total entries, consistency %, and avg per week.
-    6. 🔁 **Streak Section:** Current/Longest streaks and break pattern analysis.
+- **Dashboard Layout:** Always structure the Analytics view following this 7-point hierarchy:
+    1. ✨ **AI Soul Insight:** On-demand daily deep analysis card.
+    2. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
+    3. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.
+    4. 🧠 **Habit vs Mood Insights:** Correlations between specific habits and mood improvements.
+    5. 📊 **Habit Completion Rates:** Progress bars for individual habit performance.
+    6. ✍️ **Writing Stats:** Total entries, consistency %, and avg per week.
+    7. 🔁 **Streak Section:** Current/Longest streaks and break pattern analysis.
 - **Smart Insights:** Prioritize narrative "takeaways". Include "Comeback Insights" when users return after a 2+ day break to encourage consistency without guilt.
 - **Visualizations:** Prefer custom SVG components (like the `MoodChart`) to maintain the project's unique aesthetic without external charting dependencies.
 
@@ -99,4 +101,4 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Data Integrity:** Always ensure new Firestore queries are supported by appropriate indexes in `firestore.indexes.json` and rules in `firestore.rules`.
 - **UI/UX:** Maintain the established glow-based futuristic aesthetic. Use `animate-in` utilities for all major view transitions.
 - **Habit Tracking:** Ensure habit completions are stored with ISO date strings (YYYY-MM-DD).
-- **Error Handling:** Prefer explicit, user-friendly error handling for Firebase and AI operations.
+- **Error Handling:** Prefer explicit, user-friendly error handling for Firebase and AI operations. Use the global `ToastContext` (`useToast`) for system-wide notifications and error snackbars.
