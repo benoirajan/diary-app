@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
 import { discoverMood } from '../services/aiService';
 import { useSecurity } from '../context/SecurityContext';
+import { useToast } from '../context/ToastContext';
 
 const EntryForm = ({
   onSubmit,
@@ -12,6 +13,7 @@ const EntryForm = ({
   isSubmitting = false,
 }) => {
   const { encryptAll } = useSecurity();
+  const { showToast } = useToast();
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [mood, setMood] = useState(initialData?.mood || "peaceful");
@@ -58,9 +60,18 @@ const EntryForm = ({
     // Set a new timer for 1.5 seconds
     debounceTimer.current = setTimeout(async () => {
       setIsAnalyzing(true);
-      const discovered = await discoverMood(content);
-      setSuggestedMood(discovered);
-      setIsAnalyzing(false);
+      try {
+        const discovered = await discoverMood(content);
+        if (discovered) {
+          setSuggestedMood(discovered);
+        } else {
+          showToast("AI couldn't analyze your mood. Try writing a bit more!", "error");
+        }
+      } catch (err) {
+        showToast("AI Mood analysis failed. Please check your connection.", "error");
+      } finally {
+        setIsAnalyzing(false);
+      }
     }, 1500);
 
     return () => {

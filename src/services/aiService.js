@@ -1,4 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
+import { db } from "../firebase";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -7,6 +9,7 @@ const client = API_KEY ? new GoogleGenAI({
   apiKey: API_KEY,
 }) : null;
 
+const model = 'gemini-2.5-flash-lite';
 /**
  * Analyzes the sentiment of diary content and maps it to SoulScript moods.
  * Uses the latest Gemini Flash Lite model with system instructions.
@@ -17,7 +20,7 @@ export const discoverMood = async (content) => {
   if (!client || !content || content.trim().length < 20) return null;
 
   try {
-    const model = 'gemini-flash-lite-latest';
+    
     
     const config = {
       temperature: 0.1,
@@ -53,4 +56,88 @@ export const discoverMood = async (content) => {
     console.error("Mood discovery failed:", error);
     return null;
   }
+};
+
+/**
+ * Generates a personalized weekly summary/insight based on recent journal entries.
+ * @param {Array} entries - Array of recent diary entries.
+ * @returns {Promise<string|null>} - The generated insight or null.
+ */
+export const generateWeeklyInsight = async (entries) => {
+  if (!client || !entries || entries.length === 0) return null;
+
+  try {
+    
+    const config = {
+      temperature: 0.7,
+      systemInstruction: `
+        You are SoulScript's empathetic journaling assistant. Your goal is to provide deep, personalized insights based on a user's recent entries.
+        
+        Style Guide:
+        - Tone: Empathetic, warm, minimalist, and encouraging.
+        - Persona: A wise, futuristic companion.
+        - Structure: 2-3 short, impactful paragraphs.
+        
+        Instructions:
+        1. Analyze the provided entries for emotional patterns, recurring themes, or correlations between mood and activities.
+        2. Provide one specific "Soul Observation" about their week.
+        3. Offer one gentle "Growth Spark" or actionable suggestion for the coming days.
+        4. Do NOT explicitly quote sensitive journal content, but refer to the 'feelings' and 'patterns' generally.
+        5. Use simple, clear language. No corporate jargon.
+      `,
+    };
+
+    const entriesSummary = entries
+      .map((e) => `Date: ${new Date(e.date).toDateString()}, Mood: ${e.mood}, Content: ${e.title}\n${e.content}`)
+      .join("\n---\n");
+
+    const response = await client.models.generateContent({
+      model,
+      config,
+      contents: [`Here are my recent journal entries from the past week:\n\n${entriesSummary}`],
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error("AI Insight generation failed:", error);
+    return null;
+  }
+};
+
+/**
+ * Saves a generated insight to Firestore.
+ * @param {string} userId - The user's ID.
+ * @param {string} insight - The generated insight text.
+ */
+export const saveDailyInsight = async (userId, insight) => {
+  if (!userId || !insight) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const ref = doc(db, "users", userId, "aiInsights", today);
+
+  await setDoc(ref, {
+    content: insight,
+    date: today,
+    createdAt: serverTimestamp(),
+  });
+};
+
+/**
+ * Fetches the AI insight for a specific date or the latest one.
+ * @param {string} userId - The user's ID.
+ * @param {string} date - Optional date string (YYYY-MM-DD). Defaults to today.
+ * @returns {Promise<Object|null>} - The insight document or null.
+ */
+export const getDailyInsight = async (userId, date = null) => {
+  if (!userId) return null;
+
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  const ref = doc(db, "users", userId, "aiInsights", targetDate);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    return snap.data();
+  }
+  
+  return null;
 };

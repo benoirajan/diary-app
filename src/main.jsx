@@ -4,12 +4,15 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { SecurityProvider } from './context/SecurityContext'
+import { ToastProvider } from './context/ToastContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <SecurityProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </SecurityProvider>
     </AuthProvider>
   </StrictMode>,
