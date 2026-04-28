@@ -6,23 +6,31 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 ## Project Context
 - **Project Name:** SoulScript (formerly AI Diary)
 - **Project Type:** React (Vite) Single Page Application (Journaling + Habit Tracking + Emotional Analytics)
-- **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics)
+- **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics, Remote Config)
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Google Gemini AI (via client-side or functions)
-    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx` using `gemini-flash-lite-latest` and `systemInstruction`.
+    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx`.
     - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/{date}`).
+    - **Model Management:** Uses Firebase Remote Config (`aiModel`) to dynamically select the Gemini model. Defaults to `gemini-2.5-flash-lite`.
+    - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
     - **Debounce Logic:** Analysis is triggered after a 1.5s delay and 30+ character input to optimize API usage.
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
+- **Theme System:** 
+    - Supports **Light**, **Dark**, and **System** (Device Default) modes.
+    - Persists user preference in `localStorage` (`soulscript_theme`).
+    - Synchronizes with system appearance changes when in "System" mode.
+    - Remote Config (`is_light`) acts as a global override if no local preference exists.
 
 ## Development Guidelines
 - **Component Style:** Use functional components with hooks.
 - **File Naming:** React components should use PascalCase (e.g., `MyComponent.jsx`). Hooks should use camelCase and start with `use` (e.g., `useEntries.js`, `useHabits.js`).
 - **Imports:** Group imports logically (React/Libraries first, then local components, then assets/styles).
 - **State Management:** When dealing with lists and details, prefer storing a `selectedId` and using `useMemo` to find the object in the main list.
+- **Remote Config:** Use `RemoteConfigContext` (`useRemoteConfig`) to access global configuration values.
 - **Responsive Layout:**
-    - **Mobile:** Uses a bottom-navigation tab system and full-width header with a "Feedback" icon (💬).
-    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation and an optimized wide-content area. Feedback trigger is located in the sidebar's footer.
+    - **Mobile:** Uses a bottom-navigation tab system and full-width header. Theme switcher and feedback are accessible via the header.
+    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation. Theme switcher and feedback triggers are located in the sidebar's footer.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
 - **Feedback Loop:** Use the `FeedbackForm.jsx` modal for collecting user suggestions, bug reports, and praise. Submissions are stored in the global `feedback` collection.
 - **Sticky Actions:** The "New Entry" action is permanently accessible via a Floating Action Button (FAB) at the bottom-right.
@@ -42,7 +50,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Mood Trend (30%):** Emotional trajectory.
 - **Streak Calculation:** Streaks are calculated using the user-selected `date` field (ISO string) and normalized to midnight. Calculation must be robust against Daylight Saving Time shifts.
 - **Dashboard Layout:** Always structure the Analytics view following this 7-point hierarchy:
-    1. ✨ **AI Soul Insight:** On-demand daily deep analysis card.
+    1. ✨ **AI Soul Insight:** On-demand daily deep analysis card (Visible only if `isAiEnabled` is true).
     2. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
     3. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.
     4. 🧠 **Habit vs Mood Insights:** Correlations between specific habits and mood improvements.
@@ -82,6 +90,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Encryption Modes:**
     - **Global:** "Always Encrypt Entries" can be enabled in the Settings view to protect all future entries automatically.
     - **Per-Entry:** Users can manually toggle encryption for specific entries within the `EntryForm.jsx`.
+    - **Default Setting:** New users inherit the global default from Remote Config (`is_encrypted`).
 - **Admin Transparency:** 
     - Administrators can view user analytics, mood trends, and activity stats.
     - Encrypted content and titles are masked in the Admin Dashboard (`🔒 [Encrypted]`) to preserve user privacy.
