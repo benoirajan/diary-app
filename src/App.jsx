@@ -45,15 +45,22 @@ function App() {
     const [currentView, setCurrentView] = useState("list");
     const [selectedEntryId, setSelectedEntryId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [darkMode, setDarkMode] = useState(true);
+    
+    // Initialize darkMode based on system preference
+    const [darkMode, setDarkMode] = useState(() => 
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+    
     const [showAuth, setShowAuth] = useState(false);
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
     const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false);
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-    // Sync theme with Remote Config is_light
+    // Sync theme with Remote Config is_light (acts as a remote override)
     useEffect(() => {
         if (!configLoading) {
+            // If the user has explicitly set a preference in Remote Config, it can override
+            // For now, we'll keep the logic where is_light: true forces light mode
             setDarkMode(!config.is_light);
         }
     }, [config.is_light, configLoading]);
