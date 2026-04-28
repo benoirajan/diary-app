@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
-import { db } from "../firebase";
+import { db, remoteConfig } from "../firebase";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { fetchAndActivate, getString } from "firebase/remote-config";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -9,7 +10,22 @@ const client = API_KEY ? new GoogleGenAI({
   apiKey: API_KEY,
 }) : null;
 
-const model = 'gemini-2.5-flash-lite';
+// Remote Config setup
+remoteConfig.settings.minimumFetchIntervalMillis = 3600000; // 1 hour
+remoteConfig.defaultConfig = {
+  aiModel: 'gemini-2.5-flash-lite'
+};
+
+const getAIModel = async () => {
+  try {
+    await fetchAndActivate(remoteConfig);
+    return getString(remoteConfig, "aiModel");
+  } catch (error) {
+    console.error("Remote Config fetch failed, using default:", error);
+    return 'gemini-2.5-flash-lite';
+  }
+};
+
 /**
  * Analyzes the sentiment of diary content and maps it to SoulScript moods.
  * Uses the latest Gemini Flash Lite model with system instructions.
@@ -20,8 +36,7 @@ export const discoverMood = async (content) => {
   if (!client || !content || content.trim().length < 20) return null;
 
   try {
-    
-    
+    const modelName = await getAIModel();
     const config = {
       temperature: 0.1,
       topP: 0.1,
@@ -42,7 +57,7 @@ export const discoverMood = async (content) => {
     };
 
     const response = await client.models.generateContent({
-      model,
+      model: modelName,
       config,
       contents: [content],
     });
@@ -67,7 +82,7 @@ export const generateWeeklyInsight = async (entries) => {
   if (!client || !entries || entries.length === 0) return null;
 
   try {
-    
+    const modelName = await getAIModel();
     const config = {
       temperature: 0.7,
       systemInstruction: `
@@ -92,7 +107,7 @@ export const generateWeeklyInsight = async (entries) => {
       .join("\n---\n");
 
     const response = await client.models.generateContent({
-      model,
+      model: modelName,
       config,
       contents: [`Here are my recent journal entries from the past week:\n\n${entriesSummary}`],
     });
