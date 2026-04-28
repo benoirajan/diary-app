@@ -46,22 +46,42 @@ function App() {
     const [selectedEntryId, setSelectedEntryId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     
-    // Initialize darkMode based on system preference
-    const [darkMode, setDarkMode] = useState(() => 
-        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    );
+    // Theme state: 'light' | 'dark' | 'system'
+    const [themeMode, setThemeMode] = useState(() => {
+        return localStorage.getItem("soulscript_theme") || "system";
+    });
+
+    // Resolved dark mode boolean
+    const [isDark, setIsDark] = useState(true);
+
+    // Sync resolved dark mode with themeMode and system preference
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        
+        const handleChange = () => {
+            if (themeMode === "system") {
+                setIsDark(mediaQuery.matches);
+            } else {
+                setIsDark(themeMode === "dark");
+            }
+        };
+
+        handleChange();
+        mediaQuery.addEventListener("change", handleChange);
+        localStorage.setItem("soulscript_theme", themeMode);
+
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, [themeMode]);
     
     const [showAuth, setShowAuth] = useState(false);
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
     const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false);
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-    // Sync theme with Remote Config is_light (acts as a remote override)
+    // Remote Config override (only applies if no local preference is set)
     useEffect(() => {
-        if (!configLoading) {
-            // If the user has explicitly set a preference in Remote Config, it can override
-            // For now, we'll keep the logic where is_light: true forces light mode
-            setDarkMode(!config.is_light);
+        if (!configLoading && !localStorage.getItem("soulscript_theme")) {
+            setThemeMode(config.is_light ? "light" : "dark");
         }
     }, [config.is_light, configLoading]);
 
@@ -259,7 +279,7 @@ function App() {
             : <LandingPage onGetStarted={() => setShowAuth(true)} />;
     }
     return (
-        <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>
+        <div className={`min-h-screen transition-colors duration-500 ${isDark ? "dark" : ""}`}>
             <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--ui-accent)]/30 lg:flex">
                 
                 {/* Desktop Sidebar */}
@@ -302,15 +322,16 @@ function App() {
                             <span className="text-lg">💬</span>
                             <span className="text-sm">Feedback</span>
                         </button>
-                        <div className="flex items-center justify-between px-2">
-                            <span className="text-xs font-bold text-[var(--text-secondary)] uppercase">Dark Mode</span>
-                            <button
-                                onClick={() => setDarkMode(!darkMode)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-soft)] hover:border-[var(--ui-accent)] transition-all text-lg"
-                            >
-                                {darkMode ? "🌙" : "☀️"}
-                            </button>
-                        </div>
+                        
+                        {/* Theme Switcher Header Component used for the selector */}
+                        <Header 
+                            themeMode={themeMode}
+                            onThemeChange={setThemeMode}
+                            hideTitle={true}
+                            hideFeedback={true}
+                            hideSignOut={true}
+                            isSidebar={true}
+                        />
                     </div>
                 </aside>
 
@@ -319,8 +340,8 @@ function App() {
                         {/* Mobile Header */}
                         <div className="lg:hidden">
                             <Header
-                                isDarkMode={darkMode}
-                                onToggleDarkMode={() => setDarkMode(!darkMode)}
+                                themeMode={themeMode}
+                                onThemeChange={setThemeMode}
                                 onFeedback={() => setIsFeedbackFormOpen(true)}
                                 streak={streak}
                             />
@@ -329,9 +350,10 @@ function App() {
                         {/* Desktop Header Content */}
                         <div className="hidden lg:flex justify-end items-center mb-10 gap-4">
                             <Header
-                                isDarkMode={darkMode}
+                                themeMode={themeMode}
+                                onThemeChange={setThemeMode}
                                 hideTitle={true}
-                                hideToggle={true}
+                                hideToggle={false}
                                 streak={streak}
                             />
                         </div>
