@@ -15,6 +15,7 @@ import AdminView from "./views/AdminView";
 import SettingsView from "./views/SettingsView";
 import { useAuth } from "./context/AuthContext";
 import { useSecurity } from "./context/SecurityContext";
+import { useRemoteConfig } from "./context/RemoteConfigContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
 import { submitFeedback } from "./services/feedbackService";
@@ -23,6 +24,7 @@ import { submitFeedback } from "./services/feedbackService";
 function App() {
 
     const { user, isAdmin } = useAuth();
+    const { config, loading: configLoading } = useRemoteConfig();
     const { vaultPassword, unlock, lock, isLocked } = useSecurity();
     const [vaultInput, setVaultInput] = useState("");
     // console.log(user)
@@ -48,6 +50,13 @@ function App() {
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
     const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false);
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+    // Sync theme with Remote Config is_light
+    useEffect(() => {
+        if (!configLoading) {
+            setDarkMode(!config.is_light);
+        }
+    }, [config.is_light, configLoading]);
 
     /*
       =========================

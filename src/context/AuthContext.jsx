@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
 import { auth, db, analytics } from "../firebase";
+import { useRemoteConfig } from "./RemoteConfigContext";
 
 const AuthContext = createContext();
 
@@ -10,6 +11,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { config } = useRemoteConfig();
 
   useEffect(() => {
     let unsubscribeProfile = () => {};
@@ -34,7 +36,7 @@ export function AuthProvider({ children }) {
               isAdmin: false,
               vaultKey: randomKey,
               settings: {
-                encryptAll: false,
+                encryptAll: config.is_encrypted,
               },
               createdAt: serverTimestamp(),
               lastLogin: serverTimestamp(),

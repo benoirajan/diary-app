@@ -5,15 +5,18 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { SecurityProvider } from './context/SecurityContext'
 import { ToastProvider } from './context/ToastContext'
+import { RemoteConfigProvider } from './context/RemoteConfigContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <SecurityProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </SecurityProvider>
-    </AuthProvider>
+    <RemoteConfigProvider>
+      <AuthProvider>
+        <SecurityProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </SecurityProvider>
+      </AuthProvider>
+    </RemoteConfigProvider>
   </StrictMode>,
 )

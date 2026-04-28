@@ -5,6 +5,7 @@ import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/mood
 import { discoverMood } from '../services/aiService';
 import { useSecurity } from '../context/SecurityContext';
 import { useToast } from '../context/ToastContext';
+import { useRemoteConfig } from '../context/RemoteConfigContext';
 
 const EntryForm = ({
   onSubmit,
@@ -14,6 +15,7 @@ const EntryForm = ({
 }) => {
   const { encryptAll } = useSecurity();
   const { showToast } = useToast();
+  const { config: remoteConfig } = useRemoteConfig();
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.content || "");
   const [mood, setMood] = useState(initialData?.mood || "peaceful");
@@ -46,8 +48,8 @@ const EntryForm = ({
 
   // Effect for automatic mood discovery
   useEffect(() => {
-    // Only analyze if content is long enough and not just whitespace
-    if (content.trim().length < 30) {
+    // Only analyze if AI is enabled, content is long enough and not just whitespace
+    if (!remoteConfig.isAiEnabled || content.trim().length < 30) {
       setSuggestedMood(null);
       return;
     }
@@ -77,7 +79,7 @@ const EntryForm = ({
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [content]);
+  }, [content, remoteConfig.isAiEnabled]);
 
   const startVoiceRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
