@@ -272,8 +272,18 @@ function App() {
 
     if (!user) {
         return showAuth 
-            ? <AuthPage onBack={() => setShowAuth(false)} /> 
-            : <LandingPage onGetStarted={() => setShowAuth(true)} />;
+            ? <AuthPage 
+                onBack={() => setShowAuth(false)} 
+                isDark={isDark}
+                themeMode={themeMode}
+                onThemeChange={setThemeMode}
+              /> 
+            : <LandingPage 
+                onGetStarted={() => setShowAuth(true)} 
+                isDark={isDark}
+                themeMode={themeMode}
+                onThemeChange={setThemeMode}
+              />;
     }
     return (
         <div className={`min-h-screen transition-colors duration-500 ${isDark ? "dark" : ""}`}>

@@ -32,7 +32,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Remote Config:** Use `RemoteConfigContext` (`useRemoteConfig`) to access global configuration values.
 - **Responsive Layout:**
     - **Mobile:** Uses a toggleable sidebar (hamburger menu) for navigation. The header focuses on the streak and branding.
-    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation.
+    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation. Maintains a spacious layout with responsive horizontal padding (`md:px-10 lg:px-16`) and internal card spacing to prevent content from feeling cramped.
     - **Sidebar Footer:** Actions (Feedback, Theme Switcher, Sign Out) are organized in a vertical stack at the bottom of the sidebar.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
 - **Mindful Editing:** Editing past entries is intentionally discouraged with a philosophical confirmation prompt ("Alter the Past?") to preserve the integrity of the user's emotional history.
