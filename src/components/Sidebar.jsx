@@ -52,23 +52,13 @@ const Sidebar = ({
             </nav>
 
             <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-4">
-                <button
-                    onClick={() => {
-                        onFeedback();
-                        if (onClose) onClose();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all"
-                >
-                    <span className="text-lg">💬</span>
-                    <span className="text-sm">Feedback</span>
-                </button>
-                
                 <Header 
                     themeMode={themeMode}
                     onThemeChange={onThemeChange}
+                    onFeedback={onFeedback}
                     hideTitle={true}
-                    hideFeedback={true}
-                    hideSignOut={true}
+                    hideFeedback={false}
+                    hideSignOut={false}
                     isSidebar={true}
                 />
             </div>

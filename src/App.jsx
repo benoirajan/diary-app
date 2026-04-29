@@ -328,10 +328,11 @@ function App() {
                             <Header
                                 themeMode={themeMode}
                                 onThemeChange={setThemeMode}
-                                onFeedback={() => setIsFeedbackFormOpen(true)}
                                 streak={streak}
                                 showMenuButton={true}
                                 onMenuClick={() => setIsMobileSidebarOpen(true)}
+                                hideFeedback={true}
+                                hideSignOut={true}
                             />
                         </div>
 
