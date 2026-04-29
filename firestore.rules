@@ -39,7 +39,7 @@ service cloud.firestore {
       // Allow any authenticated user to create feedback
       allow create: if request.auth != null;
       // Only allow admins to read feedback
-      allow read: if isAdmin();
+      allow read, write: if isAdmin();
     }
   }
 }
