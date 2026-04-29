@@ -69,7 +69,7 @@ const EntryForm = ({
         } else {
           showToast("AI couldn't analyze your mood. Try writing a bit more!", "error");
         }
-      } catch (err) {
+      } catch {
         showToast("AI Mood analysis failed. Please check your connection.", "error");
       } finally {
         setIsAnalyzing(false);
@@ -79,7 +79,7 @@ const EntryForm = ({
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [content, remoteConfig.isAiEnabled]);
+  }, [content, remoteConfig.isAiEnabled, showToast]);
 
   const startVoiceRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

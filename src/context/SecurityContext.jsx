@@ -87,6 +87,7 @@ export function SecurityProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSecurity() {
   const context = useContext(SecurityContext);
   if (!context) {

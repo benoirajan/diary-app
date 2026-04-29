@@ -64,7 +64,7 @@ const HabitsView = () => {
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 md:px-4 lg:px-8">
       {/* Add Habit Form */}
       <div className="bg-[var(--bg-card)] rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)]">
         <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">New Habit<span className="text-[var(--accent-happy)]">.</span></h2>
@@ -188,7 +188,7 @@ const HabitsView = () => {
                       try {
                         await deleteHabit(habit.id);
                         showToast("Habit deleted successfully");
-                      } catch (err) {
+                      } catch {
                         showToast("Failed to delete habit", "error");
                       }
                     }

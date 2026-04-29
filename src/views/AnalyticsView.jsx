@@ -94,7 +94,7 @@ const AnalyticsView = ({ entries = [] }) => {
   };
 
   return (
-    <div className="rounded-3xl p-8 transition-all space-y-12">
+    <div className="rounded-3xl transition-all space-y-12 md:px-4 lg:px-8">
       <AnalyticsHeader smartMessages={analytics.smartMessages} />
 
       <AiInsightCard 
@@ -113,7 +113,7 @@ const AnalyticsView = ({ entries = [] }) => {
       />
 
       {/* 2. 📈 Mood Trend Graph */}
-      <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
+      <div className="p-6 md:p-10 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
         <h3 className="text-xl font-black text-[var(--text-primary)] mb-8 flex items-center gap-3 uppercase tracking-widest">
             <span className="w-8 h-8 rounded-lg bg-[var(--accent-happy)]/20 flex items-center justify-center text-sm">📈</span>
             Mood Journey

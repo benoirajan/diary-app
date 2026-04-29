@@ -37,7 +37,7 @@ const EntryList = ({
   const hasEntries = entries.length > 0;
 
   return (
-    <div className="p-8  transition-all">
+    <div className="transition-all md:px-4 lg:px-8">
       {/* Search */}
       <div className="mb-8">
         <input
@@ -75,7 +75,7 @@ const EntryList = ({
               <article
                 key={entry.id}
                 onClick={() => onSelectEntry(entry)}
-                className="relative group pl-14 pr-5 py-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--ui-border)] shadow-sm hover:shadow-[var(--shadow-soft)] hover:border-[var(--ui-accent)]/50 hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                className="relative group pl-14 pr-5 py-5 md:pr-8 md:py-7 rounded-2xl bg-[var(--bg-card)] border border-[var(--ui-border)] shadow-sm hover:shadow-[var(--shadow-soft)] hover:border-[var(--ui-accent)]/50 hover:scale-[1.01] transition-all duration-300 cursor-pointer"
                 style={{ '--mood-color': `var(--accent-${entry.mood})` }}
               >
                 <div className="flex justify-between items-start mb-2 gap-3">

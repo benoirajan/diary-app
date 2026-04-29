@@ -89,7 +89,7 @@ const EntryDetail = ({
                             try {
                                 onDelete(entry.id);
                                 showToast("Memory deleted successfully");
-                            } catch (err) {
+                            } catch {
                                 showToast("Failed to delete memory", "error");
                             }
                         }

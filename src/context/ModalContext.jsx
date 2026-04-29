@@ -2,14 +2,6 @@ import { createContext, useContext, useState, useCallback, useRef } from 'react'
 
 const ModalContext = createContext();
 
-export const useModal = () => {
-    const context = useContext(ModalContext);
-    if (!context) {
-        throw new Error('useModal must be used within a ModalProvider');
-    }
-    return context;
-};
-
 export const ModalProvider = ({ children }) => {
     const [modalConfig, setModalConfig] = useState(null);
     const resolverRef = useRef(null);
@@ -95,4 +87,13 @@ export const ModalProvider = ({ children }) => {
             )}
         </ModalContext.Provider>
     );
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useModal = () => {
+    const context = useContext(ModalContext);
+    if (!context) {
+        throw new Error('useModal must be used within a ModalProvider');
+    }
+    return context;
 };

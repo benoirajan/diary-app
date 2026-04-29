@@ -5,9 +5,7 @@ import {
   orderBy, 
   limit,
   startAfter,
-  writeBatch,
   doc,
-  where,
   deleteDoc
 } from "firebase/firestore";
 import { db } from "../firebase";

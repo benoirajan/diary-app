@@ -49,6 +49,7 @@ export function RemoteConfigProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRemoteConfig() {
   const context = useContext(RemoteConfigContext);
   if (context === undefined) {

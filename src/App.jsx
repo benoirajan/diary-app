@@ -14,7 +14,6 @@ import HabitsView from "./views/HabitsView";
 import AdminView from "./views/AdminView";
 import SettingsView from "./views/SettingsView";
 import { useAuth } from "./context/AuthContext";
-import { useSecurity } from "./context/SecurityContext";
 import { useRemoteConfig } from "./context/RemoteConfigContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
@@ -27,8 +26,6 @@ function App() {
     const { user, isAdmin } = useAuth();
     const { showToast } = useToast();
     const { config, loading: configLoading } = useRemoteConfig();
-    const { vaultPassword, unlock, lock, isLocked } = useSecurity();
-    const [vaultInput, setVaultInput] = useState("");
     
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     // console.log(user)
@@ -322,7 +319,7 @@ function App() {
                 )}
 
                 <div className="flex-1 flex flex-col min-h-screen">
-                    <div className=" w-full mx-auto px-6 py-6 flex-1">
+                    <div className=" w-full mx-auto px-6 md:px-10 lg:px-16 py-6 flex-1">
                         {/* Mobile Header */}
                         <div className="lg:hidden">
                             <Header

@@ -85,7 +85,7 @@ export function AuthProvider({ children }) {
       unsubscribeAuth();
       unsubscribeProfile();
     };
-  }, []);
+  }, [config.is_encrypted]);
 
   const isAdmin = profile?.isAdmin || false;
 
