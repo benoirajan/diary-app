@@ -31,8 +31,9 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **State Management:** When dealing with lists and details, prefer storing a `selectedId` and using `useMemo` to find the object in the main list.
 - **Remote Config:** Use `RemoteConfigContext` (`useRemoteConfig`) to access global configuration values.
 - **Responsive Layout:**
-    - **Mobile:** Uses a bottom-navigation tab system and full-width header. Theme switcher and feedback are accessible via the header.
-    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation. Theme switcher and feedback triggers are located in the sidebar's footer.
+    - **Mobile:** Uses a toggleable sidebar (hamburger menu) for navigation. The header focuses on the streak and branding.
+    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation.
+    - **Sidebar Footer:** Actions (Feedback, Theme Switcher, Sign Out) are organized in a vertical stack at the bottom of the sidebar.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
 - **Mindful Editing:** Editing past entries is intentionally discouraged with a philosophical confirmation prompt ("Alter the Past?") to preserve the integrity of the user's emotional history.
 - **Journal Aesthetic:** The `EntryDetail` view follows a "Futuristic Analog" design, featuring a vertical margin line, date-stamp headers, and signature footers to evoke the feel of a physical journal.
