@@ -1,5 +1,7 @@
 import { useState } from "react";
 import useHabits from "../hooks/useHabits";
+import { useModal } from "../context/ModalContext";
+import { useToast } from "../context/ToastContext";
 
 const HabitsView = () => {
   const {
@@ -11,6 +13,9 @@ const HabitsView = () => {
     deleteHabit,
     toggleHabitCompletion,
   } = useHabits();
+
+  const { confirm } = useModal();
+  const { showToast } = useToast();
 
   const [newHabitName, setNewHabitName] = useState("");
   const [editingHabitId, setEditingHabitId] = useState(null);
@@ -130,7 +135,7 @@ const HabitsView = () => {
                       </h3>
                       <button
                         onClick={() => startEditing(habit)}
-                        className="p-1 text-gray-400 hover:text-[var(--accent-happy)] opacity-0 group-hover:opacity-100 transition-all"
+                        className="p-1 text-gray-400 hover:text-[var(--accent-happy)] md:opacity-0 md:group-hover:opacity-100 transition-all"
                         title="Edit Habit"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -171,12 +176,24 @@ const HabitsView = () => {
                 })}
                 
                 <button
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to delete this habit?")) {
-                      deleteHabit(habit.id);
+                  onClick={async () => {
+                    const confirmed = await confirm({
+                      title: "Delete Habit?",
+                      message: `Are you sure you want to remove "${habit.name}"? This action cannot be undone.`,
+                      confirmText: "Delete",
+                      type: "danger"
+                    });
+                    
+                    if (confirmed) {
+                      try {
+                        await deleteHabit(habit.id);
+                        showToast("Habit deleted successfully");
+                      } catch (err) {
+                        showToast("Failed to delete habit", "error");
+                      }
                     }
                   }}
-                  className="ml-4 p-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
+                  className="ml-4 p-2 text-red-400 hover:text-red-600 md:opacity-0 md:group-hover:opacity-100 transition-all"
                   title="Delete Habit"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

@@ -1,14 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import * as adminService from "../services/adminService";
 import { useAuth } from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
+import { useToast } from "../context/ToastContext";
 
 export default function AdminView() {
   const { isAdmin } = useAuth();
+  const { confirm } = useModal();
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
-  const [isMigrating, setIsMigrating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userStats, setUserStats] = useState(null);
@@ -48,23 +51,6 @@ export default function AdminView() {
     }
   };
 
-  const handleMigrateMoods = async () => {
-    if (!window.confirm("This will scan all user entries and update old mood labels (happy, sad, etc.) to new ones (joyful, down, etc.). This is a one-time operation. Proceed?")) return;
-    
-    setIsMigrating(true);
-    try {
-      const count = await adminService.migrateOldMoods();
-      alert(`Migration complete! Successfully updated ${count} entries.`);
-      // Refresh current view if needed
-      if (selectedUserId) handleSelectUser(selectedUserId);
-    } catch (err) {
-      console.error("Migration failed:", err);
-      alert("Migration failed. Check console for details.");
-    } finally {
-      setIsMigrating(false);
-    }
-  };
-
   const handleSelectUser = async (userId) => {
     setSelectedUserId(userId);
     setLoadingStats(true);
@@ -79,6 +65,26 @@ export default function AdminView() {
       console.error("Failed to load user stats", err);
     } finally {
       setLoadingStats(false);
+    }
+  };
+
+  const handleDeleteFeedback = async (feedbackId) => {
+    const confirmed = await confirm({
+      title: "Delete Feedback",
+      message: "Are you sure you want to permanently delete this feedback? This action cannot be undone.",
+      confirmText: "Delete",
+      type: "danger"
+    });
+
+    if (confirmed) {
+      try {
+        await adminService.deleteFeedback(feedbackId);
+        setFeedbacks(prev => prev.filter(f => f.id !== feedbackId));
+        showToast("Feedback deleted successfully", "success");
+      } catch (err) {
+        console.error("Failed to delete feedback:", err);
+        showToast("Failed to delete feedback", "error");
+      }
     }
   };
 
@@ -132,31 +138,24 @@ export default function AdminView() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-4xl font-black text-[var(--text-primary)] tracking-tight">Admin Dashboard</h1>
           <p className="text-[var(--text-secondary)] font-medium mt-1">Manage users and monitor SoulScript activity.</p>
         </div>
         <div className="flex items-center gap-3">
             <div className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
                 <span className="text-lg">👥</span>
-                <span className="font-bold text-white">{users.length}</span>
+                <span className="font-bold text-[var(--text-primary)]">{users.length}</span>
                 <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Users</span>
             </div>
             <div className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
                 <span className="text-lg">💬</span>
-                <span className="font-bold text-white">{feedbacks.length}</span>
+                <span className="font-bold text-[var(--text-primary)]">{feedbacks.length}</span>
                 <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Feedbacks</span>
             </div>
-            <button 
-                onClick={handleMigrateMoods}
-                disabled={isMigrating}
-                className="px-4 py-2 flex items-center justify-center rounded-2xl bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] transition-all border border-transparent hover:border-amber-400/50 text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-amber-400 gap-2 disabled:opacity-50"
-                title="Migrate old mood labels to new ones"
-            >
-                <span>🛠️</span> {isMigrating ? "Migrating..." : "Migrate Moods"}
-            </button>
+            
             <button 
                 onClick={() => { loadUsers(); loadFeedbacks(); }}
-                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] transition-all border border-transparent hover:border-[var(--accent-happy)]"
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] transition-all border border-transparent hover:border-[var(--ui-accent)]"
             >
                 🔄
             </button>
@@ -169,8 +168,8 @@ export default function AdminView() {
               onClick={() => setActiveTab("users")}
               className={`px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${
                   activeTab === "users" 
-                  ? "bg-[var(--accent-happy)] text-black shadow-md scale-105" 
-                  : "text-[var(--text-secondary)] hover:text-white"
+                  ? "bg-[var(--ui-accent)] text-black shadow-md scale-105" 
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
           >
               User Directory
@@ -179,8 +178,8 @@ export default function AdminView() {
               onClick={() => setActiveTab("feedbacks")}
               className={`px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${
                   activeTab === "feedbacks" 
-                  ? "bg-[var(--accent-happy)] text-black shadow-md scale-105" 
-                  : "text-[var(--text-secondary)] hover:text-white"
+                  ? "bg-[var(--ui-accent)] text-black shadow-md scale-105" 
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               }`}
           >
               User Feedback
@@ -196,7 +195,7 @@ export default function AdminView() {
                   <input
                     type="text"
                     placeholder="Search users by name, email or ID..."
-                    className="w-full px-6 py-4 bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-2xl focus:ring-2 focus:ring-[var(--accent-happy)] transition-all outline-none text-[var(--text-primary)] shadow-sm group-hover:border-[var(--accent-happy)]/30"
+                    className="w-full px-6 py-4 bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-2xl focus:ring-2 focus:ring-[var(--ui-accent)] transition-all outline-none text-[var(--text-primary)] shadow-sm group-hover:border-[var(--ui-accent)]/30"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -214,8 +213,8 @@ export default function AdminView() {
                             onClick={() => setFilter(f.value)}
                             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                                 filter === f.value 
-                                ? "bg-[var(--bg-card)] text-white shadow-sm" 
-                                : "text-[var(--text-secondary)] hover:text-white"
+                                ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm" 
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                             }`}
                         >
                             {f.label}
@@ -240,20 +239,20 @@ export default function AdminView() {
                           key={user.id}
                           onClick={() => handleSelectUser(user.id)}
                           className={`w-full text-left p-5 flex items-center gap-4 transition-all hover:bg-[var(--bg-soft)]/50 ${
-                            selectedUserId === user.id ? "bg-[var(--accent-happy)]/10 border-l-4 border-[var(--accent-happy)]" : "border-l-4 border-transparent"
+                            selectedUserId === user.id ? "bg-[var(--ui-accent-soft)] border-l-4 border-[var(--ui-accent)]" : "border-l-4 border-transparent"
                           }`}
                         >
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-400/20 flex items-center justify-center text-xl font-bold text-cyan-300">
+                          <div className="w-12 h-12 rounded-2xl bg-[var(--ui-accent-soft)] border border-[var(--ui-accent)] flex items-center justify-center text-xl font-bold text-[var(--ui-accent)] shadow-[0_0_10px_rgba(34,211,238,0.2)]">
                             {user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase() || "?"}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-bold text-white truncate">{user.displayName || "Anonymous User"}</div>
+                            <div className="font-bold text-[var(--text-primary)] truncate">{user.displayName || "Anonymous User"}</div>
                             <div className="text-sm text-[var(--text-secondary)] truncate">{user.email}</div>
                             <div className="text-[10px] text-[var(--text-secondary)] opacity-50 font-mono mt-1 truncate uppercase">{user.id}</div>
                           </div>
                           <div className="text-right">
                             {user.isAdmin && (
-                                <span className="text-[10px] font-black bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-lg uppercase tracking-wider border border-cyan-400/20 mb-1 inline-block">Admin</span>
+                                <span className="text-[10px] font-black bg-[var(--ui-accent-soft)] text-[var(--ui-accent)] px-2 py-1 rounded-lg uppercase tracking-wider border border-[var(--ui-accent)] mb-1 inline-block">Admin</span>
                             )}
                             <div className="text-[10px] font-bold text-[var(--text-secondary)] uppercase opacity-40">
                                 {user.lastLogin ? new Date(user.lastLogin?.seconds * 1000).toLocaleDateString() : 'Never'}
@@ -272,7 +271,7 @@ export default function AdminView() {
               {!selectedUserId ? (
                 <div className="h-full min-h-[400px] bg-[var(--bg-card)]/50 border-2 border-dashed border-[var(--bg-soft)] rounded-3xl flex flex-col items-center justify-center p-10 text-center">
                   <div className="text-6xl mb-6 opacity-20">👤</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Select a User</h3>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Select a User</h3>
                   <p className="text-[var(--text-secondary)] max-w-xs">Click on a user from the list to view their detailed profile, activity stats, and journaling history.</p>
                 </div>
               ) : loadingStats ? (
@@ -293,16 +292,16 @@ export default function AdminView() {
                                 {users.find(u => u.id === selectedUserId)?.displayName?.charAt(0) || "?"}
                             </div>
                             <div className="flex-1">
-                                <h2 className="text-3xl font-black text-white">{users.find(u => u.id === selectedUserId)?.displayName || "Anonymous User"}</h2>
+                                <h2 className="text-3xl font-black text-[var(--text-primary)]">{users.find(u => u.id === selectedUserId)?.displayName || "Anonymous User"}</h2>
                                 <p className="text-[var(--text-secondary)] font-medium">{users.find(u => u.id === selectedUserId)?.email}</p>
                                 <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4 text-xs font-bold uppercase tracking-widest">
                                     <div className="bg-[var(--bg-soft)] px-3 py-1.5 rounded-xl border border-[var(--bg-soft)] text-[var(--text-secondary)]">
-                                        Member Since: <span className="text-white ml-1">
+                                        Member Since: <span className="text-[var(--text-primary)] ml-1">
                                             {users.find(u => u.id === selectedUserId)?.createdAt ? new Date(users.find(u => u.id === selectedUserId)?.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}
                                         </span>
                                     </div>
                                     <div className="bg-[var(--bg-soft)] px-3 py-1.5 rounded-xl border border-[var(--bg-soft)] text-[var(--text-secondary)]">
-                                        ID: <span className="text-white ml-1 font-mono">{selectedUserId.slice(0, 8)}...</span>
+                                        ID: <span className="text-[var(--text-primary)] ml-1 font-mono">{selectedUserId.slice(0, 8)}...</span>
                                     </div>
                                 </div>
                             </div>
@@ -314,12 +313,12 @@ export default function AdminView() {
                         {[
                             { label: "Total Entries", value: userStats?.totalEntries || 0, icon: "📝" },
                             { label: "Habits Tracked", value: userStats?.totalHabits || 0, icon: "🎯" },
-                            { label: "Avg Mood", value: userStats?.moodAvg || "N/A", icon: "✨" },
+                            { label: "Avg Mood", value: userStats?.moodAvg + " / 5" || "N/A", icon: "✨" },
                             { label: "Last Active", value: userStats?.lastEntry ? new Date(userStats.lastEntry.createdAt?.seconds * 1000).toLocaleDateString() : "Never", icon: "🕒", isSmall: true }
                         ].map((stat, i) => (
                             <div key={i} className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-2xl p-5 shadow-sm text-center md:text-left">
                                 <div className="text-2xl mb-2">{stat.icon}</div>
-                                <div className={`text-2xl font-black text-white ${stat.isSmall ? 'text-sm' : ''}`}>{stat.value}</div>
+                                <div className={`text-2xl font-black text-[var(--text-primary)] ${stat.isSmall ? 'text-sm' : ''}`}>{stat.value}</div>
                                 <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-wider mt-1">{stat.label}</div>
                             </div>
                         ))}
@@ -328,7 +327,7 @@ export default function AdminView() {
                     {/* Activity Summary */}
                     <div className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-3xl overflow-hidden shadow-xl">
                         <div className="p-6 border-b border-[var(--bg-soft)] bg-[var(--bg-soft)]/20 flex items-center justify-between">
-                            <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Recent Entries</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.2em]">Recent Entries</h3>
                             <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{userStats?.totalEntries || 0} Total</span>
                         </div>
                         <div className="max-h-[400px] overflow-y-auto p-4 space-y-3 custom-scrollbar">
@@ -339,7 +338,7 @@ export default function AdminView() {
                                     {userActivity.entries.map((entry, i) => (
                                         <div key={i} className="p-4 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-2xl hover:border-cyan-400/20 transition-all">
                                             <div className="flex justify-between items-start mb-2">
-                                                <h4 className="font-bold text-white">
+                                                <h4 className="font-bold text-[var(--text-primary)]">
                                                     {entry.isEncrypted ? "🔒 [Encrypted Title]" : entry.title}
                                                 </h4>
                                                 <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{new Date(entry.createdAt?.seconds * 1000).toLocaleDateString()}</span>
@@ -354,7 +353,7 @@ export default function AdminView() {
                                         <button
                                             onClick={loadMoreEntries}
                                             disabled={loadingMore}
-                                            className="w-full py-3 mt-2 bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-white text-xs font-black uppercase tracking-widest rounded-xl border border-transparent hover:border-[var(--accent-happy)] transition-all disabled:opacity-50"
+                                            className="w-full py-3 mt-2 bg-[var(--bg-soft)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-black uppercase tracking-widest rounded-xl border border-transparent hover:border-[var(--ui-accent)] transition-all disabled:opacity-50"
                                         >
                                             {loadingMore ? "Fetching Data..." : "Load Older Entries ↓"}
                                         </button>
@@ -366,7 +365,7 @@ export default function AdminView() {
 
                     <div className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-3xl overflow-hidden shadow-xl">
                         <div className="p-6 border-b border-[var(--bg-soft)] bg-[var(--bg-soft)]/20 flex items-center justify-between">
-                            <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Habits</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-[0.2em]">Habits</h3>
                             <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">{userActivity?.habits?.length || 0} Active</span>
                         </div>
                         <div className="p-4 flex flex-wrap gap-2">
@@ -376,7 +375,7 @@ export default function AdminView() {
                                 userActivity?.habits?.map((habit, i) => (
                                     <div key={i} className="px-4 py-2 bg-[var(--bg-soft)]/30 border border-[var(--bg-soft)] rounded-xl flex items-center gap-2">
                                         <span>{habit.icon || "✨"}</span>
-                                        <span className="text-sm font-bold text-white">{habit.name}</span>
+                                        <span className="text-sm font-bold text-[var(--text-primary)]">{habit.name}</span>
                                     </div>
                                 ))
                             )}
@@ -401,13 +400,13 @@ export default function AdminView() {
                     {feedbacks.map((item) => {
                         const user = users.find(u => u.id === item.userId);
                         const typeColors = {
-                            suggestion: "bg-blue-500/20 text-blue-300 border-blue-500/20",
-                            bug: "bg-red-500/20 text-red-300 border-red-500/20",
-                            praise: "bg-emerald-500/20 text-emerald-300 border-emerald-500/20"
+                            suggestion: "bg-[var(--suggestion)]/20 text-[var(--suggestion)] border-[var(--suggestion)]/20",
+                            bug: "bg-[var(--bug)]/20 text-[var(--bug)] border-[var(--bug)]/20",
+                            praise: "bg-[var(--praise)]/20 text-[var(--praise)] border-[var(--praise)]/20"
                         };
 
                         return (
-                            <div key={item.id} className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-3xl p-6 shadow-xl hover:border-[var(--accent-happy)]/30 transition-all flex flex-col h-full">
+                            <div key={item.id} className="bg-[var(--bg-card)] border border-[var(--bg-soft)] rounded-3xl p-6 shadow-xl hover:border-[var(--ui-accent)]/30 transition-all flex flex-col h-full">
                                 <div className="flex justify-between items-start mb-4">
                                     <span className={`text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider border ${typeColors[item.type] || 'bg-gray-500/20 text-gray-300'}`}>
                                         {item.type}
@@ -422,11 +421,11 @@ export default function AdminView() {
                                 </p>
 
                                 <div className="pt-4 border-t border-[var(--bg-soft)] flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-[var(--bg-soft)] flex items-center justify-center text-xs font-bold text-white">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--bg-soft)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)]">
                                         {user?.displayName?.charAt(0) || user?.email?.charAt(0) || "?"}
                                     </div>
                                     <div className="min-w-0">
-                                        <div className="text-xs font-bold text-white truncate">{user?.displayName || "Anonymous"}</div>
+                                        <div className="text-xs font-bold text-[var(--text-primary)] truncate">{user?.displayName || "Anonymous"}</div>
                                         <div className="text-[10px] text-[var(--text-secondary)] truncate">{user?.email || item.userId}</div>
                                     </div>
                                     <button 
@@ -438,6 +437,13 @@ export default function AdminView() {
                                         title="View User"
                                     >
                                         👤
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDeleteFeedback(item.id)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--bg-soft)] hover:bg-red-500/20 text-red-500 text-xs transition-all"
+                                        title="Delete Feedback"
+                                    >
+                                        🗑️
                                     </button>
                                 </div>
                             </div>

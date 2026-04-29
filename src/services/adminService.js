@@ -7,9 +7,11 @@ import {
   startAfter,
   writeBatch,
   doc,
-  where
+  where,
+  deleteDoc
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { getMoodScore } from "../constants/moods";
 
 const MOOD_MAPPING = {
   happy: "joyful",
@@ -17,46 +19,6 @@ const MOOD_MAPPING = {
   excited: "radiant",
   angry: "rough",
   calm: "peaceful"
-};
-
-/**
- * Bulk updates all entries from old mood values to new ones.
- * WARNING: This is a heavy operation. Use with caution.
- */
-export const migrateOldMoods = async () => {
-  const usersRef = collection(db, "users");
-  const usersSnapshot = await getDocs(usersRef);
-  let totalUpdated = 0;
-
-  for (const userDoc of usersSnapshot.docs) {
-    const userId = userDoc.id;
-    const entriesRef = collection(db, "users", userId, "entries");
-    
-    // Find entries that still have old mood values
-    const q = query(entriesRef, where("mood", "in", Object.keys(MOOD_MAPPING)));
-    const entriesSnapshot = await getDocs(q);
-
-    if (entriesSnapshot.empty) continue;
-
-    const batch = writeBatch(db);
-    entriesSnapshot.docs.forEach((entryDoc) => {
-      const oldMood = entryDoc.data().mood;
-      const newMood = MOOD_MAPPING[oldMood];
-      
-      if (newMood) {
-        batch.update(doc(db, "users", userId, "entries", entryDoc.id), {
-          mood: newMood,
-          updatedAt: new Date()
-        });
-        totalUpdated++;
-      }
-    });
-
-    await batch.commit();
-    console.log(`Migrated entries for user: ${userId}`);
-  }
-
-  return totalUpdated;
 };
 
 export const getAllUsers = async () => {
@@ -82,7 +44,7 @@ export const getUserStats = async (userId) => {
 
   // Calculate mood distribution and consistency
   const entries = entriesSnapshot.docs.map(doc => doc.data());
-  const moods = entries.map(e => e.mood).filter(Boolean);
+  const moods = entries.map(e => getMoodScore(e.mood)).filter(Boolean);
   const moodAvg = moods.length > 0 ? moods.reduce((a, b) => a + b, 0) / moods.length : 0;
   console.log(moodAvg, moods);
 
@@ -141,4 +103,9 @@ export const getFeedbacks = async () => {
     id: doc.id,
     ...doc.data()
   }));
+};
+
+export const deleteFeedback = async (feedbackId) => {
+  const feedbackDocRef = doc(db, "feedback", feedbackId);
+  await deleteDoc(feedbackDocRef);
 };

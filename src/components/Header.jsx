@@ -14,6 +14,8 @@ const Header = ({
     primaryActionLabel = "",
     streak = 0,
     isSidebar = false,
+    onMenuClick,
+    showMenuButton = false,
   }) => {
     const [showStreakInfo, setShowStreakInfo] = useState(false);
     const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -40,11 +42,21 @@ const Header = ({
 
     return (
       <header className={`flex justify-between items-center px-2 ${hideTitle ? 'justify-end' : ''} ${isSidebar ? 'w-full mb-0' : 'mb-6'}`}>
-        {/* Left Side - Title */}
+        {/* Left Side - Title & Menu */}
         {!hideTitle && (
-          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[var(--text-primary)]">
-            SoulScript<span className="text-[var(--ui-accent)]">.</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            {showMenuButton && (
+              <button
+                onClick={onMenuClick}
+                className="lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-[var(--bg-card)] border border-[var(--bg-soft)] hover:border-[var(--ui-accent)] transition-all shadow-sm text-xl"
+              >
+                ☰
+              </button>
+            )}
+            <h1 className="text-2xl md:text-4xl font-black tracking-tight text-[var(--text-primary)]">
+              SoulScript<span className="text-[var(--ui-accent)]">.</span>
+            </h1>
+          </div>
         )}
   
         {/* Right Side - Actions */}

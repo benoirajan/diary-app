@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import { SecurityProvider } from './context/SecurityContext'
 import { ToastProvider } from './context/ToastContext'
 import { RemoteConfigProvider } from './context/RemoteConfigContext'
+import { ModalProvider } from './context/ModalContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <SecurityProvider>
           <ToastProvider>
-            <App />
+            <ModalProvider>
+              <App />
+            </ModalProvider>
           </ToastProvider>
         </SecurityProvider>
       </AuthProvider>

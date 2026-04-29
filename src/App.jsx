@@ -4,7 +4,7 @@ import { analytics } from "./firebase";
 import useEntries from "./hooks/useEntries";
 
 import Header from "./components/Header";
-import NavigationTabs from "./components/NavigationTabs";
+import Sidebar from "./components/Sidebar";
 import EntryForm from "./components/EntryForm";
 import FeedbackForm from "./components/FeedbackForm";
 import EntryList from "./components/EntryList";
@@ -19,14 +19,18 @@ import { useRemoteConfig } from "./context/RemoteConfigContext";
 import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
 import { submitFeedback } from "./services/feedbackService";
+import { useToast } from "./context/ToastContext";
 
 
 function App() {
 
     const { user, isAdmin } = useAuth();
+    const { showToast } = useToast();
     const { config, loading: configLoading } = useRemoteConfig();
     const { vaultPassword, unlock, lock, isLocked } = useSecurity();
     const [vaultInput, setVaultInput] = useState("");
+    
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     // console.log(user)
     /*
       =========================
@@ -180,10 +184,10 @@ function App() {
         try {
             await submitFeedback(user.uid, feedbackData);
             setIsFeedbackFormOpen(false);
-            alert("Thank you for your feedback!");
+            showToast("Thank you for your feedback!", "success");
         } catch (err) {
             console.error("Error submitting feedback:", err);
-            alert("Failed to submit feedback. Please try again.");
+            showToast("Failed to submit feedback. Please try again.", "error");
         } finally {
             setIsSubmittingFeedback(false);
         }
@@ -264,10 +268,6 @@ function App() {
                             setSelectedEntryId(entry.id);
                             setCurrentView("detail");
                         }}
-                        onEditEntry={(entry) => {
-                            setSelectedEntryId(entry.id);
-                            setCurrentView("edit");
-                        }}
                     />
                 );
         }
@@ -283,57 +283,43 @@ function App() {
             <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--ui-accent)]/30 lg:flex">
                 
                 {/* Desktop Sidebar */}
-                <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--bg-soft)] p-6 z-40">
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)]">
-                            SoulScript<span className="text-[var(--ui-accent)]">.</span>
-                        </h1>
-                        <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] mt-1 opacity-50">Digital Soul Journal</p>
-                    </div>
+                <div className="hidden lg:block h-screen sticky top-0">
+                    <Sidebar 
+                        tabs={tabs}
+                        currentView={currentView}
+                        onTabChange={(value) => {
+                            setSelectedEntryId(null);
+                            setCurrentView(value);
+                        }}
+                        onFeedback={() => setIsFeedbackFormOpen(true)}
+                        themeMode={themeMode}
+                        onThemeChange={setThemeMode}
+                    />
+                </div>
 
-                    <nav className="flex-1 space-y-2">
-                        {tabs.map((tab) => {
-                            const isActive = (currentView === "detail" ? "list" : currentView) === tab.value;
-                            return (
-                                <button
-                                    key={tab.value}
-                                    onClick={() => {
-                                        setSelectedEntryId(null);
-                                        setCurrentView(tab.value);
-                                    }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all ${
-                                        isActive
-                                            ? "bg-[var(--ui-accent-soft)] text-[var(--ui-active)] border border-[var(--ui-accent)]/20 shadow-[0_0_15px_rgba(0,0,0,0.02)]"
-                                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)]"
-                                    }`}
-                                >
-                                    <span className="text-xl">{tab.icon}</span>
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
-                    </nav>
-
-                    <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-4">
-                        <button
-                            onClick={() => setIsFeedbackFormOpen(true)}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all"
-                        >
-                            <span className="text-lg">💬</span>
-                            <span className="text-sm">Feedback</span>
-                        </button>
-                        
-                        {/* Theme Switcher Header Component used for the selector */}
-                        <Header 
-                            themeMode={themeMode}
-                            onThemeChange={setThemeMode}
-                            hideTitle={true}
-                            hideFeedback={true}
-                            hideSignOut={true}
-                            isSidebar={true}
-                        />
+                {/* Mobile Sidebar */}
+                {isMobileSidebarOpen && (
+                    <div className="fixed inset-0 z-[100] lg:hidden animate-in fade-in duration-300">
+                        <div 
+                            className="absolute inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm"
+                            onClick={() => setIsMobileSidebarOpen(false)}
+                        ></div>
+                        <div className="relative h-full w-64 animate-in slide-in-from-left duration-300">
+                            <Sidebar 
+                                tabs={tabs}
+                                currentView={currentView}
+                                onTabChange={(value) => {
+                                    setSelectedEntryId(null);
+                                    setCurrentView(value);
+                                }}
+                                onFeedback={() => setIsFeedbackFormOpen(true)}
+                                themeMode={themeMode}
+                                onThemeChange={setThemeMode}
+                                onClose={() => setIsMobileSidebarOpen(false)}
+                            />
+                        </div>
                     </div>
-                </aside>
+                )}
 
                 <div className="flex-1 flex flex-col min-h-screen">
                     <div className=" w-full mx-auto px-6 py-6 flex-1">
@@ -344,6 +330,8 @@ function App() {
                                 onThemeChange={setThemeMode}
                                 onFeedback={() => setIsFeedbackFormOpen(true)}
                                 streak={streak}
+                                showMenuButton={true}
+                                onMenuClick={() => setIsMobileSidebarOpen(true)}
                             />
                         </div>
 
@@ -358,18 +346,6 @@ function App() {
                             />
                         </div>
                         
-                        {/* Mobile Tabs */}
-                        <div className="lg:hidden">
-                            <NavigationTabs
-                                tabs={tabs}
-                                activeTab={currentView === "detail" ? "list" : currentView}
-                                onTabChange={(value) => {
-                                    setSelectedEntryId(null);
-                                    setCurrentView(value);
-                                }}
-                            />
-                        </div>
-
                         {/* Main Content */}
                         <main className="animate-in mb-15 fade-in slide-in-from-bottom-4 duration-700">
                             {renderView()}

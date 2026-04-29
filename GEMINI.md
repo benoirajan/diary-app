@@ -19,6 +19,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Theme System:** 
     - Supports **Light**, **Dark**, and **System** (Device Default) modes.
     - Avoid using these colors in the UI because it is mood colors (--accent-happy,  --accent-sad,  --accent-angry,  --accent-neutral,  --accent-excited,--accent-calm)
+    - Avoid using independent colors in the UI if the color is not available in the existing theme create new one
     - Persists user preference in `localStorage` (`soulscript_theme`).
     - Synchronizes with system appearance changes when in "System" mode.
     - Remote Config (`is_light`) acts as a global override if no local preference exists.
@@ -33,6 +34,8 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Mobile:** Uses a bottom-navigation tab system and full-width header. Theme switcher and feedback are accessible via the header.
     - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation. Theme switcher and feedback triggers are located in the sidebar's footer.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
+- **Mindful Editing:** Editing past entries is intentionally discouraged with a philosophical confirmation prompt ("Alter the Past?") to preserve the integrity of the user's emotional history.
+- **Journal Aesthetic:** The `EntryDetail` view follows a "Futuristic Analog" design, featuring a vertical margin line, date-stamp headers, and signature footers to evoke the feel of a physical journal.
 - **Feedback Loop:** Use the `FeedbackForm.jsx` modal for collecting user suggestions, bug reports, and praise. Submissions are stored in the global `feedback` collection.
 - **Sticky Actions:** The "New Entry" action is permanently accessible via a Floating Action Button (FAB) at the bottom-right.
 - **Git Flow:** After every successful task/feature, stage the changes (`git add .`) and commit with a concise, descriptive message.
@@ -78,7 +81,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **User Directory:** Searchable list of all registered users with filters for "Admins" and "Active Today".
     - **User Profiles:** View aggregated stats (total entries, habits, avg mood) and last activity date.
     - **User Feedback:** View a list of categorized feedback submissions (Suggestions, Bugs, Praise).
-    - **Mood Migration:** Bulk update old mood labels (happy, sad, etc.) to the new SoulScript scale across all user entries.
+    - **Feedback Management:** Ability to permanently delete user feedback submissions.
     - **Paginated Activity:** View a scrollable, paginated history of user entries (15 entries per load).
 - **Service Integration:** Use `adminService.js` for administrative queries and data migrations.
 - **Security:** Administrative access is enforced both via UI (`isAdmin` flag in `AuthContext`) and Backend (`firestore.rules`).

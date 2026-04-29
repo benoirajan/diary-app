@@ -13,7 +13,12 @@
   --text-secondary: #706f6c;
   --text-muted: #a1a09d;
 
-  /* Refined Accents - Futuristic yet Organic */
+  /* feedback colors */
+  --suggestion: #3b82f6; /* Vibrant Blue */
+  --bug: #f43f5e; /* Rose Coral */
+  --praise: #10b981; /* Emerald Mint */
+
+  /* Mood colors dont use for UI */
   --accent-happy: #f59e0b;   /* Golden Amber */
   --accent-sad: #6366f1;     /* Soft Indigo */
   --accent-angry: #f43f5e;    /* Rose Coral */
@@ -127,6 +132,14 @@ body {
   animation: enter 0.6s cubic-bezier(0, 0, 0.2, 1);
 }
 
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in-from-left {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
 @keyframes enter {
   from {
     opacity: 0;
@@ -136,4 +149,14 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }

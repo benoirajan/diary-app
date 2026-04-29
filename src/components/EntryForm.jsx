@@ -84,7 +84,7 @@ const EntryForm = ({
   const startVoiceRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser.");
+      showToast("Speech recognition is not supported in this browser.", "error");
       return;
     }
 

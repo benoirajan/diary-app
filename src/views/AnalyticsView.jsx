@@ -89,7 +89,7 @@ const AnalyticsView = ({ entries = [] }) => {
         }).catch(() => {});
     } else {
         navigator.clipboard.writeText(text);
-        alert('Score copied to clipboard! 🚀');
+        showToast('Score copied to clipboard! 🚀');
     }
   };
 

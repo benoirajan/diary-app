@@ -1,16 +1,19 @@
 import { useSecurity } from "../context/SecurityContext";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function SettingsView() {
   const { encryptAll, updateSettings } = useSecurity();
   const { profile } = useAuth();
+  const { showToast } = useToast();
 
   const handleToggleEncryptAll = async () => {
     try {
       await updateSettings({ encryptAll: !encryptAll });
+      showToast("Settings updated successfully.");
     } catch (err) {
       console.error("Failed to update settings:", err);
-      alert("Failed to update settings.");
+      showToast("Failed to update settings.", "error");
     }
   };
 
@@ -38,13 +41,13 @@ export default function SettingsView() {
                 </div>
                 <button
                     onClick={handleToggleEncryptAll}
-                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${
-                        encryptAll ? 'bg-[var(--ui-accent)]' : 'bg-[var(--bg-soft)]'
+                    className={`relative inline-flex h-7 w-15 items-center rounded-full transition-colors focus:outline-none ${
+                        encryptAll ? 'bg-[var(--ui-accent)]' : 'bg-[var(--bg-hover)]'
                     }`}
                 >
                     <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-[var(--bg-card)] transition-transform ${
-                            encryptAll ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-5 w-5 transform rounded-full bg-[var(--bg-main)] transition-transform ${
+                            encryptAll ? 'translate-x-5' : 'translate-x-1'
                         }`}
                     />
                 </button>
