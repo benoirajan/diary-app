@@ -10,7 +10,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Google Gemini AI (via client-side or functions)
     - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx`.
-    - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/{date}`).
+    - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/history`) using a map of dates to limit storage and document count. **Pruned automatically to keep only the last 30 insights.**
     - **Model Management:** Uses Firebase Remote Config (`aiModel`) to dynamically select the Gemini model. Defaults to `gemini-2.5-flash-lite`.
     - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
@@ -18,6 +18,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
 - **Theme System:** 
     - Supports **Light**, **Dark**, and **System** (Device Default) modes.
+    - Avoid using these colors in the UI because it is mood colors (--accent-happy,  --accent-sad,  --accent-angry,  --accent-neutral,  --accent-excited,--accent-calm)
     - Persists user preference in `localStorage` (`soulscript_theme`).
     - Synchronizes with system appearance changes when in "System" mode.
     - Remote Config (`is_light`) acts as a global override if no local preference exists.
@@ -59,6 +60,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     7. 🔁 **Streak Section:** Current/Longest streaks and break pattern analysis.
 - **Smart Insights:** Prioritize narrative "takeaways". Include "Comeback Insights" when users return after a 2+ day break to encourage consistency without guilt.
 - **Visualizations:** Prefer custom SVG components (like the `MoodChart`) to maintain the project's unique aesthetic without external charting dependencies.
+- **Modular Dashboard:** The Analytics view is split into specialized components in `src/components/analytics/` and powered by the `useAnalytics` hook to keep logic separate from presentation.
 
 ## Google Analytics
 - **Implementation:** Firebase Analytics (GA4). Initialized in `src/firebase.js`.

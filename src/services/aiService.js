@@ -128,30 +128,62 @@ export const saveDailyInsight = async (userId, insight) => {
   if (!userId || !insight) return;
 
   const today = new Date().toISOString().split('T')[0];
-  const ref = doc(db, "users", userId, "aiInsights", today);
+  const ref = doc(db, "users", userId, "aiInsights", "history");
 
-  await setDoc(ref, {
-    content: insight,
-    date: today,
-    createdAt: serverTimestamp(),
-  });
+  try {
+    const snap = await getDoc(ref);
+    let insights = {};
+    
+    if (snap.exists()) {
+      insights = snap.data().insights || {};
+    }
+
+    // Add/Update today's insight
+    insights[today] = insight;
+
+    // Prune history to keep storage small (keep last 30 insights)
+    const sortedDates = Object.keys(insights).sort().reverse();
+    if (sortedDates.length > 30) {
+      const keptDates = sortedDates.slice(0, 30);
+      const newInsights = {};
+      keptDates.forEach(d => { newInsights[d] = insights[d]; });
+      insights = newInsights;
+    }
+
+    await setDoc(ref, {
+      insights,
+      lastUpdated: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Error saving daily insight:", error);
+  }
 };
 
 /**
  * Fetches the AI insight for a specific date or the latest one.
  * @param {string} userId - The user's ID.
  * @param {string} date - Optional date string (YYYY-MM-DD). Defaults to today.
- * @returns {Promise<Object|null>} - The insight document or null.
+ * @returns {Promise<Object|null>} - The insight data or null.
  */
 export const getDailyInsight = async (userId, date = null) => {
   if (!userId) return null;
 
   const targetDate = date || new Date().toISOString().split('T')[0];
-  const ref = doc(db, "users", userId, "aiInsights", targetDate);
-  const snap = await getDoc(ref);
-
-  if (snap.exists()) {
-    return snap.data();
+  const ref = doc(db, "users", userId, "aiInsights", "history");
+  
+  try {
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const insights = snap.data().insights || {};
+      if (insights[targetDate]) {
+        return { 
+          content: insights[targetDate], 
+          date: targetDate 
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching daily insight:", error);
   }
   
   return null;
