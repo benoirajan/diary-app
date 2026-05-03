@@ -12,6 +12,7 @@
   --text-primary: #1c1c1a;
   --text-secondary: #706f6c;
   --text-muted: #a1a09d;
+  --text-inverted: #ffffff;
 
   /* feedback colors */
   --suggestion: #3b82f6; /* Vibrant Blue */
@@ -50,6 +51,7 @@
   --text-primary: #fafaf9;
   --text-secondary: #a8a29e;
   --text-muted: #57534e;
+  --text-inverted: #0c0c0b;
 
   /* Glowing Versions for Dark Mode */
   --accent-happy: #24f0fb;   /* Brighter Amber */

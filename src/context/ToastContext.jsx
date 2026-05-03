@@ -19,7 +19,7 @@ export const ToastProvider = ({ children }) => {
                 <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] animate-in fade-in slide-in-from-bottom-10 duration-300">
                     <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
                         toast.type === 'error' 
-                            ? 'bg-red-500/10 border-red-500/20 text-red-500' 
+                            ? 'bg-[var(--bug)] border-[var(--bug)] text-[var(--text-inverted)]' 
                             : 'bg-[var(--bg-card)] border-[var(--bg-soft)] text-[var(--text-primary)]'
                     }`}>
                         <span className="text-xl">

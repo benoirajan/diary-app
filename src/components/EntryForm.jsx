@@ -59,13 +59,14 @@ const EntryForm = ({
       clearTimeout(debounceTimer.current);
     }
 
-    // Set a new timer for 1.5 seconds
+    // Set a new timer for 2.5 seconds
     debounceTimer.current = setTimeout(async () => {
       setIsAnalyzing(true);
       try {
         const discovered = await discoverMood(content);
         if (discovered) {
           setSuggestedMood(discovered);
+          setMood(discovered); // AI automatically selects the mood
         } else {
           showToast("AI couldn't analyze your mood. Try writing a bit more!", "error");
         }
@@ -74,7 +75,7 @@ const EntryForm = ({
       } finally {
         setIsAnalyzing(false);
       }
-    }, 1500);
+    }, 2500);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -256,7 +257,7 @@ const EntryForm = ({
             <div className="flex items-center gap-3">
                 <span className="text-xl">{isEncrypted ? "🔒" : "🔓"}</span>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold text-white uppercase tracking-widest">Encrypt this entry</span>
+                    <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest">Encrypt this entry</span>
                     <span className="text-[10px] text-[var(--text-secondary)]">
                         {encryptAll ? "Forced by global settings" : "Protect with your private vault key"}
                     </span>
@@ -287,14 +288,10 @@ const EntryForm = ({
                 ✨ Discovering Mood...
               </span>
             )}
-            {!isAnalyzing && suggestedMood && suggestedMood !== mood && (
-              <button 
-                type="button"
-                onClick={() => setMood(suggestedMood)}
-                className="text-[10px] font-bold text-[var(--accent-main)] hover:underline uppercase tracking-widest flex items-center gap-1"
-              >
+            {!isAnalyzing && suggestedMood && (
+              <span className="text-[10px] font-bold text-[var(--accent-main)] uppercase tracking-widest flex items-center gap-1">
                 ✨ AI thinks you feel {getMoodLabel(suggestedMood)} {getMoodEmoji(suggestedMood)}
-              </button>
+              </span>
             )}
           </div>
           <div className="flex gap-2.5 flex-wrap">
@@ -308,7 +305,7 @@ const EntryForm = ({
                   onClick={() => setMood(m.value)}
                   className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
                     isActive
-                      ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
+                      ? `${moodColors[m.value]} text-[var(--text-inverted)] border-transparent shadow-md scale-105`
                       : isSuggested
                         ? "bg-[var(--bg-soft)] border-[var(--accent-main)] text-[var(--text-primary)] animate-glow"
                         : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"

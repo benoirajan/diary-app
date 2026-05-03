@@ -9,12 +9,12 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics, Remote Config)
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Google Gemini AI (via client-side or functions)
-    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx`.
+    - **Automatic Mood Discovery:** Real-time sentiment analysis in `EntryForm.jsx`. Automatically selects the detected mood and displays a "✨ AI thinks you feel [mood]" indicator for transparency.
     - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/history`) using a map of dates to limit storage and document count. **Pruned automatically to keep only the last 30 insights.**
     - **Model Management:** Uses Firebase Remote Config (`aiModel`) to dynamically select the Gemini model. Defaults to `gemini-2.5-flash-lite`.
     - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
-    - **Debounce Logic:** Analysis is triggered after a 1.5s delay and 30+ character input to optimize API usage.
+    - **Debounce Logic:** Analysis is triggered after a 2.5s delay and 30+ character input to optimize API usage.
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
 - **Theme System:** 
     - Supports **Light**, **Dark**, and **System** (Device Default) modes.
