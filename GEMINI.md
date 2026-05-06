@@ -36,9 +36,16 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **State Management:** When dealing with lists and details, prefer storing a `selectedId` and using `useMemo` to find the object in the main list.
 - **Remote Config:** Use `RemoteConfigContext` (`useRemoteConfig`) to access global configuration values.
 - **Responsive Layout:**
-    - **Mobile:** Uses a toggleable sidebar (hamburger menu) for navigation. The header focuses on the streak and branding.
-    - **Desktop (lg+):** Uses a persistent vertical sidebar for navigation. Maintains a spacious layout with responsive horizontal padding (`md:px-10 lg:px-16`) and internal card spacing to prevent content from feeling cramped.
-    - **Sidebar Footer:** Actions (Feedback, Theme Switcher, Sign Out) are organized in a vertical stack at the bottom of the sidebar.
+    - **Mobile:** 
+        - Uses a toggleable sidebar (hamburger menu) for secondary actions (Settings, Admin, Theme, Sign Out).
+        - **Bottom Navigation:** Provides persistent access to primary views (Entries, Habits, Analytics) with custom SVG icons.
+        - **History API:** State is synchronized with the browser history stack to support the hardware back button and swipe-to-back gestures.
+    - **Desktop (lg+):** Uses a persistent vertical sidebar for all navigation. Maintains a spacious layout with responsive horizontal padding (`md:px-10 lg:px-16`) and internal card spacing to prevent content from feeling cramped.
+- **PWA & Browser Integration:**
+    - **Installable:** SoulScript is a PWA with a dedicated `manifest.json` and a minimal Service Worker for home-screen installation.
+    - **Proactive Prompting:** Displays a custom `InstallPrompt.jsx` popup if the app is installable and hasn't been dismissed.
+    - **Permanent Access:** An "Install App" button is available in the sidebar with platform-specific guidance (Automatic prompt for Chrome/Android, manual instructions for iOS/Safari).
+    - **Standalone Mode:** The app detects when it's running as an installed PWA and hides installation UI to maintain a native feel.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
 - **Mindful Editing:** Editing past entries is intentionally discouraged with a philosophical confirmation prompt ("Alter the Past?") to preserve the integrity of the user's emotional history.
 - **Journal Aesthetic:** The `EntryDetail` view follows a "Futuristic Analog" design, featuring a vertical margin line, date-stamp headers, and signature footers to evoke the feel of a physical journal.
