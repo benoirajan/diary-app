@@ -13,7 +13,8 @@ const client = API_KEY ? new GoogleGenAI({
 // Remote Config setup
 remoteConfig.settings.minimumFetchIntervalMillis = 3600000; // 1 hour
 remoteConfig.defaultConfig = {
-  aiModel: 'gemini-2.5-flash-lite'
+  aiModel: 'gemini-2.5-flash-lite',
+  insightModel: 'gemini-flash-lite-latest'
 };
 
 const getAIModel = async () => {
@@ -23,6 +24,16 @@ const getAIModel = async () => {
   } catch (error) {
     console.error("Remote Config fetch failed, using default:", error);
     return 'gemini-2.5-flash-lite';
+  }
+};
+
+const getInsightModel = async () => {
+  try {
+    await fetchAndActivate(remoteConfig);
+    return getString(remoteConfig, "insightModel");
+  } catch (error) {
+    console.error("Remote Config fetch failed, using default:", error);
+    return 'gemini-flash-lite-latest';
   }
 };
 
@@ -82,7 +93,7 @@ export const generateWeeklyInsight = async (entries) => {
   if (!client || !entries || entries.length === 0) return null;
 
   try {
-    const modelName = await getAIModel();
+    const modelName = await getInsightModel();
     const config = {
       temperature: 0.7,
       systemInstruction: `

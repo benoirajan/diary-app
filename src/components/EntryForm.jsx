@@ -44,13 +44,16 @@ const EntryForm = ({
   // AI Mood Discovery State
   const [suggestedMood, setSuggestedMood] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasDetectedRealTime, setHasDetectedRealTime] = useState(false);
+  const [showMoodConfirmation, setShowMoodConfirmation] = useState(false);
+  const [isMoodDetecting, setIsMoodDetecting] = useState(false);
   const debounceTimer = useRef(null);
 
   // Effect for automatic mood discovery
   useEffect(() => {
     // Only analyze if AI is enabled, content is long enough and not just whitespace
-    if (!remoteConfig.isAiEnabled || content.trim().length < 30) {
-      setSuggestedMood(null);
+    // AND we haven't already performed live detection
+    if (!remoteConfig.isAiEnabled || content.trim().length < 30 || hasDetectedRealTime) {
       return;
     }
 
@@ -66,12 +69,11 @@ const EntryForm = ({
         const discovered = await discoverMood(content);
         if (discovered) {
           setSuggestedMood(discovered);
-          setMood(discovered); // AI automatically selects the mood
-        } else {
-          showToast("AI couldn't analyze your mood. Try writing a bit more!", "error");
+          setMood(discovered); // AI automatically selects the mood for first time
+          setHasDetectedRealTime(true); // Mark as detected once
         }
       } catch {
-        showToast("AI Mood analysis failed. Please check your connection.", "error");
+        // Silent fail for real-time background analysis
       } finally {
         setIsAnalyzing(false);
       }
@@ -80,7 +82,7 @@ const EntryForm = ({
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [content, remoteConfig.isAiEnabled, showToast]);
+  }, [content, remoteConfig.isAiEnabled, hasDetectedRealTime]);
 
   const startVoiceRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -115,18 +117,13 @@ const EntryForm = ({
     recognition.start();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!title.trim() || !content.trim()) return;
-
-    // Combine date and time
+  const performSubmit = (finalMood = mood) => {
     const combinedDateTime = new Date(`${date}T${time}`);
 
     onSubmit({
       title,
       content,
-      mood,
+      mood: finalMood,
       isEncrypted,
       date: combinedDateTime.toISOString(),
     });
@@ -137,10 +134,47 @@ const EntryForm = ({
       setContent("");
       setMood("peaceful");
       setSuggestedMood(null);
+      setHasDetectedRealTime(false);
+      setShowMoodConfirmation(false);
       const now = new Date();
       setDate(now.toISOString().split('T')[0]);
       setTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!title.trim() || !content.trim()) return;
+
+    // Trigger AI discovery on save if enabled and not already confirmed
+    if (remoteConfig.isAiEnabled && !showMoodConfirmation && content.trim().length >= 30) {
+      setIsMoodDetecting(true);
+      
+      // If we already detected it in real-time, just "fake" a short delay to reuse the result
+      if (hasDetectedRealTime && suggestedMood) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setShowMoodConfirmation(true);
+        setIsMoodDetecting(false);
+        return;
+      }
+
+      try {
+        const discovered = await discoverMood(content);
+        if (discovered) {
+          setSuggestedMood(discovered);
+          setShowMoodConfirmation(true);
+          setIsMoodDetecting(false);
+          return; // Wait for user to confirm mood
+        }
+      } catch (err) {
+        showToast("AI Mood analysis failed. Proceeding with your selection.", "error");
+      } finally {
+        setIsMoodDetecting(false);
+      }
+    }
+
+    performSubmit();
   };
 
   return (
@@ -285,12 +319,12 @@ const EntryForm = ({
             <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">How do you feel?</label>
             {isAnalyzing && (
               <span className="text-[10px] font-bold text-[var(--accent-main)] animate-pulse uppercase tracking-widest">
-                ✨ Discovering Mood...
+                ✨ Hmm, let me see...
               </span>
             )}
             {!isAnalyzing && suggestedMood && (
               <span className="text-[10px] font-bold text-[var(--accent-main)] uppercase tracking-widest flex items-center gap-1">
-                ✨ AI thinks you feel {getMoodLabel(suggestedMood)} {getMoodEmoji(suggestedMood)}
+                ✨ I think you feel {getMoodLabel(suggestedMood)} {getMoodEmoji(suggestedMood)}
               </span>
             )}
           </div>
@@ -319,18 +353,44 @@ const EntryForm = ({
         </div>
 
         <div className="pt-2 flex flex-col gap-3">
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
-          >
-            {isSubmitting 
-                ? "Saving..." 
-                : initialData 
-                    ? "Update Entry" 
-                    : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
-          </button>
+          {showMoodConfirmation ? (
+            <div className="bg-[var(--bg-soft)] p-5 rounded-3xl border border-[var(--accent-happy)] animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <p className="text-xs font-bold text-[var(--text-primary)] mb-4 text-center uppercase tracking-[0.2em]">
+                 ✨ I think you feel {getMoodLabel(suggestedMood)}
+               </p>
+               <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMood(suggestedMood);
+                      performSubmit(suggestedMood);
+                    }}
+                    className="py-3.5 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-xs hover:opacity-90 transition-all shadow-md"
+                  >
+                    Use {getMoodEmoji(suggestedMood)}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => performSubmit()}
+                    className="py-3.5 rounded-2xl bg-[var(--bg-soft)] border border-[var(--bg-soft)] text-[var(--text-secondary)] font-black text-xs hover:bg-gray-200 transition-all"
+                  >
+                    Keep {getMoodEmoji(mood)}
+                  </button>
+               </div>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting || isMoodDetecting}
+              className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
+            >
+              {isSubmitting || isMoodDetecting
+                  ? (isMoodDetecting ? "Hmm let me see what is your mood..." : "Saving...") 
+                  : initialData 
+                      ? "Update Entry" 
+                      : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
+            </button>
+          )}
         </div>
       </form>
     </div>

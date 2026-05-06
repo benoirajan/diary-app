@@ -8,6 +8,7 @@ export function RemoteConfigProvider({ children }) {
   const [config, setConfig] = useState({
     isAiEnabled: true,
     aiModel: "gemini-2.5-flash-lite",
+    insightModel: "gemini-flash-lite-latest",
     is_encrypted: false,
     is_light: false,
   });
@@ -20,6 +21,7 @@ export function RemoteConfigProvider({ children }) {
         remoteConfig.defaultConfig = {
           isAiEnabled: true,
           aiModel: "gemini-2.5-flash-lite",
+          insightModel: "gemini-flash-lite-latest",
           is_encrypted: false,
           is_light: false,
         };
@@ -29,6 +31,7 @@ export function RemoteConfigProvider({ children }) {
         setConfig({
           isAiEnabled: getBoolean(remoteConfig, "isAiEnabled"),
           aiModel: getString(remoteConfig, "aiModel"),
+          insightModel: getString(remoteConfig, "insightModel"),
           is_encrypted: getBoolean(remoteConfig, "is_encrypted"),
           is_light: getBoolean(remoteConfig, "is_light"),
         });

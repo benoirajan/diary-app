@@ -3,6 +3,9 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "remoteconfig": {
+    "template": "remoteconfig.updated.json"
+  },
   "hosting": {
     "target": "default",
     "public": "dist",
