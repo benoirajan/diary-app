@@ -1,0 +1,22 @@
+{
+  "short_name": "SoulScript",
+  "name": "SoulScript: Digital Soul Journal",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0c0c0b",
+  "background_color": "#0c0c0b"
+}

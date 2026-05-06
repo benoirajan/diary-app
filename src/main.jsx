@@ -8,6 +8,12 @@ import { ToastProvider } from './context/ToastContext'
 import { RemoteConfigProvider } from './context/RemoteConfigContext'
 import { ModalProvider } from './context/ModalContext'
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RemoteConfigProvider>

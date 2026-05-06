@@ -5,6 +5,8 @@ import useEntries from "./hooks/useEntries";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
+import BottomNav from "./components/BottomNav";
+import InstallPrompt from "./components/InstallPrompt";
 import EntryForm from "./components/EntryForm";
 import FeedbackForm from "./components/FeedbackForm";
 import EntryList from "./components/EntryList";
@@ -46,6 +48,37 @@ function App() {
     const [currentView, setCurrentView] = useState("list");
     const [selectedEntryId, setSelectedEntryId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+
+    // Unified Navigation Handler
+    const navigateTo = (view, id = null, replace = false) => {
+        setSelectedEntryId(id);
+        setCurrentView(view);
+        const state = { view, id };
+        if (replace) {
+            window.history.replaceState(state, "", "");
+        } else {
+            window.history.pushState(state, "", "");
+        }
+    };
+
+    // Sync state with browser history (Back button support)
+    useEffect(() => {
+        const handlePopState = (event) => {
+            if (event.state) {
+                setCurrentView(event.state.view);
+                setSelectedEntryId(event.state.id);
+            } else {
+                setCurrentView("list");
+                setSelectedEntryId(null);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        // Initial state
+        window.history.replaceState({ view: "list", id: null }, "", "");
+
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, []);
     
     // Theme state: 'light' | 'dark' | 'system'
     const [themeMode, setThemeMode] = useState(() => {
@@ -78,6 +111,63 @@ function App() {
     const [isEntryFormOpen, setIsEntryFormOpen] = useState(false);
     const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false);
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+    // PWA Install Prompt State
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+    useEffect(() => {
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            
+            // Show prompt if not dismissed recently
+            const isDismissed = localStorage.getItem("soulscript_install_dismissed");
+            if (!isDismissed) {
+                setShowInstallPrompt(true);
+            }
+        };
+
+        window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+        return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (!deferredPrompt) {
+            // Check if already installed
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isStandalone) {
+                showToast("SoulScript is already installed!", "success");
+            } else {
+                // Show manual instructions for iOS/other browsers
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    showToast("To install on iOS: Tap 'Share' then 'Add to Home Screen' 📲", "info");
+                } else {
+                    showToast("Use your browser menu to 'Add to Home Screen' 📲", "info");
+                }
+            }
+            return;
+        }
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setDeferredPrompt(null);
+            setShowInstallPrompt(false);
+        }
+    };
+
+    // Check if the app is already running in standalone mode
+    const isInstalled = useMemo(() => {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    }, []);
+
+    const handleDismissInstall = () => {
+        setShowInstallPrompt(false);
+        // Don't show again for 7 days (simplified as a flag for now)
+        localStorage.setItem("soulscript_install_dismissed", "true");
+    };
 
     // Remote Config override (only applies if no local preference is set)
     useEffect(() => {
@@ -219,9 +309,9 @@ function App() {
                         initialData={selectedEntry}
                         onSubmit={(data) => {
                             updateEntry(selectedEntry.id, data);
-                            setCurrentView("list");
+                            navigateTo("list");
                         }}
-                        onCancel={() => setCurrentView("list")}
+                        onCancel={() => navigateTo("list")}
                     />
                 );
 
@@ -230,13 +320,11 @@ function App() {
                     <EntryDetail
                         entry={selectedEntry}
                         onBack={() => {
-                            setSelectedEntryId(null);
-                            setCurrentView("list");
+                            navigateTo("list");
                         }}
                         onDelete={(id) => {
                             deleteEntry(id);
-                            setSelectedEntryId(null);
-                            setCurrentView("list");
+                            navigateTo("list");
                         }}
                         onUpdate={updateEntry}
                     />
@@ -262,8 +350,7 @@ function App() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         onSelectEntry={(entry) => {
-                            setSelectedEntryId(entry.id);
-                            setCurrentView("detail");
+                            navigateTo("detail", entry.id);
                         }}
                     />
                 );
@@ -295,10 +382,10 @@ function App() {
                         tabs={tabs}
                         currentView={currentView}
                         onTabChange={(value) => {
-                            setSelectedEntryId(null);
-                            setCurrentView(value);
+                            navigateTo(value);
                         }}
                         onFeedback={() => setIsFeedbackFormOpen(true)}
+                        onInstall={!isInstalled ? handleInstallClick : null}
                         themeMode={themeMode}
                         onThemeChange={setThemeMode}
                     />
@@ -316,10 +403,10 @@ function App() {
                                 tabs={tabs}
                                 currentView={currentView}
                                 onTabChange={(value) => {
-                                    setSelectedEntryId(null);
-                                    setCurrentView(value);
+                                    navigateTo(value);
                                 }}
                                 onFeedback={() => setIsFeedbackFormOpen(true)}
+                                onInstall={!isInstalled ? handleInstallClick : null}
                                 themeMode={themeMode}
                                 onThemeChange={setThemeMode}
                                 onClose={() => setIsMobileSidebarOpen(false)}
@@ -333,34 +420,44 @@ function App() {
                         {/* Mobile Header */}
                         <div className="lg:hidden">
                             <Header
-                                themeMode={themeMode}
-                                onThemeChange={setThemeMode}
                                 streak={streak}
                                 showMenuButton={true}
                                 onMenuClick={() => setIsMobileSidebarOpen(true)}
                                 hideFeedback={true}
-                                hideSignOut={true}
                             />
                         </div>
 
                         {/* Desktop Header Content */}
                         <div className="hidden lg:flex justify-end items-center mb-10 gap-4">
                             <Header
-                                themeMode={themeMode}
-                                onThemeChange={setThemeMode}
                                 hideTitle={true}
-                                hideToggle={false}
                                 streak={streak}
                             />
                         </div>
                         
                         {/* Main Content */}
-                        <main className="animate-in mb-15 fade-in slide-in-from-bottom-4 duration-700">
+                        <main className="animate-in mb-28 lg:mb-15 fade-in slide-in-from-bottom-4 duration-700">
                             {renderView()}
                         </main>
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <BottomNav 
+                currentView={currentView} 
+                onTabChange={(value) => {
+                    navigateTo(value);
+                }} 
+            />
+
+            {/* PWA Install Prompt */}
+            {showInstallPrompt && (
+                <InstallPrompt 
+                    onInstall={handleInstallClick} 
+                    onDismiss={handleDismissInstall} 
+                />
+            )}
 
             {/* Popup Dialog for Entry Creation */}
             {isEntryFormOpen && (
@@ -404,7 +501,7 @@ function App() {
             {/* Sticky "New Entry" FAB */}
             <button
                 onClick={() => setIsEntryFormOpen(true)}
-                className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-main)] text-black font-black shadow-xl shadow-[var(--accent-main)]/20 hover:scale-110 hover:shadow-[var(--accent-main)]/40 active:scale-95 transition-all group"
+                className="fixed bottom-28 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-main)] text-black font-black shadow-xl shadow-[var(--accent-main)]/20 hover:scale-110 hover:shadow-[var(--accent-main)]/40 active:scale-95 transition-all group"
             >
                 <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">+</span>
                 <span className="text-sm uppercase tracking-widest hidden sm:inline">New Entry</span>

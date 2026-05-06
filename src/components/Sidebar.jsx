@@ -7,6 +7,7 @@ const Sidebar = ({
     currentView, 
     onTabChange, 
     onFeedback, 
+    onInstall,
     themeMode, 
     onThemeChange,
     onClose 
@@ -75,6 +76,18 @@ const Sidebar = ({
             </nav>
 
             <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-2">
+                {/* Install App Button */}
+                <button
+                    onClick={() => {
+                        onInstall();
+                        if (onClose) onClose();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--accent-main)] bg-[var(--ui-accent-soft)] hover:brightness-110 transition-all mb-2"
+                >
+                    <span className="text-xl">📲</span>
+                    <span className="text-sm">Install App</span>
+                </button>
+
                 {/* Feedback Button */}
                 <button
                     onClick={() => {
