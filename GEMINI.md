@@ -67,6 +67,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Mood Trend (30%):** Emotional trajectory.
 - **Streak Calculation:** Streaks are calculated using the user-selected `date` field (ISO string) and normalized to midnight. Calculation must be robust against Daylight Saving Time shifts.
 - **Dashboard Layout:** Always structure the Analytics view following this 7-point hierarchy:
+    - **Header Title:** Use "Analytics Dashboard" (without emojis) in the `AnalyticsHeader` component.
     1. ✨ **AI Soul Insight:** On-demand daily deep analysis card (Visible only if `isAiEnabled` is true).
     2. 🔥 **Insight Card:** Well-being status (Radiant, Balanced, Growing, Recovering) and Weekly Summary.
     3. 📈 **Mood Trend Graph:** SVG-based 14-day emotional journey.

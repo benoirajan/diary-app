@@ -26,9 +26,33 @@ const Sidebar = ({
     }, []);
 
     const themeOptions = [
-        { label: "Light", value: "light", icon: "☀️" },
-        { label: "Dark", value: "dark", icon: "🌙" },
-        { label: "System", value: "system", icon: "💻" },
+        { 
+            label: "Light", 
+            value: "light", 
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M3 12h2.25m.386-6.364 1.591-1.591M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
+                </svg>
+            )
+        },
+        { 
+            label: "Dark", 
+            value: "dark", 
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                </svg>
+            )
+        },
+        { 
+            label: "System", 
+            value: "system", 
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                </svg>
+            )
+        },
     ];
 
     const currentThemeOption = themeOptions.find(opt => opt.value === themeMode) || themeOptions[2];
@@ -45,9 +69,11 @@ const Sidebar = ({
                 {onClose && (
                     <button 
                         onClick={onClose}
-                        className="lg:hidden p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        className="lg:hidden p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
-                        ✕
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 )}
             </div>
@@ -68,7 +94,7 @@ const Sidebar = ({
                                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)]"
                             }`}
                         >
-                            <span className="text-xl">{tab.icon}</span>
+                            <span className="flex items-center justify-center">{tab.icon}</span>
                             {tab.label}
                         </button>
                     );
@@ -77,16 +103,20 @@ const Sidebar = ({
 
             <div className="mt-auto pt-6 border-t border-[var(--bg-soft)] space-y-2">
                 {/* Install App Button */}
-                <button
-                    onClick={() => {
-                        onInstall();
-                        if (onClose) onClose();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--accent-main)] bg-[var(--ui-accent-soft)] hover:brightness-110 transition-all mb-2"
-                >
-                    <span className="text-xl">📲</span>
-                    <span className="text-sm">Install App</span>
-                </button>
+                {onInstall && (
+                    <button
+                        onClick={() => {
+                            onInstall();
+                            if (onClose) onClose();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--accent-main)] bg-[var(--ui-accent-soft)] hover:brightness-110 transition-all mb-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                        </svg>
+                        <span className="text-sm">Install App</span>
+                    </button>
+                )}
 
                 {/* Feedback Button */}
                 <button
@@ -96,7 +126,9 @@ const Sidebar = ({
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all"
                 >
-                    <span className="text-xl">💬</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                    </svg>
                     <span className="text-sm">Feedback</span>
                 </button>
 
@@ -107,7 +139,7 @@ const Sidebar = ({
                         className="w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-soft)] transition-all"
                     >
                         <div className="flex items-center gap-3">
-                            <span className="text-xl">{currentThemeOption.icon}</span>
+                            <span className="flex items-center justify-center">{currentThemeOption.icon}</span>
                             <span className="text-sm">Theme</span>
                         </div>
                         <span className="text-xs opacity-50">{currentThemeOption.label}</span>
@@ -128,7 +160,7 @@ const Sidebar = ({
                                             : "text-[var(--text-secondary)] hover:bg-[var(--bg-soft)] hover:text-[var(--text-primary)]"
                                     }`}
                                 >
-                                    <span className="text-lg">{opt.icon}</span>
+                                    <span className="flex items-center justify-center">{opt.icon}</span>
                                     {opt.label}
                                 </button>
                             ))}
@@ -141,7 +173,9 @@ const Sidebar = ({
                     onClick={() => signOut(auth)}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[var(--text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-all"
                 >
-                    <span className="text-xl">🚪</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                    </svg>
                     <span className="text-sm">Sign Out</span>
                 </button>
             </div>

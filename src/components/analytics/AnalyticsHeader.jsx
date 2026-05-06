@@ -2,7 +2,7 @@ const AnalyticsHeader = ({ smartMessages }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <h2 className="text-3xl font-bold text-[var(--text-primary)] tracking-wide drop-shadow-[0_0_5px_var(--glow-color)]">
-          📊 Analytics Dashboard
+        Analytics Dashboard
       </h2>
 
       {smartMessages.length > 0 && (
