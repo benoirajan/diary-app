@@ -54,6 +54,9 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Git Flow:** After every successful task/feature, stage the changes (`git add .`) and commit with a concise, descriptive message.
 
 ## Analytics Engine
+- **Data Strategy:**
+    - **Paginated Loading:** Main entry lists must use cursor-based pagination (15 items per batch) via `useEntries` to maintain performance.
+    - **Metadata Fetching:** Analytics and streaks must be powered by lightweight metadata fetches (date and mood only) via `useEntryStats` to ensure accuracy without loading full content.
 - **Mood Scale:** SoulScript uses a specialized mindful scale for mapping human emotions (1-5):
     - **Radiant (5):** Peak energy and joy.
     - **Joyful (4):** Positive and light.

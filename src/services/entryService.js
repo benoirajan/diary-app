@@ -6,6 +6,9 @@ import {
   deleteDoc,
   query,
   orderBy,
+  limit,
+  startAfter,
+  getDocs,
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
@@ -26,6 +29,49 @@ export const listenToEntries = (userId, callback) => {
 
     callback(entries);
   });
+};
+
+export const getEntriesMetadata = async (userId) => {
+  const q = query(
+    collection(db, "users", userId, "entries"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      date: data.date,
+      mood: data.mood,
+      createdAt: data.createdAt,
+      isLocked: data.isLocked
+    };
+  });
+};
+
+export const getEntriesPaginated = async (userId, pageSize = 15, lastDoc = null) => {
+  let q = query(
+    collection(db, "users", userId, "entries"),
+    orderBy("createdAt", "desc"),
+    limit(pageSize)
+  );
+
+  if (lastDoc) {
+    q = query(q, startAfter(lastDoc));
+  }
+
+  const snapshot = await getDocs(q);
+  const entries = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return {
+    entries,
+    lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
+    hasMore: snapshot.docs.length === pageSize
+  };
 };
 
 export const addEntry = async (userId, entry) => {

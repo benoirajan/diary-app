@@ -16,6 +16,9 @@ const EntryList = ({
   searchTerm = "",
   onSearchChange,
   onSelectEntry,
+  onLoadMore,
+  hasMore = false,
+  loadingMore = false,
 }) => {
   // Group entries by formatted date
   const groupedEntries = useMemo(() => {
@@ -50,7 +53,7 @@ const EntryList = ({
       </div>
 
       {/* Empty State */}
-      {!hasEntries && (
+      {!hasEntries && !loadingMore && (
         <div className="text-center py-16 text-[var(--text-secondary)]">
           <div className="text-4xl mb-4">🚀</div>
           <p>No entries found. Start your futuristic journey.</p>
@@ -103,6 +106,26 @@ const EntryList = ({
           </div>
         </section>
       ))}
+
+      {/* Load More */}
+      {hasMore && (
+        <div className="flex justify-center mt-10 mb-10">
+          <button
+            onClick={onLoadMore}
+            disabled={loadingMore}
+            className="px-8 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--ui-border)] text-[var(--text-primary)] font-bold hover:border-[var(--ui-accent)] hover:text-[var(--ui-accent)] transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+          >
+            {loadingMore ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-[var(--ui-accent)] border-t-transparent rounded-full animate-spin" />
+                <span>Syncing more memories...</span>
+              </div>
+            ) : (
+              <span>Load Older Memories</span>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

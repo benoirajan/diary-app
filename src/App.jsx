@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "./firebase";
 import useEntries from "./hooks/useEntries";
+import useEntryStats from "./hooks/useEntryStats";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -39,11 +40,20 @@ function App() {
     const {
         entries,
         loading,
+        loadingMore,
+        hasMore,
         error,
         addEntry,
         updateEntry,
         deleteEntry,
+        loadMore,
     } = useEntries();
+
+    const {
+        allMetadata,
+        streak,
+        refreshStats,
+    } = useEntryStats();
 
     const [currentView, setCurrentView] = useState("list");
     const [selectedEntryId, setSelectedEntryId] = useState(null);
@@ -193,52 +203,6 @@ function App() {
       Derived State
       =========================
     */
-    const streak = useMemo(() => {
-        if (!entries || entries.length === 0) return 0;
-
-        const daysWithEntries = [...new Set(entries
-            .filter(e => e.date || e.createdAt)
-            .map(e => {
-                let date;
-                if (e.date) {
-                    date = new Date(e.date);
-                } else if (e.createdAt && typeof e.createdAt.toDate === 'function') {
-                    date = e.createdAt.toDate();
-                } else {
-                    date = new Date(e.createdAt);
-                }
-                return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-            })
-        )].sort((a, b) => b - a);
-
-        if (daysWithEntries.length === 0) return 0;
-
-        const now = new Date();
-        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
-
-
-        // If the latest entry is before yesterday, the streak is broken
-        if (daysWithEntries[0] < yesterday) return 0;
-
-        let currentStreak = 0;
-        let expectedDay = daysWithEntries[0];
-
-        for (const day of daysWithEntries) {
-            // Use a small buffer (1 hour) for comparison to be safe against DST shifts if they somehow creep in
-            if (Math.abs(day - expectedDay) < 3600000) {
-                currentStreak++;
-                // Set expectedDay to exactly midnight of the previous day
-                const prevDay = new Date(expectedDay);
-                prevDay.setDate(prevDay.getDate() - 1);
-                expectedDay = prevDay.getTime();
-            } else {
-                break;
-            }
-        }
-
-        return currentStreak;
-    }, [entries]);
-
     const filteredEntries = useMemo(() => {
         if (!searchTerm.trim()) return entries;
 
@@ -366,13 +330,14 @@ function App() {
                         onDelete={(id) => {
                             deleteEntry(id);
                             navigateTo("list");
+                            refreshStats();
                         }}
                         onUpdate={updateEntry}
                     />
                 );
 
             case "analytics":
-                return <AnalyticsView entries={entries} />;
+                return <AnalyticsView entries={allMetadata} />;
 
             case "habits":
                 return <HabitsView />;
@@ -393,6 +358,9 @@ function App() {
                         onSelectEntry={(entry) => {
                             navigateTo("detail", entry.id);
                         }}
+                        onLoadMore={loadMore}
+                        hasMore={hasMore}
+                        loadingMore={loadingMore}
                     />
                 );
         }
@@ -512,8 +480,9 @@ function App() {
                     {/* Dialog Content */}
                     <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
                         <EntryForm
-                            onSubmit={(data) => {
-                                addEntry(data);
+                            onSubmit={async (data) => {
+                                await addEntry(data);
+                                refreshStats();
                                 setIsEntryFormOpen(false);
                             }}
                             onCancel={() => setIsEntryFormOpen(false)}

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useSecurity } from "../context/SecurityContext";
 import {
-  listenToEntries,
+  getEntriesPaginated,
   addEntry as addEntryService,
   updateEntry as updateEntryService,
   deleteEntry as deleteEntryService,
@@ -14,44 +14,67 @@ export default function useEntries() {
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchBatch = useCallback(async (isInitial = false) => {
+    if (!user) return;
+    
+    try {
+      if (isInitial) setLoading(true);
+      else setLoadingMore(true);
+
+      const result = await getEntriesPaginated(user.uid, 15, isInitial ? null : lastDoc);
+      
+      const processed = await Promise.all(
+        result.entries.map(entry => decryptEntry(entry))
+      );
+
+      setEntries(prev => isInitial ? processed : [...prev, ...processed]);
+      setLastDoc(result.lastDoc);
+      setHasMore(result.hasMore);
+    } catch (err) {
+      console.error("useEntries Error:", err);
+      setError("Failed to sync memories.");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [user, lastDoc, decryptEntry]);
 
   useEffect(() => {
-    if (!user) return;
-
-    const unsubscribe = listenToEntries(user.uid, async (data) => {
-      // Decrypt entries if necessary
-      const processedEntries = await Promise.all(
-        data.map(entry => decryptEntry(entry))
-      );
-      setEntries(processedEntries);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user, decryptEntry, vaultPassword]);
+    fetchBatch(true);
+  }, [user, vaultPassword]);
 
   const addEntry = async (entry) => {
-    if (!user) return;
     const processedEntry = await encryptEntry(entry);
     await addEntryService(user.uid, processedEntry);
+    await fetchBatch(true); // Reset list to show new entry
   };
 
   const updateEntry = async (id, updatedData) => {
-    if (!user) return;
     const processedData = await encryptEntry(updatedData);
     await updateEntryService(user.uid, id, processedData);
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, ...updatedData } : e));
   };
 
   const deleteEntry = async (id) => {
-    if (!user) return;
     await deleteEntryService(user.uid, id);
+    setEntries(prev => prev.filter(e => e.id !== id));
   };
 
   return {
     entries,
     loading,
+    loadingMore,
+    hasMore,
+    error,
     addEntry,
     updateEntry,
     deleteEntry,
+    loadMore: () => !loadingMore && hasMore && fetchBatch(false),
+    refresh: () => fetchBatch(true)
   };
 }
