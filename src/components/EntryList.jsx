@@ -19,6 +19,7 @@ const EntryList = ({
   onLoadMore,
   hasMore = false,
   loadingMore = false,
+  isSearching = false,
 }) => {
   // Group entries by formatted date
   const groupedEntries = useMemo(() => {
@@ -42,7 +43,7 @@ const EntryList = ({
   return (
     <div className="transition-all md:px-4 lg:px-8">
       {/* Search */}
-      <div className="mb-8">
+      <div className="mb-8 relative">
         <input
           type="text"
           placeholder="Search your thoughts..."
@@ -50,13 +51,25 @@ const EntryList = ({
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full  px-5 py-4 rounded-2xl bg-[var(--bg-soft)] border border-[var(--ui-border)] focus:bg-[var(--bg-card)] focus:ring-2 focus:ring-[var(--ui-accent)] outline-none transition-all text-[var(--text-primary)] placeholder-[var(--text-secondary)]"
         />
+        {isSearching && (
+          <div className="absolute right-5 top-1/2 -translate-y-1/2">
+            <div className="w-5 h-5 border-2 border-[var(--ui-accent)] border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       {/* Empty State */}
       {!hasEntries && !loadingMore && (
-        <div className="text-center py-16 text-[var(--text-secondary)]">
-          <div className="text-4xl mb-4">🚀</div>
-          <p>No entries found. Start your futuristic journey.</p>
+        <div className="text-center py-16 text-[var(--text-secondary)] animate-in fade-in zoom-in-95 duration-500">
+          <div className="text-4xl mb-4">{searchTerm ? "🔍" : "🚀"}</div>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+            {searchTerm ? "No matches found" : "No entries found"}
+          </h3>
+          <p className="max-w-xs mx-auto">
+            {searchTerm 
+              ? `We searched deep into the vaults but couldn't find "${searchTerm}".`
+              : "Start your futuristic journey by recording your first memory."}
+          </p>
         </div>
       )}
 
@@ -118,10 +131,10 @@ const EntryList = ({
             {loadingMore ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-[var(--ui-accent)] border-t-transparent rounded-full animate-spin" />
-                <span>Syncing more memories...</span>
+                <span>{searchTerm ? "Scanning more memories..." : "Syncing more memories..."}</span>
               </div>
             ) : (
-              <span>Load Older Memories</span>
+              <span>{searchTerm ? "Search Deeper" : "Load Older Memories"}</span>
             )}
           </button>
         </div>

@@ -39,9 +39,12 @@ function App() {
     */
     const {
         entries,
+        searchTerm,
+        setSearchTerm,
         loading,
         loadingMore,
         hasMore,
+        isSearching,
         error,
         addEntry,
         updateEntry,
@@ -57,7 +60,6 @@ function App() {
 
     const [currentView, setCurrentView] = useState("list");
     const [selectedEntryId, setSelectedEntryId] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
 
     // Unified Navigation Handler
     const navigateTo = (view, id = null, replace = false) => {
@@ -203,15 +205,6 @@ function App() {
       Derived State
       =========================
     */
-    const filteredEntries = useMemo(() => {
-        if (!searchTerm.trim()) return entries;
-
-        return entries.filter((entry) =>
-            entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            entry.content.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [entries, searchTerm]);
-
     const selectedEntry = useMemo(() => {
         if (!selectedEntryId) return null;
         return entries.find(e => e.id === selectedEntryId);
@@ -352,9 +345,10 @@ function App() {
             default:
                 return (
                     <EntryList
-                        entries={filteredEntries}
+                        entries={entries}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
+                        isSearching={isSearching}
                         onSelectEntry={(entry) => {
                             navigateTo("detail", entry.id);
                         }}
