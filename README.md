@@ -6,11 +6,12 @@ A modern, minimal, and intelligent personal diary application built with **React
 
 ## 🌟 Key Features
 
--   **📖 Beautiful Journaling:** A "futuristic analog" interface designed for focused writing with markdown support.
--   **🤖 AI Soul Insights:** Automatic mood discovery with auto-selection during writing and on-demand daily deep analysis using Gemini AI.
+-   **📖 Beautiful Journaling:** A "futuristic analog" interface designed for focused writing with cursor-based paginated loading for high performance.
+-   **🤖 AI Soul Insights:** Automatic mood discovery during writing and on-demand daily deep analysis using Gemini AI.
+-   **🔍 Greedy Search:** Search through encrypted content using a smart greedy-fetching strategy that maintains client-side privacy.
 -   **🔒 Zero-Knowledge Security:** Client-side encryption (AES-GCM 256-bit) ensures your private thoughts never leave your device unencrypted.
 -   **🎯 Habit Tracking:** Build consistency with integrated habit tracking and streak monitoring.
--   **📈 Emotional Analytics:** Visualize your mood journey with SVG-based trends and well-being scores.
+-   **📈 Emotional Analytics:** Metadata-driven analytics for fast, accurate visualization of your mood journey and well-being scores.
 -   **🌓 Dynamic Theming:** Soft Warm Minimal aesthetic with Light, Dark, and System mode support.
 -   **🛡️ Admin Dashboard:** Comprehensive management for feedback and user activity stats (restricted access).
 
