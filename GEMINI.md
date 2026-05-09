@@ -56,6 +56,8 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 ## Analytics Engine
 - **Data Strategy:**
     - **Paginated Loading:** Main entry lists must use cursor-based pagination (15 items per batch) via `useEntries` to maintain performance.
+    - **Greedy Search:** SoulScript uses a "greedy" fetching strategy for searching across encrypted content. Since Firestore cannot index encrypted fields, the `useEntries` hook fetches batches (20 items), decrypts them locally, and continues until 10 matches are found or it reaches a safety cap (5 iterations).
+    - **Search Optimization:** Search input is debounced (500ms) to minimize Firestore reads. A `useRef` tracks the search cursor to prevent re-render loops.
     - **Metadata Fetching:** Analytics and streaks must be powered by lightweight metadata fetches (date and mood only) via `useEntryStats` to ensure accuracy without loading full content.
 - **Mood Scale:** SoulScript uses a specialized mindful scale for mapping human emotions (1-5):
     - **Radiant (5):** Peak energy and joy.
