@@ -128,7 +128,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 
 ## Agent Mandates
 - **Rename Integrity:** Ensure the name "SoulScript" is used in all user-facing strings and documentation.
-- **Auth Support:** Maintain support for both Email/Password and Google Authentication.
+- **Auth Support:** Maintain support for both Email/Password and Google Authentication. Mandatory email verification is required for all Email/Password accounts before app access is granted. User profile creation in Firestore is deferred until verification is complete.
 - **User Profiles:** Ensure every authenticated user has a corresponding document in the `users` collection.
 - **Admin Security:** Never expose administrative functionality or user data to non-admin users. Always verify the `isAdmin` flag from `AuthContext`.
 - **Data Integrity:** Always ensure new Firestore queries are supported by appropriate indexes in `firestore.indexes.json` and rules in `firestore.rules`.

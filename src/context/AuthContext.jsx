@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const { config } = useRemoteConfig();
 
   useEffect(() => {
@@ -19,6 +20,19 @@ export function AuthProvider({ children }) {
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
+        // Check if email is verified for email/password accounts
+        const isEmailPasswordProvider = firebaseUser.providerData.some(provider => provider.providerId === 'password');
+        const isEmailVerified = firebaseUser.emailVerified || !isEmailPasswordProvider;
+
+        if (!isEmailVerified) {
+          // Email not verified - don't set user/profile, but keep loading false
+          setUser(null);
+          setProfile(null);
+          setNeedsVerification(true);
+          setLoading(false);
+          return;
+        }
+
         try {
           const userDocRef = doc(db, "users", firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
@@ -76,6 +90,7 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
         setProfile(null);
+        setNeedsVerification(false);
         unsubscribeProfile();
         setLoading(false);
       }
@@ -90,7 +105,7 @@ export function AuthProvider({ children }) {
   const isAdmin = profile?.isAdmin || false;
 
   return (
-    <AuthContext.Provider value={{ user, profile, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, profile, isAdmin, loading, needsVerification }}>
       {!loading && children}
     </AuthContext.Provider>
   );

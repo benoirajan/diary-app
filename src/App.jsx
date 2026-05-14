@@ -26,7 +26,7 @@ import { useToast } from "./context/ToastContext";
 
 function App() {
 
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, needsVerification } = useAuth();
     const { showToast } = useToast();
     const { config, loading: configLoading } = useRemoteConfig();
     
@@ -360,13 +360,14 @@ function App() {
         }
     };
 
-    if (!user) {
+    if (!user || needsVerification) {
         return showAuth 
             ? <AuthPage 
                 onBack={() => setShowAuth(false)} 
                 isDark={isDark}
                 themeMode={themeMode}
                 onThemeChange={setThemeMode}
+                needsVerification={needsVerification}
               /> 
             : <LandingPage 
                 onGetStarted={() => setShowAuth(true)} 

@@ -89,7 +89,7 @@ export default function useEntries() {
         currentResults = [...currentResults, ...matches];
         currentLastDoc = result.lastDoc;
         currentHasMore = result.hasMore;
-        console.debug(`Search iteration ${iterations + 1}: Found ${matches.length} matches, current batch size: ${currentResults.length}`);
+        // console.debug(`Search iteration ${iterations + 1}: Found ${matches.length} matches, current batch size: ${currentResults.length}`);
         iterations++;
       }
 
