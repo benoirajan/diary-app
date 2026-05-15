@@ -20,6 +20,12 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
     - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
     - **Debounce Logic:** Analysis is triggered after a 2.5s delay and 30+ character input to optimize API usage.
+- **Notification Service:** Daily gentle reminders to encourage consistent journaling.
+    - **Frequency:** Limited to once per day.
+    - **Configuration:** Users can toggle reminders and set a custom "Reminder Time" in the Settings view.
+    - **Privacy:** Notifications never contain private journal content; they use generic, encouraging prompts.
+    - **PWA Integration:** Utilizes Service Worker `showNotification` for a native experience across platforms. 
+    - **Persistence:** Reminder state and settings are stored locally (`localStorage`) to ensure immediate availability without database overhead.
 - **Styling:** Vanilla CSS with a "Soft Warm Minimal" futuristic aesthetic (high-glow, deep contrast).
 - **Theme System:** 
     - Supports **Light**, **Dark**, and **System** (Device Default) modes.

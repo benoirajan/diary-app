@@ -22,6 +22,7 @@ import AuthPage from "./views/AuthPage";
 import LandingPage from "./views/LandingPage";
 import { submitFeedback } from "./services/feedbackService";
 import { useToast } from "./context/ToastContext";
+import { checkAndTriggerReminder } from "./services/notificationService";
 
 
 function App() {
@@ -30,6 +31,17 @@ function App() {
     const { showToast } = useToast();
     const { config, loading: configLoading } = useRemoteConfig();
     
+    // Check for daily reminders
+    useEffect(() => {
+        if (user && !needsVerification) {
+            checkAndTriggerReminder();
+            
+            // Re-check every hour to see if the reminder time has passed
+            const interval = setInterval(checkAndTriggerReminder, 1000 * 60 * 60);
+            return () => clearInterval(interval);
+        }
+    }, [user, needsVerification]);
+
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     // console.log(user)
     /*

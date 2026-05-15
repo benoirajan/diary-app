@@ -167,7 +167,7 @@ const EntryForm = ({
           setIsMoodDetecting(false);
           return; // Wait for user to confirm mood
         }
-      } catch (err) {
+      } catch {
         showToast("AI Mood analysis failed. Proceeding with your selection.", "error");
       } finally {
         setIsMoodDetecting(false);
