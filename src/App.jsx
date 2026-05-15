@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import InstallPrompt from "./components/InstallPrompt";
+import Tutorial from "./components/Tutorial";
 import EntryForm from "./components/EntryForm";
 import FeedbackForm from "./components/FeedbackForm";
 import EntryList from "./components/EntryList";
@@ -390,6 +391,7 @@ function App() {
     }
     return (
         <div className={`min-h-screen transition-colors duration-500 ${isDark ? "dark" : ""}`}>
+            <Tutorial />
             <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans selection:bg-[var(--ui-accent)]/30 lg:flex">
                 
                 {/* Desktop Sidebar */}
@@ -518,6 +520,7 @@ function App() {
             {/* Sticky "New Entry" FAB */}
             <button
                 onClick={() => setIsEntryFormOpen(true)}
+                data-tour="new-entry"
                 className="fixed bottom-28 right-6 md:bottom-10 md:right-10 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--accent-main)] text-black font-black shadow-xl shadow-[var(--accent-main)]/20 hover:scale-110 hover:shadow-[var(--accent-main)]/40 active:scale-95 transition-all group"
             >
                 <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">+</span>

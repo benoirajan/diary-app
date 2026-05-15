@@ -81,9 +81,11 @@ const Sidebar = ({
             <nav className="flex-1 space-y-2">
                 {tabs.map((tab) => {
                     const isActive = (currentView === "detail" ? "list" : currentView) === tab.value;
+                    const tourId = tab.value === "habits" ? "nav-habits" : tab.value === "analytics" ? "nav-analytics" : null;
                     return (
                         <button
                             key={tab.value}
+                            data-tour={tourId}
                             onClick={() => {
                                 onTabChange(tab.value);
                                 if (onClose) onClose();
