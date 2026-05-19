@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Joyride, STATUS } from 'react-joyride';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Joyride, STATUS, EVENTS, ACTIONS } from 'react-joyride';
 import { useAuth } from '../context/AuthContext';
 
 const Tutorial = () => {
   const { profile } = useAuth();
   const [run, setRun] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  
+  const uidRef = useRef(profile?.uid);
+  
+  useEffect(() => {
+    uidRef.current = profile?.uid;
+  }, [profile?.uid]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -16,10 +22,13 @@ const Tutorial = () => {
   }, []);
 
   useEffect(() => {
-    if (profile?.uid) {
-      const tourCompleted = localStorage.getItem(`soulscript_tour_${profile.uid}`);
+    const currentUid = profile?.uid;
+    
+    if (currentUid) {
+      const storageKey = `soulscript_tour_${currentUid}`;
+      const tourCompleted = localStorage.getItem(storageKey);
+      
       if (!tourCompleted) {
-        // Delay slightly to ensure elements are rendered and animate-in finishes
         const timer = setTimeout(() => {
           setRun(true);
         }, 2000);
@@ -27,10 +36,12 @@ const Tutorial = () => {
       } else {
         setRun(false);
       }
+    } else {
+      setRun(false);
     }
   }, [profile?.uid]);
 
-  const steps = [
+  const steps = useMemo(() => [
     {
       target: 'body',
       placement: 'center',
@@ -77,19 +88,25 @@ const Tutorial = () => {
         </div>
       ),
     },
-  ];
+  ], [isMobile]);
 
-  const handleJoyrideCallback = (data) => {
-    const { status } = data;
+  const handleJoyrideCallback = useCallback((data) => {
+    const { status, type, action } = data;
+
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    const isTourEnd = finishedStatuses.includes(status) || type === EVENTS.TOUR_END;
+    const isManualStop = action === ACTIONS.CLOSE || action === ACTIONS.STOP;
 
-    if (finishedStatuses.includes(status)) {
+    if (isTourEnd || isManualStop) {
+      const currentUid = uidRef.current;
+      
       setRun(false);
-      if (profile?.uid) {
-        localStorage.setItem(`soulscript_tour_${profile.uid}`, 'true');
+      if (currentUid) {
+        const storageKey = `soulscript_tour_${currentUid}`;
+        localStorage.setItem(storageKey, 'true');
       }
     }
-  };
+  }, []);
 
   return (
     <Joyride
@@ -98,7 +115,7 @@ const Tutorial = () => {
       continuous={true}
       showProgress={true}
       showSkipButton={true}
-      callback={handleJoyrideCallback}
+      onEvent={handleJoyrideCallback}
       disableScrolling={isMobile}
       floaterProps={{
         disableAnimation: true,
@@ -136,9 +153,6 @@ const Tutorial = () => {
         buttonSkip: {
           color: 'var(--text-secondary)',
           fontWeight: 'bold',
-        },
-        spotlight: {
-          borderRadius: '24px',
         },
       }}
     />

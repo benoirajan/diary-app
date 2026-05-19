@@ -8,17 +8,18 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Project Type:** React (Vite) Single Page Application (Journaling + Habit Tracking + Emotional Analytics)
 - **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics, Remote Config)
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
-- **AI Integration:** Google Gemini AI (via client-side or functions)
+- **AI Integration:** Vertex AI for Firebase (Secure client-side AI)
+    - **Architecture:** Moved from direct Gemini SDK to Vertex AI for Firebase to prevent API key exposure in the browser.
     - **Automatic Mood Discovery:** Semi-automatic flow in `EntryForm.jsx`. 
         - **Real-time:** Performs a one-time background analysis after a 2.5s debounce to provide a friendly suggestion (e.g., "✨ I think you feel [mood]").
         - **On-Save:** Clicking "Save" triggers a final confirmation step. If real-time analysis was already done, it reuses the result with a fake delay for polish; otherwise, it performs a definitive analysis.
         - **Confirmation:** Users are prompted to either "Use [AI Mood]" or "Keep [Manual Mood]" before final submission.
     - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/history`) using a map of dates to limit storage and document count. **Pruned automatically to keep only the last 30 insights.**
     - **Model Management:** Uses Firebase Remote Config for dynamic model selection:
-        - `aiModel`: Used for mood prediction (Defaults to `gemini-2.5-flash-lite`).
-        - `insightModel`: Used for deep weekly soul insights (Defaults to `gemini-2.0-flash-exp`).
+        - `aiModel`: Used for mood prediction (Defaults to `gemini-1.5-flash`).
+        - `insightModel`: Used for deep weekly soul insights (Defaults to `gemini-1.5-flash`).
     - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
-    - **SDK:** Uses the newer `@google/genai` package for enhanced performance.
+    - **SDK:** Uses `@firebase/vertexai` for enterprise-grade security and Firebase Auth integration.
     - **Debounce Logic:** Analysis is triggered after a 2.5s delay and 30+ character input to optimize API usage.
 - **Notification Service:** Daily gentle reminders to encourage consistent journaling.
     - **Frequency:** Limited to once per day.
@@ -52,9 +53,10 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Proactive Prompting:** Displays a custom `InstallPrompt.jsx` popup if the app is installable and hasn't been dismissed.
     - **Permanent Access:** An "Install App" button is available in the sidebar with platform-specific guidance (Automatic prompt for Chrome/Android, manual instructions for iOS/Safari).
     - **Standalone Mode:** The app detects when it's running as an installed PWA and hides installation UI to maintain a native feel.
-- **Onboarding Tutorial:** Guided tour for first-time users using `react-joyride`.
+- **Onboarding Tutorial:** Guided tour for first-time users using `react-joyride` (v3).
     - **Trigger:** Automatically starts 2s after the first login/signup to ensure layout stability.
     - **Persistence:** Completion state is tracked per user in `localStorage` (`soulscript_tour_{uid}`).
+    - **Implementation:** Uses stable `onEvent` callbacks and `useRef` for UID tracking to ensure reliable persistence across refreshes.
     - **Targets:** Uses responsive `data-tour` attributes. Desktop uses `sidebar-nav-*` targets, while mobile uses `mobile-nav-*` targets in the persistent bottom navigation. The "New Entry" FAB uses a global `new-entry` target.
     - **Mobile Optimization:** Uses `disableScrolling` and `disableAnimation` on mobile devices to ensure a smooth, stable experience on touch screens.
     - **Design:** Custom-styled to match the project's futuristic aesthetic with high-glow borders and high-contrast tooltips.

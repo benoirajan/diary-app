@@ -3,6 +3,7 @@ import { getFirestore } from "firebase/firestore"
 import { getAuth } from "firebase/auth"
 import { getAnalytics } from "firebase/analytics"
 import { getRemoteConfig } from "firebase/remote-config"
+import { getVertexAI } from "@firebase/vertexai"
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,3 +21,4 @@ export const db = getFirestore(app)
 export const auth = getAuth(app)
 export const analytics = getAnalytics(app)
 export const remoteConfig = getRemoteConfig(app)
+export const vertexAI = getVertexAI(app)
