@@ -39,7 +39,7 @@ const MoodChart = ({ data = [] }) => {
                     return (
                         <g key={v}>
                             <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="var(--bg-soft)" strokeWidth="1" strokeDasharray="4 4" />
-                            <text x={padding - 10} y={y + 4} textAnchor="end" className="text-[10px] fill-[var(--text-secondary)] font-bold">{moodEmojis[v]}</text>
+                            <text x={padding - 12} y={y + 6} textAnchor="end" className="text-base md:text-lg grayscale-0">{moodEmojis[v]}</text>
                         </g>
                     );
                 })}
@@ -50,8 +50,43 @@ const MoodChart = ({ data = [] }) => {
                 {/* Data Points */}
                 {points.map((p, i) => (
                     <g key={i} className="group/point">
-                        <circle cx={p.x} cy={p.y} r="6" fill="var(--bg-card)" stroke="var(--accent-happy)" strokeWidth="3" className="transition-all hover:r-8 cursor-pointer" />
-                        <text x={p.x} y={height - 10} textAnchor="middle" className="text-[9px] fill-[var(--text-secondary)] font-bold uppercase tracking-tighter opacity-60">
+                        {/* Interactive Area */}
+                        <circle cx={p.x} cy={p.y} r="15" fill="transparent" className="cursor-pointer" />
+                        
+                        {/* The Point */}
+                        <circle 
+                            cx={p.x} 
+                            cy={p.y} 
+                            r="5" 
+                            fill="var(--bg-card)" 
+                            stroke="var(--accent-happy)" 
+                            strokeWidth="3" 
+                            className="transition-all duration-300 group-hover/point:r-7 group-hover/point:stroke-width-4 cursor-pointer" 
+                        />
+
+                        {/* Hover Tooltip */}
+                        <g className="opacity-0 group-hover/point:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            <rect 
+                                x={p.x - 40} 
+                                y={p.y - 45} 
+                                width="80" 
+                                height="32" 
+                                rx="8" 
+                                fill="var(--bg-card)" 
+                                className="shadow-xl stroke-[var(--accent-happy)]/30 stroke-1"
+                            />
+                            <text 
+                                x={p.x} 
+                                y={p.y - 24} 
+                                textAnchor="middle" 
+                                className="text-sm font-bold fill-[var(--text-primary)]"
+                            >
+                                {moodEmojis[Math.round(p.score)]} {p.score.toFixed(1)}
+                            </text>
+                        </g>
+
+                        {/* Date Label */}
+                        <text x={p.x} y={height - 5} textAnchor="middle" className="text-[10px] fill-[var(--text-secondary)] font-bold uppercase tracking-tighter opacity-80">
                             {p.label}
                         </text>
                     </g>

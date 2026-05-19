@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { logEvent } from "firebase/analytics";
+import { analytics as fbAnalytics } from "../firebase";
 import useHabits from "../hooks/useHabits";
 import useAnalytics from "../hooks/useAnalytics";
 import { generateWeeklyInsight, getDailyInsight, saveDailyInsight } from "../services/aiService";
+import { getEntriesPaginated } from "../services/entryService";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
+import { useSecurity } from "../context/SecurityContext";
 import { useRemoteConfig } from "../context/RemoteConfigContext";
 
 // Components
@@ -21,6 +25,7 @@ const AnalyticsView = ({ entries = [] }) => {
   const { habits } = useHabits();
   const { showToast } = useToast();
   const { user } = useAuth();
+  const { decryptEntry } = useSecurity();
   const { config: remoteConfig } = useRemoteConfig();
   const [aiInsight, setAiInsight] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,24 +55,32 @@ const AnalyticsView = ({ entries = [] }) => {
 
     setIsGenerating(true);
     try {
-        const now = new Date();
-        const tenDaysAgo = new Date(now.getTime() - 10 * 86400000);
-        const recentEntries = entries
-            .filter(e => new Date(e.date) >= tenDaysAgo)
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        if (recentEntries.length < 2) {
-            showToast("You need at least 2 entries from the last 10 days to generate an insight.", "error");
+        // To provide a truly deep insight, we need the full content of recent entries,
+        // not just the metadata (mood/date) passed in via the 'entries' prop.
+        const result = await getEntriesPaginated(user.uid, 10);
+        
+        if (result.entries.length < 2) {
+            showToast("You need at least 2 entries to generate a deep Soul Insight.", "error");
             setIsGenerating(false);
             return;
         }
 
-        const insight = await generateWeeklyInsight(recentEntries);
+        // Decrypt the entries so the AI can analyze the actual text
+        const richEntries = await Promise.all(
+            result.entries.map(entry => decryptEntry(entry))
+        );
+
+        const insight = await generateWeeklyInsight(richEntries);
         if (insight) {
             setAiInsight(insight);
             setHasGeneratedToday(true);
             await saveDailyInsight(user.uid, insight);
             showToast("Your Soul Insight is ready and saved! ✨");
+            
+            // Track successful insight generation
+            logEvent(fbAnalytics, "generate_ai_insight", {
+                entries_count: richEntries.length
+            });
         } else {
             showToast("AI couldn't generate an insight right now.", "error");
         }
@@ -115,7 +128,7 @@ const AnalyticsView = ({ entries = [] }) => {
       {/* 2. 📈 Mood Trend Graph */}
       <div className="p-6 md:p-10 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--bg-soft)] shadow-inner">
         <h3 className="text-xl font-black text-[var(--text-primary)] mb-8 flex items-center gap-3 uppercase tracking-widest">
-            <span className="w-8 h-8 rounded-lg bg-[var(--accent-happy)]/20 flex items-center justify-center text-sm">📈</span>
+            <span className="w-8 h-8 rounded-lg bg-[var(--accent-happy)]/20 flex items-center justify-center text-lg">📈</span>
             Mood Journey
         </h3>
         <MoodChart data={analytics.moodChartData} />

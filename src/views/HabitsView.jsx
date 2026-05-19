@@ -68,17 +68,17 @@ const HabitsView = () => {
       {/* Add Habit Form */}
       <div className="bg-[var(--bg-card)] rounded-3xl p-6 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)]">
         <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">New Habit<span className="text-[var(--accent-happy)]">.</span></h2>
-        <form onSubmit={handleAddHabit} className="flex gap-3">
+        <form onSubmit={handleAddHabit} className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             placeholder="What habit would you like to track?"
             value={newHabitName}
             onChange={(e) => setNewHabitName(e.target.value)}
-            className="flex-1 px-5 py-3 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+            className="flex-1 px-5 py-3 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm w-full"
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-sm hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-amber-200/20"
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-sm hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md shadow-amber-200/20"
           >
             Add
           </button>

@@ -22,12 +22,13 @@ const Tutorial = () => {
         // Delay slightly to ensure elements are rendered and animate-in finishes
         const timer = setTimeout(() => {
           setRun(true);
-          
         }, 2000);
         return () => clearTimeout(timer);
+      } else {
+        setRun(false);
       }
     }
-  }, [profile]);
+  }, [profile?.uid]);
 
   const steps = [
     {

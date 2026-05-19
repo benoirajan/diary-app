@@ -116,6 +116,7 @@ export const generateWeeklyInsight = async (entries) => {
     const entriesSummary = entries
       .map((e) => `Date: ${new Date(e.date).toDateString()}, Mood: ${e.mood}, Content: ${e.title}\n${e.content}`)
       .join("\n---\n");
+    // console.log("Entries summary sent to AI:", entriesSummary);
 
     const response = await client.models.generateContent({
       model: modelName,

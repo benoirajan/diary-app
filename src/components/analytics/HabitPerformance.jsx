@@ -4,7 +4,7 @@ const HabitPerformance = ({ performance }) => {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-black text-[var(--text-primary)] uppercase tracking-widest flex items-center gap-3">
-        <span className="w-8 h-8 rounded-lg bg-[var(--accent-calm)]/20 flex items-center justify-center text-sm">📊</span>
+        <span className="w-8 h-8 rounded-lg bg-[var(--accent-calm)]/20 flex items-center justify-center text-lg">📊</span>
         Habit Performance
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
