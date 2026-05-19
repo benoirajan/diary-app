@@ -53,9 +53,10 @@ The Gemini CLI will read this file and prioritize these instructions over its de
     - **Permanent Access:** An "Install App" button is available in the sidebar with platform-specific guidance (Automatic prompt for Chrome/Android, manual instructions for iOS/Safari).
     - **Standalone Mode:** The app detects when it's running as an installed PWA and hides installation UI to maintain a native feel.
 - **Onboarding Tutorial:** Guided tour for first-time users using `react-joyride`.
-    - **Trigger:** Automatically starts 1.5s after the first login/signup to ensure layout stability.
+    - **Trigger:** Automatically starts 2s after the first login/signup to ensure layout stability.
     - **Persistence:** Completion state is tracked per user in `localStorage` (`soulscript_tour_{uid}`).
-    - **Targets:** Uses `data-tour` attributes to highlight the "New Entry" FAB, "Habits" navigation, and "Analytics" navigation.
+    - **Targets:** Uses responsive `data-tour` attributes. Desktop uses `sidebar-nav-*` targets, while mobile uses `mobile-nav-*` targets in the persistent bottom navigation. The "New Entry" FAB uses a global `new-entry` target.
+    - **Mobile Optimization:** Uses `disableScrolling` and `disableAnimation` on mobile devices to ensure a smooth, stable experience on touch screens.
     - **Design:** Custom-styled to match the project's futuristic aesthetic with high-glow borders and high-contrast tooltips.
 - **Entry Creation:** Always use the popup modal (`isEntryFormOpen` state) instead of a dedicated view for new entries to maintain user context.
 - **Mindful Editing:** Editing past entries is intentionally discouraged with a philosophical confirmation prompt ("Alter the Past?") to preserve the integrity of the user's emotional history.
@@ -132,7 +133,7 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Real-time Synchronization:** User settings and profile changes are synced in real-time using Firestore `onSnapshot` listeners in `AuthContext.jsx`.
 
 ## Common Commands
-- **Start Development Server:** `npm run dev`
+- **Start Development Server:** `npm run dev` (Exposed to local network via `--host`)
 - **Build for Production:** `npm run build`
 - **Deploy to Firebase:** `firebase deploy`
 - **Deploy Rules Only:** `firebase deploy --only firestore:rules`
