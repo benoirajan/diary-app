@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Joyride, STATUS } from 'react-joyride';
+import Joyride, { STATUS } from 'react-joyride';
 import { useAuth } from '../context/AuthContext';
 
 const Tutorial = () => {
   const { profile } = useAuth();
   const [run, setRun] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (profile?.uid) {
@@ -14,7 +23,7 @@ const Tutorial = () => {
         const timer = setTimeout(() => {
           setRun(true);
           
-        }, 1500);
+        }, 2000);
         return () => clearTimeout(timer);
       }
     }
@@ -46,7 +55,7 @@ const Tutorial = () => {
       ),
     },
     {
-      target: '[data-tour="nav-habits"]',
+      target: isMobile ? '[data-tour="mobile-nav-habits"]' : '[data-tour="sidebar-nav-habits"]',
       content: (
         <div className="text-left space-y-2">
           <h3 className="text-lg font-bold">Track Your Habits ⚡</h3>
@@ -57,7 +66,7 @@ const Tutorial = () => {
       ),
     },
     {
-      target: '[data-tour="nav-analytics"]',
+      target: isMobile ? '[data-tour="mobile-nav-analytics"]' : '[data-tour="sidebar-nav-analytics"]',
       content: (
         <div className="text-left space-y-2">
           <h3 className="text-lg font-bold">Soul Insights 📊</h3>
@@ -89,6 +98,10 @@ const Tutorial = () => {
       showProgress={true}
       showSkipButton={true}
       callback={handleJoyrideCallback}
+      disableScrolling={isMobile}
+      floaterProps={{
+        disableAnimation: true,
+      }}
       styles={{
         options: {
           arrowColor: 'var(--bg-card)',

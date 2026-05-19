@@ -35,7 +35,7 @@ const BottomNav = ({ currentView, onTabChange }) => {
         <nav className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-[var(--bg-card)]/80 backdrop-blur-xl border-t border-[var(--bg-soft)] px-6 py-4 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
             {navItems.map((item) => {
                 const isActive = (currentView === "detail" || currentView === "edit" ? "list" : currentView) === item.value;
-                const tourId = item.value === "habits" ? "nav-habits" : item.value === "analytics" ? "nav-analytics" : null;
+                const tourId = item.value === "habits" ? "mobile-nav-habits" : item.value === "analytics" ? "mobile-nav-analytics" : null;
                 return (
                     <button
                         key={item.value}
