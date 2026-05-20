@@ -95,9 +95,9 @@ const Tutorial = () => {
 
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
     const isTourEnd = finishedStatuses.includes(status) || type === EVENTS.TOUR_END;
-    const isManualStop = action === ACTIONS.CLOSE || action === ACTIONS.STOP;
+    // const isManualStop = action === ACTIONS.CLOSE || action === ACTIONS.STOP;
 
-    if (isTourEnd || isManualStop) {
+    if (isTourEnd /*|| isManualStop*/) {
       const currentUid = uidRef.current;
       
       setRun(false);

@@ -9,17 +9,18 @@ The Gemini CLI will read this file and prioritize these instructions over its de
 - **Backend:** Firebase (Firestore, Authentication, Hosting, Analytics, Remote Config)
 - **App Usage Tracking:** Google Analytics (GA4) integrated for monitoring user engagement and feature adoption.
 - **AI Integration:** Vertex AI for Firebase (Secure client-side AI)
-    - **Architecture:** Moved from direct Gemini SDK to Vertex AI for Firebase to prevent API key exposure in the browser.
+    - **Architecture:** Moved to the new **Firebase AI Logic SDK** (`firebase/ai`) for unified Vertex AI access.
     - **Automatic Mood Discovery:** Semi-automatic flow in `EntryForm.jsx`. 
         - **Real-time:** Performs a one-time background analysis after a 2.5s debounce to provide a friendly suggestion (e.g., "✨ I think you feel [mood]").
         - **On-Save:** Clicking "Save" triggers a final confirmation step. If real-time analysis was already done, it reuses the result with a fake delay for polish; otherwise, it performs a definitive analysis.
         - **Confirmation:** Users are prompted to either "Use [AI Mood]" or "Keep [Manual Mood]" before final submission.
     - **Daily Soul Insights:** On-demand deep analysis in `AnalyticsView.jsx`. Restricted to daily once, with results stored in Firestore (`users/{uid}/aiInsights/history`) using a map of dates to limit storage and document count. **Pruned automatically to keep only the last 30 insights.**
     - **Model Management:** Uses Firebase Remote Config for dynamic model selection:
-        - `aiModel`: Used for mood prediction (Defaults to `gemini-1.5-flash`).
-        - `insightModel`: Used for deep weekly soul insights (Defaults to `gemini-1.5-flash`).
+        - `aiModel`: Used for mood prediction (Defaults to `gemini-2.5-flash`).
+        - `insightModel`: Used for deep weekly soul insights (Defaults to `gemini-3.5-flash`).
     - **Feature Toggling:** AI features can be globally enabled/disabled via Remote Config (`isAiEnabled`).
-    - **SDK:** Uses `@firebase/vertexai` for enterprise-grade security and Firebase Auth integration.
+    - **SDK:** Uses `firebase/ai` (Firebase AI Logic SDK) for enterprise-grade security and Firebase Auth integration.
+
     - **Debounce Logic:** Analysis is triggered after a 2.5s delay and 30+ character input to optimize API usage.
 - **Notification Service:** Daily gentle reminders to encourage consistent journaling.
     - **Frequency:** Limited to once per day.

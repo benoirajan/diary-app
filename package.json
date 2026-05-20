@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@firebase/vertexai": "^1.2.4",
     "@tailwindcss/typography": "^0.5.19",
     "firebase": "^12.10.0",
     "react": "^19.1.1",

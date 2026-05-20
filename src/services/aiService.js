@@ -1,4 +1,4 @@
-import { getGenerativeModel } from "@firebase/vertexai";
+import { getGenerativeModel } from "firebase/ai";
 import { db, remoteConfig, vertexAI } from "../firebase";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { fetchAndActivate, getString } from "firebase/remote-config";
@@ -16,7 +16,7 @@ const getAIModelName = async () => {
     return getString(remoteConfig, "aiModel");
   } catch (error) {
     console.error("Remote Config fetch failed, using default:", error);
-    return 'gemini-1.5-flash';
+    return 'gemini-3.5-flash';
   }
 };
 
@@ -26,7 +26,7 @@ const getInsightModelName = async () => {
     return getString(remoteConfig, "insightModel");
   } catch (error) {
     console.error("Remote Config fetch failed, using default:", error);
-    return 'gemini-1.5-flash';
+    return 'gemini-3.5-flash';
   }
 };
 
@@ -40,8 +40,12 @@ export const discoverMood = async (content) => {
 
   try {
     const modelName = await getAIModelName();
+    const generationConfig = {
+      maxOutputTokens: 3,
+    };
     const model = getGenerativeModel(vertexAI, { 
       model: modelName,
+      generationConfig,
       systemInstruction: `
         Analyze the diary entry below and categorize it into EXACTLY ONE of these five moods:
         - radiant (extreme joy, success, high energy)
@@ -80,8 +84,12 @@ export const generateWeeklyInsight = async (entries) => {
 
   try {
     const modelName = await getInsightModelName();
+    const generationConfig = {
+      maxOutputTokens: 180,
+    };
     const model = getGenerativeModel(vertexAI, {
       model: modelName,
+      generationConfig,
       systemInstruction: `
         You are SoulScript's empathetic journaling assistant. Your goal is to provide deep, personalized insights based on a user's recent entries.
         
