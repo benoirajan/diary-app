@@ -113,7 +113,7 @@ function App() {
     // Resolved dark mode boolean
     const [isDark, setIsDark] = useState(true);
 
-    // Sync resolved dark mode with themeMode and system preference
+    // Sync resolved dark mode with themeMode and system preference.
     useEffect(() => {
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
         
