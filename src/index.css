@@ -1,32 +1,164 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-/* 🌿 Soft Warm Minimal Theme */
+/* 🚀 SoulScript - Refined Soft Warm Minimal Theme */
 :root {
-  --bg-main: #fdfaf6;
+  /* Light Theme: "Solar" */
+  --bg-main: #fdfdfc;
   --bg-card: #ffffff;
-  --bg-soft: #f4f1ea;
+  --bg-soft: #f7f7f5;
+  --bg-hover: #f0f0ed;
 
-  --text-primary: #2e2a27;
-  --text-secondary: #6b645f;
+  --text-primary: #1c1c1a;
+  --text-secondary: #706f6c;
+  --text-muted: #a1a09d;
+  --text-inverted: #ffffff;
 
-  --accent-happy: #fbbf24;
-  --accent-sad: #60a5fa;
-  --accent-angry: #f87171;
-  --accent-neutral: #a8a29e;
-  --accent-excited: #f472b6;
-  --accent-calm: #34d399;
+  /* feedback colors */
+  --suggestion: #3b82f6; /* Vibrant Blue */
+  --bug: #f43f5e; /* Rose Coral */
+  --praise: #10b981; /* Emerald Mint */
 
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  /* Mood colors dont use for UI */
+  --accent-happy: #f59e0b;   /* Golden Amber */
+  --accent-sad: #6366f1;     /* Soft Indigo */
+  --accent-angry: #f43f5e;    /* Rose Coral */
+  --accent-neutral: #94a3b8;  /* Slate Blue */
+  --accent-excited: #fbbf24;  /* Sunshine */
+  --accent-calm: #10b981;    /* Emerald Mint */
+  
+  /* Primary Branding Color */
+  --accent-main: #f9a749;    /* Sun-Kissed Gold */
+
+  /* UI Specific Elements */
+  --ui-accent: var(--accent-main);
+  --ui-accent-soft: rgba(249, 167, 73, 0.12);
+  --ui-border: #efeeea;
+  --ui-active: #d97706;
+
+  --border-soft: #efeeea;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0, 0, 0, 0.05);
+  --glow-color: rgba(245, 158, 11, 0.3);
 }
 
-/* 🌙 Dark Mode Overrides */
+/* Enhanced Dark Mode: "Lunar" */
 .dark {
-  --bg-main: #1a1817;
-  --bg-card: #252321;
-  --bg-soft: #2e2a27;
+  --bg-main: #0c0c0b;
+  --bg-card: #171715;
+  --bg-soft: #232320;
+  --bg-hover: #2d2d2a;
 
-  --text-primary: #fdfaf6;
+  --text-primary: #fafaf9;
   --text-secondary: #a8a29e;
+  --text-muted: #57534e;
+  --text-inverted: #0c0c0b;
 
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
+  /* Glowing Versions for Dark Mode */
+  --accent-happy: #24f0fb;   /* Brighter Amber */
+  --accent-sad: #818cf8;     /* Lighter Indigo */
+  --accent-angry: #fb7185;   /* Glowing Rose */
+  --accent-neutral: #64748b; 
+  --accent-excited: #fcd34d;
+  --accent-calm: #34d399;    /* Bright Mint */
+  
+  --accent-main: #00e5ff;    /* Electric Blue Glow */
+
+  /* UI Specific Elements */
+  --ui-accent: var(--accent-main);
+  --ui-accent-soft: rgba(0, 229, 255, 0.1);
+  --ui-border: #1e293b;
+  --ui-active: #00e5ff;
+
+  --border-soft: #1e293b;
+  --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.6);
+  --glow-color: #00e5ff;
+}
+
+/* Base Styles & Utility Classes */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.dark .glass-card {
+  background: rgba(23, 23, 21, 0.8);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--bg-soft);
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-main);
+}
+
+/* Selection Stylings */
+::selection {
+  background: var(--accent-main);
+  color: #fff;
+}
+
+/* Animations */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px var(--glow-color); }
+  50% { box-shadow: 0 0 20px var(--glow-color); }
+  100% { box-shadow: 0 0 5px var(--glow-color); }
+}
+
+.animate-glow {
+  animation: glow 3s infinite;
+}
+
+.animate-in {
+  animation: enter 0.6s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in-from-left {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }

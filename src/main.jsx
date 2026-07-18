@@ -3,11 +3,29 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
+import { SecurityProvider } from './context/SecurityContext'
+import { ToastProvider } from './context/ToastContext'
+import { RemoteConfigProvider } from './context/RemoteConfigContext'
+import { ModalProvider } from './context/ModalContext'
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <RemoteConfigProvider>
+      <AuthProvider>
+        <SecurityProvider>
+          <ToastProvider>
+            <ModalProvider>
+              <App />
+            </ModalProvider>
+          </ToastProvider>
+        </SecurityProvider>
+      </AuthProvider>
+    </RemoteConfigProvider>
   </StrictMode>,
 )

@@ -1,69 +1,213 @@
-import { useState } from "react";
-
-const moods = [
-  { label: "Happy", value: "happy", emoji: "😊" },
-  { label: "Sad", value: "sad", emoji: "😔" },
-  { label: "Excited", value: "excited", emoji: "🤩" },
-  { label: "Angry", value: "angry", emoji: "😡" },
-  { label: "Calm", value: "calm", emoji: "😌" },
-];
-
-const moodColors = {
-  happy: "bg-[var(--accent-happy)]",
-  sad: "bg-[var(--accent-sad)]",
-  angry: "bg-[var(--accent-angry)]",
-  excited: "bg-[var(--accent-excited)]",
-  calm: "bg-[var(--accent-calm)]",
-  neutral: "bg-[var(--accent-neutral)]",
-}
+import { useState, useEffect, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { moods, moodColors, getMoodEmoji, getMoodLabel } from '../constants/moods';
+import { discoverMood } from '../services/aiService';
+import { useSecurity } from '../context/SecurityContext';
+import { useToast } from '../context/ToastContext';
+import { useRemoteConfig } from '../context/RemoteConfigContext';
 
 const EntryForm = ({
   onSubmit,
-  onGenerateAffirmation,
+  initialData = null,
+  onCancel = null,
   isSubmitting = false,
-  isGeminiLoading = false,
 }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [mood, setMood] = useState("happy");
-  const [affirmation, setAffirmation] = useState("");
+  const { encryptAll } = useSecurity();
+  const { showToast } = useToast();
+  const { config: remoteConfig } = useRemoteConfig();
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [content, setContent] = useState(initialData?.content || "");
+  const [mood, setMood] = useState(initialData?.mood || "peaceful");
+  const [isEncrypted, setIsEncrypted] = useState(initialData?.isEncrypted || encryptAll);
+  
+  // Sync with global setting if it changes or when creating new
+  useEffect(() => {
+    if (!initialData && encryptAll) {
+        setIsEncrypted(true);
+    }
+  }, [encryptAll, initialData]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [date, setDate] = useState(
+    initialData?.date 
+      ? new Date(initialData.date).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0]
+  );
+  const [time, setTime] = useState(
+    initialData?.date
+      ? new Date(initialData.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  );
+  const [isPreview, setIsPreview] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
-    if (!title.trim() || !content.trim()) return;
+  // AI Mood Discovery State
+  const [suggestedMood, setSuggestedMood] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasDetectedRealTime, setHasDetectedRealTime] = useState(false);
+  const [showMoodConfirmation, setShowMoodConfirmation] = useState(false);
+  const [isMoodDetecting, setIsMoodDetecting] = useState(false);
+  const debounceTimer = useRef(null);
+
+  // Effect for automatic mood discovery
+  useEffect(() => {
+    // Only analyze if AI is enabled, content is long enough and not just whitespace
+    // AND we haven't already performed live detection
+    if (!remoteConfig.isAiEnabled || content.trim().length < 30 || hasDetectedRealTime) {
+      return;
+    }
+
+    // Clear previous timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Set a new timer for 2.5 seconds
+    debounceTimer.current = setTimeout(async () => {
+      setIsAnalyzing(true);
+      try {
+        const discovered = await discoverMood(content);
+        if (discovered) {
+          setSuggestedMood(discovered);
+          setMood(discovered); // AI automatically selects the mood for first time
+          setHasDetectedRealTime(true); // Mark as detected once
+        }
+      } catch {
+        // Silent fail for real-time background analysis
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }, 2500);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [content, remoteConfig.isAiEnabled, hasDetectedRealTime]);
+
+  const startVoiceRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast("Speech recognition is not supported in this browser.", "error");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setContent((prev) => prev + (prev ? " " : "") + transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+  };
+
+  const performSubmit = (finalMood = mood) => {
+    const combinedDateTime = new Date(`${date}T${time}`);
 
     onSubmit({
       title,
       content,
-      mood,
-      date: new Date().toISOString(),
+      mood: finalMood,
+      isEncrypted,
+      date: combinedDateTime.toISOString(),
     });
 
-    // Reset form after submit
-    setTitle("");
-    setContent("");
-    setMood("happy");
-    setAffirmation("");
+    if (!initialData) {
+      // Reset form after submit ONLY if it's a new entry
+      setTitle("");
+      setContent("");
+      setMood("peaceful");
+      setSuggestedMood(null);
+      setHasDetectedRealTime(false);
+      setShowMoodConfirmation(false);
+      const now = new Date();
+      setDate(now.toISOString().split('T')[0]);
+      setTime(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+    }
   };
 
-  const handleGenerate = async () => {
-    if (!content.trim()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const result = await onGenerateAffirmation(content, mood);
-    if (result) setAffirmation(result);
+    if (!title.trim() || !content.trim()) return;
+
+    // Trigger AI discovery on save if enabled and not already confirmed
+    if (remoteConfig.isAiEnabled && !showMoodConfirmation && content.trim().length >= 30) {
+      setIsMoodDetecting(true);
+      
+      // If we already detected it in real-time, just "fake" a short delay to reuse the result
+      if (hasDetectedRealTime && suggestedMood) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setShowMoodConfirmation(true);
+        setIsMoodDetecting(false);
+        return;
+      }
+
+      try {
+        const discovered = await discoverMood(content);
+        if (discovered) {
+          setSuggestedMood(discovered);
+          setShowMoodConfirmation(true);
+          setIsMoodDetecting(false);
+          return; // Wait for user to confirm mood
+        }
+      } catch {
+        showToast("AI Mood analysis failed. Proceeding with your selection.", "error");
+      } finally {
+        setIsMoodDetecting(false);
+      }
+    }
+
+    performSubmit();
   };
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-3xl p-7 shadow-[var(--shadow-soft)] border border-[var(--bg-soft)] transition-all">
-      <h2 className="text-2xl font-bold mb-6 text-[var(--text-primary)] px-1">
-        Create New Entry<span className="text-[var(--accent-happy)]">.</span>
-      </h2>
+    <div className="bg-[var(--bg-card)] rounded-3xl p-7  border border-[var(--bg-soft)] transition-all">
+      <div className="flex justify-between items-center mb-6 px-1">
+        <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">
+            {initialData ? "Edit Entry" : "Create New Entry"}<span className="text-[var(--accent-happy)]">.</span>
+        </h2>
+
+        <div className="flex gap-4 items-center">
+            {onCancel && (
+                <button 
+                    type="button"
+                    onClick={onCancel}
+                    className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors"
+                >
+                    Cancel
+                </button>
+            )}
+            <button 
+                type="button"
+                onClick={() => setIsPreview(!isPreview)}
+                className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--accent-happy)] transition-colors"
+            >
+                {isPreview ? "✍️ Edit" : "👁️ Preview"}
+            </button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Title</label>
+          <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Title</label>
           <input
             type="text"
             placeholder="How was your day?"
@@ -76,23 +220,118 @@ const EntryForm = ({
 
         {/* Content */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">Your Story</label>
-          <textarea
-            placeholder="Write your thoughts here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={5}
-            required
-            className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm resize-none leading-relaxed"
-          />
+          <div className="flex justify-between items-center px-1">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">Your Story</label>
+            <div className="flex items-center gap-3">
+                <button 
+                    type="button"
+                    onClick={startVoiceRecording}
+                    disabled={isPreview || isRecording}
+                    className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                        isRecording 
+                            ? "text-red-500 animate-pulse" 
+                            : "text-[var(--text-secondary)] hover:text-[var(--accent-happy)]"
+                    } disabled:opacity-30`}
+                >
+                    {isRecording ? "🔴 Listening..." : "🎙️ Voice to Text"}
+                </button>
+                <span className="text-[10px] text-[var(--text-secondary)] opacity-50 italic">Markdown supported</span>
+            </div>
+          </div>
+
+          {isPreview ? (
+            <div className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)]/50 min-h-[160px] border border-dashed border-[var(--bg-soft)]">
+                <article className="prose prose-sm prose-stone dark:prose-invert max-w-none 
+                    prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)]
+                    prose-strong:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-happy)]
+                    prose-li:text-[var(--text-secondary)] prose-a:text-[var(--accent-happy)]">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {content || "*No content to preview...*"}
+                    </ReactMarkdown>
+                </article>
+            </div>
+          ) : (
+            <textarea
+              placeholder="Write your thoughts here... (e.g. # Hello World)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={5}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm resize-none leading-relaxed"
+            />
+          )}
+        </div>
+
+        {/* Date & Time Selector */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] px-1 uppercase tracking-widest">Time</label>
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+              className="w-full px-5 py-3.5 rounded-2xl bg-[var(--bg-soft)] border-none focus:ring-2 focus:ring-[var(--accent-happy)] outline-none transition-all text-[var(--text-primary)] font-medium text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Encryption Toggle */}
+        <div className="flex items-center justify-between px-2 py-3 bg-[var(--bg-soft)]/50 rounded-2xl border border-[var(--bg-soft)]">
+            <div className="flex items-center gap-3">
+                <span className="text-xl">{isEncrypted ? "🔒" : "🔓"}</span>
+                <div className="flex flex-col">
+                    <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-widest">Encrypt this entry</span>
+                    <span className="text-[10px] text-[var(--text-secondary)]">
+                        {encryptAll ? "Forced by global settings" : "Protect with your private vault key"}
+                    </span>
+                </div>
+            </div>
+            <button
+                type="button"
+                disabled={encryptAll}
+                onClick={() => setIsEncrypted(!isEncrypted)}
+                className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors focus:outline-none ${
+                    isEncrypted ? 'bg-[var(--ui-accent)]' : 'bg-gray-600'
+                } ${encryptAll ? 'opacity-50' : ''}`}
+            >
+                <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isEncrypted ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                />
+            </button>
         </div>
 
         {/* Mood Selector */}
         <div className="space-y-3">
-          <label className="text-[10px] font-bold text-[var(--text-secondary)] pl-5 uppercase tracking-widest">How do you feel?</label>
+          <div className="flex justify-between items-end px-1">
+            <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">How do you feel?</label>
+            {isAnalyzing && (
+              <span className="text-[10px] font-bold text-[var(--accent-main)] animate-pulse uppercase tracking-widest">
+                ✨ Hmm, let me see...
+              </span>
+            )}
+            {!isAnalyzing && suggestedMood && (
+              <span className="text-[10px] font-bold text-[var(--accent-main)] uppercase tracking-widest flex items-center gap-1">
+                ✨ I think you feel {getMoodLabel(suggestedMood)} {getMoodEmoji(suggestedMood)}
+              </span>
+            )}
+          </div>
           <div className="flex gap-2.5 flex-wrap">
             {moods.map((m) => {
               const isActive = mood === m.value;
+              const isSuggested = suggestedMood === m.value;
               return (
                 <button
                   type="button"
@@ -100,8 +339,10 @@ const EntryForm = ({
                   onClick={() => setMood(m.value)}
                   className={`px-4 py-2.5 rounded-xl border transition-all flex items-center gap-2 font-bold text-xs ${
                     isActive
-                      ? `${moodColors[m.value]} text-white border-transparent shadow-md scale-105`
-                      : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
+                      ? `${moodColors[m.value]} text-[var(--text-inverted)] border-transparent shadow-md scale-105`
+                      : isSuggested
+                        ? "bg-[var(--bg-soft)] border-[var(--accent-main)] text-[var(--text-primary)] animate-glow"
+                        : "bg-[var(--bg-soft)] border-transparent text-[var(--text-secondary)] hover:bg-gray-200"
                   }`}
                 >
                   <span className="text-base">{m.emoji}</span> {m.label}
@@ -112,32 +353,44 @@ const EntryForm = ({
         </div>
 
         <div className="pt-2 flex flex-col gap-3">
-          {/* AI Affirmation */}
-          {onGenerateAffirmation && (
+          {showMoodConfirmation ? (
+            <div className="bg-[var(--bg-soft)] p-5 rounded-3xl border border-[var(--accent-happy)] animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <p className="text-xs font-bold text-[var(--text-primary)] mb-4 text-center uppercase tracking-[0.2em]">
+                 ✨ I think you feel {getMoodLabel(suggestedMood)}
+               </p>
+               <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMood(suggestedMood);
+                      performSubmit(suggestedMood);
+                    }}
+                    className="py-3.5 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-xs hover:opacity-90 transition-all shadow-md"
+                  >
+                    Use {getMoodEmoji(suggestedMood)}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => performSubmit()}
+                    className="py-3.5 rounded-2xl bg-[var(--bg-soft)] border border-[var(--bg-soft)] text-[var(--text-secondary)] font-black text-xs hover:bg-gray-200 transition-all"
+                  >
+                    Keep {getMoodEmoji(mood)}
+                  </button>
+               </div>
+            </div>
+          ) : (
             <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={isGeminiLoading || !content.trim()}
-              className="w-full py-3.5 rounded-2xl bg-white border-2 border-purple-100 text-purple-600 font-bold text-sm hover:bg-purple-50 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
+              type="submit"
+              disabled={isSubmitting || isMoodDetecting}
+              className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
             >
-              {isGeminiLoading ? "✨ Thinking..." : "✨ Generate AI Affirmation"}
+              {isSubmitting || isMoodDetecting
+                  ? (isMoodDetecting ? "Hmm let me see what is your mood..." : "Saving...") 
+                  : initialData 
+                      ? "Update Entry" 
+                      : <><span className="hidden sm:inline">Save Entry</span><span className="sm:hidden">Save</span></>}
             </button>
           )}
-
-          {affirmation && (
-            <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-sm text-[var(--text-primary)] italic leading-relaxed shadow-sm">
-              "{affirmation}"
-            </div>
-          )}
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl bg-[var(--accent-happy)] text-[var(--text-primary)] font-black text-base hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-amber-200/30 disabled:opacity-50 mt-1"
-          >
-            {isSubmitting ? "Saving to your diary..." : "Save Entry"}
-          </button>
         </div>
       </form>
     </div>
