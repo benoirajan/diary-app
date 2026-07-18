@@ -47,7 +47,7 @@ function App() {
     // console.log(user)
     /*
       =========================
-      Global State
+      Global State.
       =========================
     */
     const {
